@@ -1,0 +1,219 @@
+html, body
+{
+	background-color: #223;
+	color: #d9d9d9;
+	font-family: 'Tahoma', 'Verdana';
+	font-weight: 1em;
+}
+
+body
+{
+	background-color: transparent;
+}
+
+h1
+{
+	font-size: 1.2em;
+	text-align: center;
+}
+
+h2
+{
+	font-size: 1.2em;
+	text-align: center;
+}
+
+h2 .by
+{
+	font-weight: normal;
+	font-size: 0.9em;
+}
+
+h3
+{
+	text-align: center;
+	font-size: 0.9em;
+}
+
+ul
+{
+	text-align: left;
+	display: inline-block;
+}
+
+li
+{
+	text-align: left;
+}
+
+#cover-container
+{
+	text-align: center;
+}
+
+#cover
+{
+	max-width: 100%;
+	height: auto;
+	border: 0;
+	box-shadow: 0px 0px 35px rgba(0,0,0,.25);
+}
+
+table
+{
+	width: 100%;
+	border-collapse: separate;
+	border-spacing: 0px;
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+td
+{
+	margin: 0;
+	padding: 0;
+	vertical-align: top;
+}
+
+.removed
+{
+	display: none;
+}
+
+.aria-hidden
+{
+	display: none;
+}
+
+td
+{
+	text-align: center;
+	vertical-align: middle;
+}
+
+.checkbox
+{
+	width: 10px;
+	padding: 6px;
+}
+
+.index
+{
+	width: 10px;
+	padding: 2px;
+}
+
+.status
+{
+	padding: 2px;
+}
+
+.status span
+{
+	padding: 6px;
+}
+
+#id:before
+{
+	content: '#';
+}
+
+.tag-container
+{
+	text-align: center;
+}
+
+#tag-container-12227:before/*english*/
+{
+	content: url(../images/shared/country-flags/23x17/GB.png);
+}
+
+#tag-container-6346:before/*japanese*/
+{
+	content: url(../images/shared/country-flags/23x17/JP.png);
+}
+
+#tag-container-29963:before/*chinese*/
+{
+	content: url(../images/shared/country-flags/23x17/CN.png);
+}
+
+.tag-container-102632:before/*cebuano*/
+{
+	content: url(../images/shared/country-flags/23x17/PH.png);
+}
+
+.display-none
+{
+	display: none;
+}
+
+body, html
+{
+	overflow-y: hidden;
+}
+
+body, html, table, tr, td
+{
+	padding: 0;
+	margin: 0;
+	width: 100%;
+	height: 100%;
+	vertical-align: middle;
+	text-align: center;
+}
+
+td
+{
+	padding: 10px;
+}
+
+
+#cover
+{
+	display: block;
+	width: 250px;
+	height: 354px;
+}
+
+
+/* overrides */
+
+/*
+.title-component:after
+{
+	display: inline;
+}
+*/
+
+.title-component-comiket
+{
+	display: none;
+}
+
+.title-component-group
+{
+	display: none;
+}
+
+.title-component-title
+{
+}
+
+.title-component-parody
+{
+}
+
+.title-component-language
+{
+	display: none;
+}
+
+.title-component-scanlator
+{
+	display: none;
+}
+
+.title-component-version
+{
+}

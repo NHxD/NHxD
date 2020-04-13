@@ -1,0 +1,80 @@
+html, body
+{
+	background-color: #223;
+	color: #d9d9d9;
+	font-family: 'Tahoma', 'Verdana';
+	font-weight: 1em;
+}
+
+body
+{
+	background-color: transparent;
+}
+
+.center
+{
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%,-50%);
+}
+
+.search-query
+{
+	font-size: 1.2em;
+	font-weight: bolder;
+	margin: .2em;
+}
+
+.page-index
+{
+	font-weight: bold;
+}
+
+#message-container
+{
+	padding: 15px;
+	text-align: center;
+}
+
+#status-logo-container
+{
+	text-align: center;
+}
+
+#status-animation-container
+{
+	text-align: center;
+}
+
+#status-message-container
+{
+	background-color: black;
+	text-align: center;
+}
+
+#status-message
+{
+	font-weight: bolder;
+}
+
+.error #status-message
+{
+	font-size: larger;
+	color: red;
+}
+
+#status-logo:after
+{
+	content: url("../images/app-load/256x256/logo.png");
+}
+
+#status-animation:after
+{
+	content: url("../images/search-preload/progress/32x32/loading.gif");
+}
+
+.error #status-animation:after
+{
+	content: none;
+}

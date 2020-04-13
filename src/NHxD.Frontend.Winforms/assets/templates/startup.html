@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta http-equiv="Cache-Control" content="no-cache" />
+		<meta http-equiv="X-UA-Compatible" content="IE=9" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes" />
+		<meta name="description" content="Metadata download.">
+		<base href="{Path.Application:Html.Encode:Uri.FixPath}/" target="_blank" />
+		<title>Loading...</title>
+		<link type="text/css" rel="stylesheet" href="assets/styles/lib/progress.css" />
+		<link type="text/css" rel="stylesheet" href="assets/styles/search-preload.css" />
+	</head>
+	<body>
+		<div id="progress-total" class="progress">
+			<div class="progress-container">
+				<div class="progress-fill"></div>
+				<span></span>
+			</div>
+		</div>
+
+		<div id="main-container" class="center">
+			<div id="status-logo-container">
+				<span id="status-logo"></span>
+			</div>
+			<div id="message-container">
+				<span>Loading...</span>
+			</div>
+			<div id="status-animation-container">
+				<span id="status-animation"></span>
+			</div>
+			<div id="status-message-container">
+				<span id="status-message"></span>
+			</div>
+		</div>
+
+		<script src="assets/scripts/lib/htmelement.js"></script>
+		<script src="assets/scripts/lib/progress.js"></script>
+		<script src="assets/scripts/startup.js"></script>
+	</body>
+</html>

@@ -1,0 +1,277 @@
+html, body
+{
+	background-color: #223;
+	color: #d9d9d9;
+	font-family: 'Tahoma', 'Verdana';
+	font-weight: 1em;
+}
+
+body
+{
+	background-color: transparent;
+}
+
+nav
+{
+	text-align: center;
+}
+
+h1
+{
+	font-size: 1.2em;
+	text-align: center;
+}
+
+h2
+{
+	font-size: 1em;
+	text-align: center;
+}
+
+h3
+{
+	text-align: left;
+}
+
+ul
+{
+	text-align: left;
+	display: inline-block;
+}
+
+li
+{
+	text-align: left;
+}
+
+table
+{
+	width: 100%;
+}
+
+td
+{
+	vertical-align: top;
+}
+
+table
+{
+	border-spacing: 0px;
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+#cover-container
+{
+	text-align: center;
+}
+
+#cover
+{
+	max-width: 100%;
+	/*width: 100%;*/
+	height: auto;
+	border: 0;
+	box-shadow: 0px 0px 35px rgba(0,0,0,.25);
+}
+
+.tag-row td
+{
+	padding: 0;
+	margin: 0;
+}
+
+.tag-row:hover td
+{
+	background-color: #334;
+}
+
+.tag-header
+{
+}
+
+.tag-group
+{
+	display: table;
+	word-spacing: -1em;
+	padding:0;
+	margin: 0;
+}
+
+.tag-container
+{
+	display: inline-block;
+	word-spacing: 0;
+}
+
+.tag-container-type-id
+, .tag-container-type-media_id
+{
+	font-weight: bold;
+	font-family: "Courier New", Courier, monospace;
+}
+
+.tag-container-12227:before/*english*/
+{
+	content: url(../images/shared/country-flags/23x17/GB.png);
+	padding-right: 6px;
+}
+
+.tag-container-6346:before/*japanese*/
+{
+	content: url(../images/shared/country-flags/23x17/JP.png);
+	padding-right: 6px;
+}
+
+.tag-container-29963:before/*chinese*/
+{
+	content: url(../images/shared/country-flags/23x17/CN.png);
+	padding-right: 6px;
+}
+
+.tag-container-102632:before/*cebuano*/
+{
+	content: url(../images/shared/country-flags/23x17/PH.png);
+	padding-right: 6px;
+}
+/* FIXME: 'white-space: nowrap' makes the tags overflow beyond the screen area, under the scrollbar */
+/*
+.tag-button-container
+{
+	white-space: nowrap;
+}
+
+.tag-button-container:after
+{
+	content: ',';
+	margin-right: 6px;
+}
+
+.tag-container-last .tag-button-container:after
+{
+	content: none;
+	margin-right: 0;
+}
+*/
+.tag-button
+{
+	background-color: transparent;
+	color: white;
+	border: 0;
+	padding: 0;
+	text-align: left;
+	font-size: 1em;
+}
+
+.tag-button:hover
+{
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+.tag-button:after
+{
+	cursor: default;
+	content: ',';
+	margin-right: 6px;
+}
+
+.tag-container-last .tag-button:after
+{
+	content: none;
+	margin-right: 0;
+}
+
+.tag-blacklist
+{
+	color: red;
+}
+
+.tag-whitelist
+{
+	font-weight: bold;
+	color: yellow;
+}
+
+.tag-ignorelist
+{
+	text-decoration: line-through;
+}
+
+.tag-type span
+{
+	padding-right: 10px;
+}
+
+.tag-value
+{
+}
+
+.tag-row:hover td.tag-type
+{
+}
+
+.tag-row:hover td.tag-value
+{
+}
+
+
+nav button
+{
+	cursor: pointer;
+}
+
+nav button:disabled
+{
+	opacity: 0.3;
+}
+
+.button-icon:before
+{
+	width: 64px;
+	height: 64px;
+}
+
+#nav-download .button-icon:before
+{
+	content: url(../images/details/toolbar/32x32/download.png);
+}
+
+#nav-read .button-icon:before
+{
+	content: url(../images/details/toolbar/32x32/read.png);
+}
+
+#nav-open-archive .button-icon:before
+{
+	content: url(../images/details/toolbar/32x32/open-archive.png);
+}
+
+#nav-browse .button-icon:before
+{
+	content: url(../images/details/toolbar/32x32/browse.png);
+}
+
+#nav-bookmark-add .button-icon:before
+{
+	content: url(../images/details/toolbar/32x32/bookmark-add.png);
+}
+
+
+.display-none
+{
+	display: none;
+}
+
+.aria-hidden
+{
+	display: none;
+}
+
+
+/* overrides */
+
+.title-component:after
+{
+	display: inline;
+}

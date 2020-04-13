@@ -1,0 +1,14 @@
+#console
+{
+	font-family: "Courier New", Courier, monospace;
+	background-color: black;
+	color: #aad;
+	width: 100%;
+    display: inline-block;
+    word-break: break-all;
+}
+
+#console p span:before
+{
+	content: "> ";
+}

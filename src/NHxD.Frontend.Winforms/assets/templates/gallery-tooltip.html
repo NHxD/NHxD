@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta http-equiv="Cache-Control" content="no-cache" />
+		<meta http-equiv="X-UA-Compatible" content="IE=9" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes" />
+		<meta name="description" content="Show details about {Metadata.Title.Pretty}.">
+		<base href="{Path.Application:Html.Encode:Uri.FixPath}/" target="_blank" />
+		<title>{Metadata.Title.Pretty} by {Metadata.Artists}</title>
+		<link type="text/css" rel="stylesheet" href="assets/styles/lib/console.css" />
+		<link type="text/css" rel="stylesheet" href="assets/styles/lib/progress.css" />
+		<link type="text/css" rel="stylesheet" href="assets/styles/lib/title.css" />
+		<link type="text/css" rel="stylesheet" href="assets/styles/gallery-tooltip.css" />
+		<style>
+			@media(max-width: {Metadata.Cover.Width}px)
+			{
+				#cover
+				{
+					width: 100%;
+				}
+			}
+		</style>
+		<script type="text/javascript">
+		    var metadata = {Metadata}
+		    var whitelist = {MetadataKeywordList.Whitelist}
+		    var blacklist = {MetadataKeywordList.Blacklist}
+		    var ignorelist = {MetadataKeywordList.Ignorelist}
+		    var uploadDate = metadata.upload_date
+
+			function markCoverAsLoaded(img)
+			{
+				// could notify app
+			}
+
+			function markCoverAsInvalid(img)
+			{
+				img.onerror = null
+				img.src = "assets/images/cover/200x200/missing.png"
+			}
+		</script>
+	</head>
+	<body>
+		<table>
+			<tr>
+				<td id="cover-container" style="width: 250px; height: 354px; display:table-column; vertical-align: middle;">
+					<img
+						id="cover"
+						src="{Metadata.Cover.CachedPath:Uri.FixPath}"
+						alt="{Metadata.Title.Pretty} by {Metadata.Artists}"
+						title="{Metadata.Title.Pretty}"
+						onclick="window.external.Search.ShowDownload({Metadata.Id})"
+						onload="markCoverAsLoaded(this)"
+						onerror="markCoverAsInvalid(this)"
+						/>
+				</td>
+
+				<td>
+					<h1 id="title-english" class="title" title="{Metadata.Title.Pretty}">{Metadata.Title.English}</h1>
+					<h2 id="artist" class="artist"><span class="by">by </span>{Metadata.Artists}</h2>
+					<div id="tag-container-{Metadata.Language.Primary:Id}" class="tag-container"></div>
+					<h3 id="id" class="id">{Metadata.Id}</h3>
+
+					<h2 id="page-count" class="id">{Metadata.NumPages} Pages</h1>
+				</td>
+			</tr>
+		</table>
+		<script src="assets/scripts/lib/title-html-formatter.js"></script>
+		<script src="assets/scripts/gallery-tooltip.js"></script>
+	</body>
+</html>

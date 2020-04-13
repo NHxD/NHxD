@@ -1,0 +1,23 @@
+			<div id="search-result-item-{Metadata.Id}" class="search-result-item">
+				<button id="item-button-{Metadata.Id}" class="item-button" onclick="window.external.Search.ShowDetails({Metadata.Id})">
+					<img id="item-cover-{Metadata.Id}" class="item-cover" src="assets/images/shared/1x1/blank.png" alt="{Metadata.Title.Pretty}" title="{Metadata.Title.Pretty}" onload="markCoverAsLoaded(this)" onerror="markCoverAsInvalid(this)" />
+					<div id="item-cover-loading-{Metadata.Id}" class="item-cover-loading">
+						<img src="assets/images/cover/128x128/loading.gif" alt="Loading" />
+					</div>
+					<div id="progress-total-{Metadata.Id}" class="progress progress-total progress-item progress-display-overlay display-none">
+						<div class="progress-container">
+							<div class="progress-fill"></div>
+							<span></span>
+						</div>
+					</div>
+					<div id="progress-subtotal-{Metadata.Id}" class="progress progress-subtotal progress-item progress-display-overlay display-none">
+						<div class="progress-container">
+							<div class="progress-fill"></div>
+							<span></span>
+						</div>
+					</div>
+				</button>
+				<div id="tag-container-{Metadata.Language.Primary:Id}" class="item-title-container">
+					<span id="item-title-{Metadata.Id}" class="item-title" title="{Metadata.Title.English:Html.Encode}">{Metadata.Title.English}</span>
+				</div>
+			</div>

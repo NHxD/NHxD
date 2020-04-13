@@ -1,0 +1,126 @@
+html, body
+{
+	overflow: hidden;
+}
+
+body
+{
+	background-color: transparent;
+}
+
+.center
+{
+	overflow: hidden;
+}
+
+html
+{
+	background-repeat: no-repeat;
+	background-attachment: fixed;
+	background-size: 100% auto;
+	background-position: center center;
+}
+
+#status-logo:after
+{
+	content: url("../images/about/48x48/logo.png");
+}
+
+#status-logo-container
+{
+	margin: 0;
+	padding: 0;
+}
+
+#message-container
+{
+	margin: 0;
+	padding: 0;
+}
+
+a
+{
+	color: teal;
+	text-decoration: none;
+	font-weight: bold;
+}
+
+a:hover
+{
+	text-decoration: underline;
+}
+
+.part-productname
+{
+	font-size: 1.4em;
+	font-weight: bold;
+	color: white;
+	display: block;
+	margin: 0;
+	padding: 0;
+}
+
+.part-comments
+{
+	color: lightgray;
+	display: block;
+	font-size: 0.8em;
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.part-fileversion
+{
+	color: gold;
+	font-weight: bold;
+	display: block;
+	font-size: 1.0em;
+}
+
+.part-fileversion:before
+{
+	content: "Version ";
+	color: lightgray;
+	font-weight: normal;
+	font-size: 0.9em;
+}
+
+.part-companyname
+{
+	color: rgb(236, 40, 84);
+	font-weight: bold;
+	display: block;
+	font-size: 1.0em;
+}
+
+.part-companyname:before
+{
+	content: "By ";
+	color: lightgray;
+	font-weight: normal;
+	font-size: 0.9em;
+}
+
+.part-copyright
+{
+	color: lightgray;
+	display: block;
+	font-size: 0.8em;
+}
+
+.part-copyright:before
+{
+}
+
+#main-container
+{
+	width: 100%;
+	background-color: rgba(0, 0, 0, 0.9);
+}
+
+#link-container
+{
+	float: left;
+	padding-left: 18px;
+	padding-bottom: 12px;
+}

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta http-equiv="Cache-Control" content="no-cache" />
+		<meta http-equiv="X-UA-Compatible" content="IE=9" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes" />
+		<meta name="description" content="Show details about {Metadata.Title.Pretty}.">
+		<base href="{Path.Application:Html.Encode:Uri.FixPath}/" target="_blank" />
+		<title>{Metadata.Title.Pretty} by {Metadata.Artists}</title>
+		<link type="text/css" rel="stylesheet" href="assets/styles/lib/console.css" />
+		<link type="text/css" rel="stylesheet" href="assets/styles/lib/progress.css" />
+		<link type="text/css" rel="stylesheet" href="assets/styles/lib/title.css" />
+		<link type="text/css" rel="stylesheet" href="assets/styles/lib/menu.css" />
+		<link type="text/css" rel="stylesheet" href="assets/styles/download.css" />
+		<style type="text/css">
+			@media(max-width: {Metadata.Cover.Width}px)
+			{
+				#cover
+				{
+					width: 100%;
+				}
+			}
+		</style>
+		<script type="text/javascript">
+			var metadata = {Metadata}
+			var whitelist = {MetadataKeywordList.Whitelist}
+			var blacklist = {MetadataKeywordList.Blacklist}
+			var ignorelist = {MetadataKeywordList.Ignorelist}
+			var fileSystem =
+			{
+				"appDir": "{Path.Application:FixPath}"
+			}
+
+			function markCoverAsLoaded(img)
+			{
+				// could notify app
+			}
+
+			function markCoverAsInvalid(img)
+			{
+				img.onerror = null
+				img.src = "assets/images/cover/200x200/missing.png"
+			}
+		</script>
+	</head>
+	<body>
+		<h1 id="title-english" class="title" title="{Metadata.Title.Pretty}">{Metadata.Title.English}</h1>
+		<h2 id="artist" class="artist"><span class="by">by </span>{Metadata.Artists}</h2>
+		<div id="tag-container-{Metadata.Language.Primary:Id}" class="tag-container"></div>
+		<h3 id="id" class="id">{Metadata.Id}</h3>
+
+		<div id="cover-container">
+			<img
+				id="cover"
+				src="{Metadata.Cover.CachedPath:Uri.FixPath}"
+				alt="{Metadata.Title.Pretty} by {Metadata.Artists}"
+				title="{Metadata.Title.Pretty}"
+				onclick="onCoverClicked()"
+				onload="markCoverAsLoaded(this)"
+				onerror="markCoverAsInvalid(this)"
+				/>
+		</div>
+
+		<h2 id="page-count" class="id">{Metadata.NumPages} Pages</h1>
+
+		<nav id="nav-commands" class="nav nav-commands display-none">
+			<button
+				id="nav-details"
+				class="nav-button"
+				title="Details"
+				onclick="window.external.Search.ShowDetails({Metadata.Id})"><span class="aria-hidden"
+				>Details</span><span class="button-icon"></span></button>
+			<button
+				id="nav-bookmark-add"
+				title="Add bookmark"
+				onclick="if (typeof JSON !== 'undefined') window.external.Bookmark.ShowAddDownloadBookmarkPrompt(JSON.stringify(metadata))"><span class="aria-hidden"
+				>Add Bookmark</span><span class="button-icon"></span></button>
+			<button
+				id="nav-browse"
+				class="nav-button"
+				title="Browse"
+				onclick="window.external.FileSystem.Cache.Browse({Metadata.Id})"><span class="aria-hidden"
+				>Browse</span><span class="button-icon"></span></button>
+			<button
+				id="nav-read"
+				class="nav-button"
+				title="Read"
+				onclick="window.external.FileSystem.Cache.Read({Metadata.Id})"><span class="aria-hidden"
+				>Read</span><span class="button-icon"></span></button>
+			<button
+				id="nav-open-archive"
+				class="nav-button"
+				title="Open Archive"
+				onclick="window.external.FileSystem.Cache.OpenArchive({Metadata.Id})"><span class="aria-hidden"
+				>Open Archive</span><span class="button-icon"></span></button>
+			<button
+				id="nav-download"
+				class="nav-button"
+				title="Download"
+				onclick="download({Metadata.Id})"><span class="aria-hidden"
+				>Download</span><span class="button-icon"></span></button>
+		</nav>
+
+		<nav id="nav-select" class="nav nav-select display-none">
+			<div class="icon-label"></div>
+			<button
+				id="quickaction-select-first"
+				title="Select the first pages"
+				onclick="promptAndSelectFirstPages(true)"><span class="aria-hidden"
+				>Select first</span><span class="button-icon"></span></button>
+			<button
+				id="quickaction-select-last"
+				title="Select the last pages"
+				onclick="promptAndSelectLastPages(true)"><span class="aria-hidden"
+				>Select last</span><span class="button-icon"></span></button>
+			<button
+				id="quickaction-select-interval"
+				title="Select pages at a fixed interval"
+				onclick="promptAndSelectIntervalPages(true)"><span class="aria-hidden"
+				>Select interval</span><span class="button-icon"></span></button>
+			<button
+				id="quickaction-select-all"
+				title="Select every page"
+				onclick="selectEveryPages(true)"><span
+				>All</span><span class="button-icon"></span></button>
+			<div class="separator"></div>
+			<button
+				id="quickaction-select-1_1_5"
+				title="Select the first, last, and every 5 pages"
+				onclick="selectComboPages(1, 1, 5, true)"><span
+				>1-1-5</span><span class="button-icon"></span></button>
+			<button
+				id="quickaction-select-1_1_10"
+				title="Select the first, last, and every 10 pages"
+				onclick="selectComboPages(1, 1, 10, true)"><span
+				>1-1-10</span><span class="button-icon"></span></button>
+			<button
+				id="quickaction-select-1_1_20"
+				title="Select the first, last, and every 20 pages"
+				onclick="selectComboPages(1, 1, 20, true)"><span
+				>1-1-20</span><span class="button-icon"></span></button>
+		</nav>
+
+		<nav id="nav-deselect" class="nav nav-deselect display-none">
+			<div class="icon-label"></div>
+			<button
+				id="quickaction-deselect-first"
+				title="Deselect the first pages"
+				onclick="promptAndSelectFirstPages(false)"><span class="aria-hidden"
+				>Deselect first</span><span class="button-icon"></span></button>
+			<button
+				id="quickaction-deselect-last"
+				title="Deselect the last pages"
+				onclick="promptAndSelectLastPages(false)"><span class="aria-hidden"
+				>Deselect last</span><span class="button-icon"></span></button>
+			<button
+				id="quickaction-deselect-interval"
+				title="Deselect pages at a fixed interval"
+				onclick="promptAndSelectIntervalPages(false)"><span class="aria-hidden"
+				>Deselect interval</span><span class="button-icon"></span></button>
+			<button
+				id="quickaction-deselect-all"
+				title="Deselect every page"
+				onclick="selectEveryPages(false)"><span
+				>All</span><span class="button-icon"></span></button>
+		</nav>
+
+		<div id="progress-total" class="progress progress-total progress-display-fixed display-none">
+			<div class="progress-container">
+				<div class="progress-fill"></div>
+			</div>
+		</div>
+		<div id="progress-subtotal" class="progress progress-subtotal progress-display-fixed display-none">
+			<div class="progress-container">
+				<div class="progress-fill"></div>
+			</div>
+		</div>
+
+		<table id="page-links">
+			<tbody></tbody>
+		</table>
+
+		<div id="context-menu-document" class="context-menu display-none">
+			<button id="menu-command-document-scroll-top" class="menu-command" onclick="self.scrollTo(0, 0)"><span class="icon"></span>Scroll to top</button>
+			<button id="menu-command-document-scroll-bottom" class="menu-command" onclick="self.scrollTo(0, document.body.scrollHeight)"><span class="icon"></span>Scroll to bottom</button>
+		</div>
+		
+		<div id="context-menu-page-thumbnail" class="context-menu display-none">
+			<button id="menu-command-open-page" class="menu-command" onclick="window.external.FileSystem.Cache.OpenPage(JSON.stringify(metadata), pageThumbnailContextMenu.target.pageIndex)"><span class="icon"></span>Read</button>
+			<button id="menu-command-select-page" class="menu-command" onclick="window.external.FileSystem.Cache.SelectPage(JSON.stringify(metadata), pageThumbnailContextMenu.target.pageIndex)"><span class="icon"></span>Show in Explorer</button>
+		</div>
+
+		<div id="context-menu-cover" class="context-menu display-none">
+			<button id="menu-command-add-bookmark" class="menu-command" onclick="window.external.Bookmark.ShowAddDetailsBookmarkPrompt(JSON.stringify(metadata))"><span class="icon"></span>Add bookmark</button>
+			<hr />
+			<button id="menu-command-open-cover" class="menu-command" onclick="window.external.FileSystem.Cache.OpenCover(JSON.stringify(metadata))"><span class="icon"></span>Open cover</button>
+			<button id="menu-command-browse" class="menu-command" onclick="window.external.FileSystem.Cache.Browse({Metadata.Id})"><span class="icon"></span>Browse</button>
+			<button id="menu-command-read" class="menu-command" onclick="window.external.FileSystem.Cache.Read({Metadata.Id})"><span class="icon"></span>Read</button>
+			<button id="menu-command-open-archive" class="menu-command" onclick="window.external.FileSystem.Cache.OpenArchive({Metadata.Id})"><span class="icon"></span>Open archive</button>
+			<hr />
+			<button id="menu-command-select-metadata" class="menu-command" onclick="window.external.FileSystem.Cache.SelectMetadata(metadata.id)"><span class="icon"></span>Show metadata</button>
+			<button id="menu-command-select-cover" class="menu-command" onclick="window.external.FileSystem.Cache.SelectCover(JSON.stringify(metadata))"><span class="icon"></span>Show cover</button>
+			<button id="menu-command-select-pages" class="menu-command" onclick="window.external.FileSystem.Cache.SelectPagesFolder(metadata.id)"><span class="icon"></span>Show pages folder</button>
+			<button id="menu-command-select-anypage" class="menu-command" onclick="window.external.FileSystem.Cache.Select(metadata.id)"><span class="icon"></span>Show first cached page</button>
+			<button id="menu-command-select-archive" class="menu-command" onclick="window.external.FileSystem.Cache.SelectArchive(metadata.id)"><span class="icon"></span>Show archive</button>
+			<hr />
+			<button id="menu-command-plugin-archive-create" class="menu-command" onclick="createArchive({Metadata.Id})"><span class="icon"></span>Archive</button>
+			<button id="menu-command-plugin-metadata-convert" class="menu-command" onclick="convertMetadata({Metadata.Id})"><span class="icon"></span>Convert metadata</button>
+			<button id="menu-command-plugin-metadata-process" class="menu-command" onclick="processMetadata({Metadata.Id})"><span class="icon"></span>Process metadata</button>
+			<hr />
+			<button id="menu-command-show-details" class="menu-command" onclick="window.external.Search.ShowDetails({Metadata.Id})"><span class="icon"></span>Show details</button>
+			<button id="menu-command-show-download" class="menu-command" onclick="window.external.Search.ShowDownload({Metadata.Id})"><span class="icon"></span>Show download</button>
+			<hr />
+			<button id="menu-command-download-all" class="menu-command" onclick="window.external.BackgroundWorkers.PageDownloader.Download({Metadata.Id})"><span class="icon"></span>Download all</button>
+			<button id="menu-command-download-cancel" class="menu-command" onclick="window.external.BackgroundWorkers.PageDownloader.Cancel({Metadata.Id})"><span class="icon"></span>Cancel download</button>
+		</div>
+
+		<script src="assets/scripts/lib/console.js"></script>
+		<script src="assets/scripts/lib/event.js"></script>
+		<script src="assets/scripts/lib/string.js"></script>
+		<script src="assets/scripts/lib/array.js"></script>
+		<script src="assets/scripts/lib/htmelement.js"></script>
+		<script src="assets/scripts/lib/browser.js"></script>
+		<script src="assets/scripts/lib/zoom.js"></script>
+		<script src="assets/scripts/lib/progress.js"></script>
+		<script src="assets/scripts/lib/context-menu.js"></script>
+		<script src="assets/scripts/lib/title-html-formatter.js"></script>
+		<script src="assets/scripts/lib/metadata-keyword-list.js"></script>
+		<script src="assets/scripts/lib/cache.js"></script>
+		<script src="assets/scripts/lib/json/json2.js"></script>
+		<script src="assets/scripts/download.js"></script>
+	</body>
+</html>

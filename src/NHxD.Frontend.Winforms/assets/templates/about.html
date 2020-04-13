@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta http-equiv="Cache-Control" content="no-cache" />
+		<meta http-equiv="X-UA-Compatible" content="IE=9" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes" />
+		<meta name="description" content="Metadata download.">
+		<base href="{Path.Application:Html.Encode:Uri.FixPath}/" target="_blank" />
+		<title>About</title>
+		<link type="text/css" rel="stylesheet" href="assets/styles/lib/console.css" />
+		<link type="text/css" rel="stylesheet" href="assets/styles/search-preload.css" />
+		<link type="text/css" rel="stylesheet" href="assets/styles/about.css" />
+	</head>
+	<body>
+		<div id="main-container" class="center">
+			<div id="status-logo-container">
+				<span id="status-logo"></span>
+			</div>
+			<div id="message-container">
+				<div><span class="part-productname">{FileVersionInfo.ProductName}</span> <span class="part-comments">{FileVersionInfo.Comments}</span> <span class="part-fileversion">{FileVersionInfo.ProductVersion}</span> <span class="part-companyname">{FileVersionInfo.CompanyName}</span> <span class="part-copyright">{FileVersionInfo.LegalCopyright}</span></div>
+			</div>
+			<div id="link-container">
+				<a title="{FileVersionInfo.Website}" href="{FileVersionInfo.Website}" class="link-github">@github</a>
+			</div>
+		</div>
+
+		<script src="assets/scripts/lib/console.js"></script>
+		<script src="assets/scripts/about.js"></script>
+	</body>
+</html>

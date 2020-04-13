@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta http-equiv="Cache-Control" content="no-cache" />
+		<meta http-equiv="X-UA-Compatible" content="IE=9" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes" />
+		<meta name="description" content="Page {Search.PageIndex} of search results found for '{Search.Query:Html.Encode}'.">
+		<base href="{Path.Application:Html.Encode:Uri.FixPath}/" target="_blank" />
+		<title>{Search.Query:Html.Encode} ({Search.PageIndex})</title>
+		<link type="text/css" rel="stylesheet" href="assets/styles/lib/console.css" />
+		<link type="text/css" rel="stylesheet" href="assets/styles/lib/progress.css" />
+		<link type="text/css" rel="stylesheet" href="assets/styles/lib/title.css" />
+		<link type="text/css" rel="stylesheet" href="assets/styles/lib/menu.css" />
+		<link type="text/css" rel="stylesheet" href="assets/styles/search-covergrid.css" />
+		<link type="text/css" rel="stylesheet" href="assets/styles/library-covergrid.css" />
+		<script type="text/javascript">
+			var searchResult = {SearchResult}
+			var whitelist = {MetadataKeywordList.Whitelist}
+			var blacklist = {MetadataKeywordList.Blacklist}
+			var ignorelist = {MetadataKeywordList.Ignorelist}
+			var search =
+			{
+				"page_index": {Search.PageIndex},
+				"tag_id": {Search.TagId},
+				"query": "{Search.Query}"
+			}
+
+			function markCoverAsLoaded(img)
+			{
+				// could notify app
+			}
+
+			function markCoverAsInvalid(img)
+			{
+				if (img.src)
+				{
+					img.onerror = null
+					img.src = "assets/images/cover/200x200/missing.png"
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<section id="main" role="main">
+			<div class="search-result-container">
+				{SearchResult.Items}
+			</div>
+		</section>
+
+		<div id="progress-total" class="progress progress-total progress-display-fixed">
+			<div class="progress-container">
+				<div class="progress-fill"></div>
+				<span></span>
+			</div>
+		</div>
+
+		<nav id="header" class="fixed-top" role="header">
+			<h1><span class="search-query">{Search.Query:Tag.Name}</span> (<span class="search-result-numpages">{SearchResult.NumPages}</span>)</h1>
+			<button id="nav-button-first" class="nav-button" title="Jump to first page"></button>
+			<button id="nav-button-previous" class="nav-button" title="Go to previous page"></button>
+			<input id="page-index-input" class="nav-input" name="page-index" type="text" value="{Search.PageIndex}" \>
+			<button id="nav-button-next" class="nav-button" title="Go to next page"></button>
+			<button id="nav-button-last" class="nav-button" title="Jump to last page"></button>
+
+			<button id="nav-button-top" class="nav-button" title="Scroll to top"></button>
+			<button id="nav-button-bottom" class="nav-button" title="Scroll to bottom"></button>
+		</nav>
+
+		<div id="header-hotspot" class="fixed-top">
+		</div>
+
+		<div id="footer-hotspot" class="fixed-bottom">
+		</div>
+
+		<div id="context-menu-document" class="context-menu display-none">
+			<button id="menu-command-add-search-bookmark" class="menu-command" onclick="window.external.Bookmark.ShowAddLibraryBookmarkPrompt(search.page_index)"><span class="icon"></span>Add bookmark</button>
+		</div>
+
+		<div id="context-menu-cover" class="context-menu display-none">
+			<button id="menu-command-add-bookmark" class="menu-command" onclick="window.external.Bookmark.ShowAddDetailsBookmarkPrompt(JSON.stringify(searchResult.result[coverContextMenu.target.searchResultIndex]))"><span class="icon"></span>Add bookmark</button>
+			<hr />
+			<button id="menu-command-open-cover" class="menu-command" onclick="window.external.FileSystem.Cache.OpenCover(JSON.stringify(searchResult.result[coverContextMenu.target.searchResultIndex]))"><span class="icon"></span>Open cover</button>
+			<button id="menu-command-browse" class="menu-command" onclick="window.external.FileSystem.Cache.Browse(searchResult.result[coverContextMenu.target.searchResultIndex].id)"><span class="icon"></span>Browse</button>
+			<button id="menu-command-read" class="menu-command" onclick="window.external.FileSystem.Cache.Read(searchResult.result[coverContextMenu.target.searchResultIndex].id)"><span class="icon"></span>Read</button>
+			<button id="menu-command-open-archive" class="menu-command" onclick="window.external.FileSystem.Cache.OpenArchive(searchResult.result[coverContextMenu.target.searchResultIndex].id)"><span class="icon"></span>Open archive</button>
+			<hr />
+			<button id="menu-command-show-details" class="menu-command" onclick="window.external.Search.ShowDetails(searchResult.result[coverContextMenu.target.searchResultIndex].id)"><span class="icon"></span>Show details</button>
+			<button id="menu-command-show-download" class="menu-command" onclick="window.external.Search.ShowDownload(searchResult.result[coverContextMenu.target.searchResultIndex].id)"><span class="icon"></span>Show download</button>
+			<hr />
+			<button id="menu-command-download-all" class="menu-command" onclick="window.external.BackgroundWorkers.PageDownloader.Download(searchResult.result[coverContextMenu.target.searchResultIndex].id)"><span class="icon"></span>Download all</button>
+			<button id="menu-command-download-cancel" class="menu-command" onclick="window.external.BackgroundWorkers.PageDownloader.Cancel(searchResult.result[coverContextMenu.target.searchResultIndex].id)"><span class="icon"></span>Cancel download</button>
+		</div>
+
+		<script src="assets/scripts/lib/console.js"></script>
+		<script src="assets/scripts/lib/event.js"></script>
+		<script src="assets/scripts/lib/browser.js"></script>
+		<script src="assets/scripts/lib/string.js"></script>
+		<script src="assets/scripts/lib/array.js"></script>
+		<script src="assets/scripts/lib/htmelement.js"></script>
+		<script src="assets/scripts/lib/zoom.js"></script>
+		<script src="assets/scripts/lib/progress.js"></script>
+		<script src="assets/scripts/lib/navigation.js"></script>
+		<script src="assets/scripts/lib/context-menu.js"></script>
+		<script src="assets/scripts/lib/title-html-formatter.js"></script>
+		<script src="assets/scripts/lib/metadata-keyword-list.js"></script>
+		<script src="assets/scripts/lib/metadata-filter.js"></script>
+		<script src="assets/scripts/lib/cache.js"></script>
+		<script src="assets/scripts/library-covergrid.js"></script>
+	</body>
+</html>

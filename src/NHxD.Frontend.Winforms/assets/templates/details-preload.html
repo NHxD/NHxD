@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta http-equiv="Cache-Control" content="no-cache" />
+		<meta http-equiv="X-UA-Compatible" content="IE=9" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes" />
+		<meta name="description" content="Gallery details.">
+		<base href="{Path.Application:Html.Encode:Uri.FixPath}/" target="_blank" />
+		<title>Loading gallery details</title>
+		<link type="text/css" rel="stylesheet" href="assets/styles/lib/console.css" />
+		<link type="text/css" rel="stylesheet" href="assets/styles/lib/progress.css" />
+		<link type="text/css" rel="stylesheet" href="assets/styles/lib/title.css" />
+		<link type="text/css" rel="stylesheet" href="assets/styles/search-preload.css" />
+		<script type="text/javascript">
+			//var galleryId = {Metadata.Id}
+		</script>
+	</head>
+	<body>
+		<div id="progress-total" class="progress" value="0" max="100">
+			<div class="progress-container">
+				<div class="progress-fill"></div>
+				<span></span>
+			</div>
+		</div>
+
+		<div id="main-container" class="center">
+			<div id="message-container">
+				<span>Loading...</span>
+			</div>
+			<div id="status-animation-container">
+				<span id="status-animation"></span>
+			</div>
+			<div id="status-message-container">
+				<span id="status-message"></span>
+			</div>
+		</div>
+
+		<script src="assets/scripts/lib/console.js"></script>
+		<script src="assets/scripts/lib/event.js"></script>
+		<script src="assets/scripts/lib/browser.js"></script>
+		<script src="assets/scripts/lib/string.js"></script>
+		<script src="assets/scripts/lib/array.js"></script>
+		<script src="assets/scripts/lib/htmelement.js"></script>
+		<script src="assets/scripts/lib/zoom.js"></script>
+		<script src="assets/scripts/lib/progress.js"></script>
+		<script src="assets/scripts/lib/title-html-formatter.js"></script>
+		<script src="assets/scripts/details-preload.js"></script>
+	</body>
+</html>

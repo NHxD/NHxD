@@ -1,0 +1,94 @@
+.context-menu
+{
+	/*width: 225px;*/	/* with checkboxes */
+	width: 200px;
+	background-color: white;
+	color: #223;
+	position: absolute;
+	border: 1px solid white;
+	z-index: 10;
+}
+
+.context-menu hr
+{
+	height: 0px;
+	border: 0;
+	border-bottom: 1px solid lightgray;
+	margin: 0;
+	margin-left: 36px;
+	margin-top: 3px;
+	margin-bottom: 3px;
+}
+
+.menu-command
+{
+	height: 28px;
+	padding: 6px;
+	padding-left: 12px;
+	padding-right: 12px;
+	border: 1px solid transparent;
+
+	/*padding-left: 48px;*/	/* temporary placeholder until checkboxes are implemented */
+	margin: 0;
+	width: 100%;
+	text-align: left;
+	background-color: transparent;
+}
+
+.menu-command:hover
+{
+	background-color: rgb(209, 226, 242);
+	border: 1px solid rgb(120, 174, 229);
+}
+
+.menu-command:disabled:hover
+{
+	background-color: rgb(225, 225, 225);
+	border: 1px solid rgb(174, 174, 174);
+}
+
+.menu-command .icon
+{
+	width: 28px;
+	height: 28px;
+	padding-left: 14px;
+	padding-right: 14px;
+
+	display: inline;
+}
+/*
+#menu-command-open-cover .icon:after
+{
+	content: url(../../images/shared/menu/32x32/details.png);
+}
+
+#menu-command-browse .icon:after
+{
+	content: url(../../images/shared/menu/32x32/browse.png);
+}
+
+#menu-command-read .icon:after
+{
+	content: url(../../images/shared/menu/32x32/open.png);
+}
+
+#menu-command-show-details .icon:after
+{
+	content: url(../../images/shared/menu/32x32/details.png);
+}
+
+#menu-command-show-download .icon:after
+{
+	content: url(../../images/shared/menu/32x32/download.png);
+}
+
+#menu-command-download-all .icon:after
+{
+	content: url(../../images/shared/menu/32x32/download.png);
+}
+*/
+
+.display-none
+{
+	display: none;
+}

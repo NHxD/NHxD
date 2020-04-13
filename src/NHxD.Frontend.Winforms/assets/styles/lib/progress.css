@@ -1,0 +1,123 @@
+.progress
+{
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+#progress-total,	/* HACK: apparently IE7 struggles with elements having class names identical to their id's */
+.progress-display-fixed
+{
+	position: fixed;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 12px;
+}
+
+.progress-display-inline
+{
+	width: 80px;
+	padding: 2px;
+}
+
+.progress-display-overlay	/*progress-item*/
+{
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+}
+
+.progress-total
+{
+}
+
+#progress-total
+{
+}
+
+.progress-subtotal
+{
+	top: 6px;
+}
+
+#progress-subtotal	/* HACK: apparently IE7 struggles with elements having class names identical to their id's */
+{
+	position: fixed;
+	top: 6px;
+	left: 0px;
+	width: 100%;
+	height: 12px;
+}
+
+.progress-item
+{
+}
+
+.progress-container
+{
+	width: 100%;
+	height: 6px;
+	background-color: rgba(47, 95, 127, 0.6);
+	/*border: 1px solid #777;*/
+}
+
+#progress-total .progress-container
+{
+	height: 6px;
+}
+
+#progress-subtotal .progress-container
+{
+	height: 4px;
+}
+
+.progress-item .progress-container
+{
+	height: 6px;
+}
+
+.progress-fill
+{
+	width: 0%;
+	transition: width 1s;
+	height: 100%;
+	background-color: gold;
+}
+
+.progress-total .progress-fill
+{
+}
+
+.progress-subtotal .progress-fill
+{
+	background-color: darkorange;
+}
+
+
+.progress-complete .progress-container
+{
+}
+
+.progress-complete .progress-fill
+{
+	background-color: rgb(236, 40, 84);
+}
+
+.progress-download-active .progress-container
+{
+	background-image: url(../../images/shared/progress/128x32/downloading.png);
+	background-repeat: repeat-x;
+}
+
+
+.search-result-item
+{
+	position: relative;
+}
+
+.display-none-toggle
+{
+	display: none !important;
+}

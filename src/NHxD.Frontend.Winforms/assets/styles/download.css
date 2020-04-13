@@ -1,0 +1,326 @@
+html, body
+{
+	background-color: #223;
+	color: #d9d9d9;
+	font-family: 'Tahoma', 'Verdana';
+	font-weight: 1em;
+}
+
+body
+{
+	background-color: transparent;
+}
+
+nav
+{
+	text-align: center;
+}
+
+h1
+{
+	font-size: 1.2em;
+	text-align: center;
+}
+
+h2
+{
+	font-size: 1.2em;
+	text-align: center;
+}
+
+h2 .by
+{
+	font-weight: normal;
+	font-size: 0.9em;
+}
+
+h3
+{
+	text-align: center;
+	font-size: 0.9em;
+}
+
+ul
+{
+	text-align: left;
+	display: inline-block;
+}
+
+li
+{
+	text-align: left;
+}
+
+#cover-container
+{
+	text-align: center;
+}
+
+#cover
+{
+	max-width: 100%;
+	height: auto;
+	border: 0;
+	box-shadow: 0px 0px 35px rgba(0,0,0,.25);
+}
+
+table
+{
+	width: 100%;
+	border-collapse: separate;
+	border-spacing: 0px;
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+td
+{
+	margin: 0;
+	padding: 0;
+	vertical-align: top;
+}
+
+.removed
+{
+	display: none;
+}
+
+nav button
+{
+	cursor: pointer;
+}
+
+.button-icon:before
+{
+	width: 64px;
+	height: 64px;
+}
+
+#nav-details .button-icon:before
+{
+	content: url(../images/download/toolbar/32x32/details.png);
+}
+
+#nav-download .button-icon:before
+{
+	content: url(../images/download/toolbar/32x32/download.png);
+}
+
+#nav-read .button-icon:before
+{
+	content: url(../images/details/toolbar/32x32/read.png);
+}
+
+#nav-open-archive .button-icon:before
+{
+	content: url(../images/details/toolbar/32x32/open-archive.png);
+}
+
+#nav-browse .button-icon:before
+{
+	content: url(../images/details/toolbar/32x32/browse.png);
+}
+
+#nav-bookmark-add .button-icon:before
+{
+	content: url(../images/details/toolbar/32x32/bookmark-add.png);
+}
+
+.aria-hidden
+{
+	display: none;
+}
+
+.nav-commands
+{
+	margin-bottom: 10px;
+}
+
+.nav-select
+, .nav-deselect
+{
+	margin: 2px;
+}
+
+.nav-select .icon-label:after
+{
+	content: url(../images/download/toolbar/32x32/selection-add.png);
+	width: 32px;
+	height: 32px;
+}
+
+.nav-deselect .icon-label:after
+{
+	content: url(../images/download/toolbar/32x32/selection-remove.png);
+	width: 32px;
+	height: 32px;
+}
+
+.nav-select button
+{
+	color: darkgreen;
+	font-weight: bold;
+	width: 64px;
+	height: 32px;
+}
+
+.nav-deselect button
+{
+	color: crimson;
+	font-weight: bold;
+	width: 64px;
+	height: 32px;
+}
+
+td
+{
+	text-align: center;
+	vertical-align: middle;
+}
+
+.thumbnail-container
+{
+	width: 50px;
+}
+
+.thumbnail-button
+{
+	background: none;
+	border: none;
+	cursor: default;
+	margin: 0;
+	padding: 0;
+	opacity: 0;
+}
+
+/*.completed*/ .thumbnail-button
+{
+	cursor: pointer;
+	opacity: 1;
+}
+
+.thumbnail-button:disabled
+{
+	cursor: default;
+	opacity: 0;
+}
+
+.thumbnail-button:hover
+{
+}
+
+.thumbnail-image
+{
+	width: 100%;
+	height: auto;
+}
+
+.thumbnail-image:hover
+{
+	filter: brightness(200%);
+	/*filter: progid:DXImageTransform.Microsoft.Light();*/
+	/* TODO: IE7 doesn't have any brightness filter - and ICMFilter is buggy */
+}
+
+.checkbox
+{
+	width: 10px;
+	padding: 6px;
+}
+
+.index
+{
+	width: 10px;
+	padding: 6px;
+}
+
+.progress
+{
+}
+
+.status
+{
+	width: 80px;
+	padding: 2px;
+}
+
+.status div
+{
+	width: 100%;
+	display: inline-block;
+}
+
+.completed .status div
+{
+	color: green;
+}
+
+.cancelled .status div
+{
+	color: red;
+}
+
+.skipped .status div
+{
+	color: dimgray;
+}
+
+#id:before
+{
+	content: '#';
+}
+
+.tag-container
+{
+	text-align: center;
+}
+
+#tag-container-12227:before/*english*/
+{
+	content: url(../images/shared/country-flags/23x17/GB.png);
+}
+
+#tag-container-6346:before/*japanese*/
+{
+	content: url(../images/shared/country-flags/23x17/JP.png);
+}
+
+#tag-container-29963:before/*chinese*/
+{
+	content: url(../images/shared/country-flags/23x17/CN.png);
+}
+
+.tag-container-102632:before/*cebuano*/
+{
+	content: url(../images/shared/country-flags/23x17/PH.png);
+}
+
+.display-none
+{
+	display: none;
+}
+
+nav button:disabled
+{
+	opacity: 0.5;
+	cursor: default;
+}
+
+nav .separator
+{
+	margin: 6px;
+}
+
+
+.visibility-hidden
+{
+	visibility: hidden;
+}
+
+
+/* overrides */
+
+.title-component:after
+{
+	display: inline;
+}

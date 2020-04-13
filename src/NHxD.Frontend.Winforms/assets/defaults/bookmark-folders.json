@@ -1,0 +1,54 @@
+﻿{
+  "favorites": {
+	"path": "favorites",
+	"text": "❤"
+  },
+  "favorites/artists": {
+	"path": "favorites/artists",
+	"text": "Artists"
+  },
+  "favorites/groups": {
+	"path": "favorites/groups",
+	"text": "Groups"
+  },
+  "favorites/tags": {
+	"path": "favorites/tags",
+	"text": "Tags"
+  },
+  "favorites/parodies": {
+	"path": "favorites/parodies",
+	"text": "Parodies"
+  },
+  "favorites/characters": {
+	"path": "favorites/characters",
+	"text": "Characters"
+  },
+  "rating": {
+	"path": "rating",
+	"text": "★"
+  },
+  "rating/5": {
+	"path": "rating/5",
+	"text": "★★★★★"
+  },
+  "rating/4": {
+	"path": "rating/4",
+	"text": "★★★★"
+  },
+  "rating/3": {
+	"path": "rating/3",
+	"text": "★★★"
+  },
+  "rating/2": {
+	"path": "rating/2",
+	"text": "★★"
+  },
+  "rating/1": {
+	"path": "rating/1",
+	"text": "★"
+  },
+  "rating/0": {
+	"path": "rating/0",
+	"text": "☹"
+  }
+}

@@ -1,0 +1,48 @@
+.title-component:after
+{
+	display: block;
+	content: " ";
+	color: white;
+}
+
+.title-component-comiket
+{
+	color: darkorchid;
+	font-size: 0.8em;
+}
+
+.title-component-group
+{
+	color: limegreen;
+	font-size: 0.9em;
+}
+
+.title-component-title
+{
+	color: white;
+	font-size: 1.2em;
+}
+
+.title-component-parody
+{
+	color: gold;
+	font-size: 1.0em;
+}
+
+.title-component-language
+{
+	color: teal;
+	font-size: 1.0em;
+}
+
+.title-component-scanlator
+{
+	color: gray;
+	font-size: 0.8em;
+}
+
+.title-component-version
+{
+	color: deepskyblue;
+	font-size: 1.0em;
+}
