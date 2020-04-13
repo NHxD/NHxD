@@ -59,4 +59,4 @@ To report bugs or suggest features, see [issues](https://github.com/NHxD/NHxD/is
 
 This project is licensed under the `GNU General Public License v3.0`.
 
-For more information, see [license](LICENSE).
+For more information, see [license](/LICENSE).
