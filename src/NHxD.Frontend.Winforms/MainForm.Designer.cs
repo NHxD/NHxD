@@ -117,8 +117,6 @@
 			// 
 			// applicationMenuStrip
 			// 
-			this.applicationMenuStrip.GripMargin = new System.Windows.Forms.Padding(2, 2, 0, 2);
-			this.applicationMenuStrip.ImageScalingSize = new System.Drawing.Size(28, 28);
 			this.applicationMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
             this.viewToolStripMenuItem,
