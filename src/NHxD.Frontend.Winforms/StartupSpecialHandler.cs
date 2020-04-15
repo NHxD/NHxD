@@ -7,18 +7,21 @@ namespace NHxD.Frontend.Winforms
 {
 	public class StartupSpecialHandler
 	{
+		private const TagsFilters RequireWhitelistTagsFilters = TagsFilters.Whitelist;
+		private const TagsFilters DoNotCareTagsFilters = TagsFilters.Blacklist | TagsFilters.Ignorelist | TagsFilters.Hidelist;
+
 		private static readonly Dictionary<string, StartupSpecialItem> SpecialStartupItems = new Dictionary<string, StartupSpecialItem>()
 		{
-			{ "1-1", new StartupSpecialItem(StartupSpecialDateFilters.NewYearsDay, new StartupSpecialItemValueCollection { { 17773, TagsFilters.Blacklist } }) },		// kimono
-			{ "1-25", new StartupSpecialItem(StartupSpecialDateFilters.LunarNewYear, new StartupSpecialItemValueCollection { { 24450, TagsFilters.Blacklist } }) },		// chinese dress
-			{ "4-13", new StartupSpecialItem(StartupSpecialDateFilters.Easter, new StartupSpecialItemValueCollection { { 23132, TagsFilters.Blacklist } }) },        // bunny girl
-			{ "5-10", new StartupSpecialItem(StartupSpecialDateFilters.MothersDay, new StartupSpecialItemValueCollection  { { 15853, TagsFilters.Whitelist } }) },		// mother
-			{ "5-12", new StartupSpecialItem(StartupSpecialDateFilters.InternationalNursesDay, new StartupSpecialItemValueCollection  { { 6525, TagsFilters.Blacklist } }) },		// nurse
-			{ "7-24", new StartupSpecialItem(StartupSpecialDateFilters.SportsDay, new StartupSpecialItemValueCollection { { 17349, TagsFilters.Blacklist } }) },		// tracksuit
-			{ "10-31", new StartupSpecialItem(StartupSpecialDateFilters.Halloween, new StartupSpecialItemValueCollection { { 7546, TagsFilters.Blacklist } }) },	// witch
-			{ "11-19", new StartupSpecialItem(StartupSpecialDateFilters.WorldToiletDay, new StartupSpecialItemValueCollection { { 32282, TagsFilters.Whitelist }, { 10476, TagsFilters.Whitelist }, { 2820, TagsFilters.Whitelist }, { 8391, TagsFilters.Whitelist } }) },	// piss drinking, urination, scat, public use
-			{ "12-8", new StartupSpecialItem(StartupSpecialDateFilters.FeastOfTheImmaculateConception, new StartupSpecialItemValueCollection { { 2515, TagsFilters.Whitelist }, { 29224, TagsFilters.Whitelist }, { 6343, TagsFilters.Whitelist } }) },	// virginity, impregnation, pregnant
-			{ "12-25", new StartupSpecialItem(StartupSpecialDateFilters.Christmas, new StartupSpecialItemValueCollection { { 30811, TagsFilters.Blacklist } }) },	// chritsmas
+			{ "1-1", new StartupSpecialItem(StartupSpecialDateFilters.NewYearsDay, new StartupSpecialItemValueCollection { { 17773, DoNotCareTagsFilters } }) },		// kimono
+			{ "1-25", new StartupSpecialItem(StartupSpecialDateFilters.LunarNewYear, new StartupSpecialItemValueCollection { { 24450, DoNotCareTagsFilters } }) },		// chinese dress
+			{ "4-13", new StartupSpecialItem(StartupSpecialDateFilters.Easter, new StartupSpecialItemValueCollection { { 23132, DoNotCareTagsFilters } }) },        // bunny girl
+			{ "5-10", new StartupSpecialItem(StartupSpecialDateFilters.MothersDay, new StartupSpecialItemValueCollection  { { 15853, RequireWhitelistTagsFilters } }) },		// mother
+			{ "5-12", new StartupSpecialItem(StartupSpecialDateFilters.InternationalNursesDay, new StartupSpecialItemValueCollection  { { 6525, DoNotCareTagsFilters } }) },		// nurse
+			{ "7-24", new StartupSpecialItem(StartupSpecialDateFilters.SportsDay, new StartupSpecialItemValueCollection { { 17349, DoNotCareTagsFilters } }) },		// tracksuit
+			{ "10-31", new StartupSpecialItem(StartupSpecialDateFilters.Halloween, new StartupSpecialItemValueCollection { { 7546, DoNotCareTagsFilters } }) },	// witch
+			{ "11-19", new StartupSpecialItem(StartupSpecialDateFilters.WorldToiletDay, new StartupSpecialItemValueCollection { { 32282, RequireWhitelistTagsFilters }, { 10476, RequireWhitelistTagsFilters }, { 2820, RequireWhitelistTagsFilters }, { 8391, RequireWhitelistTagsFilters } }) },	// piss drinking, urination, scat, public use
+			{ "12-8", new StartupSpecialItem(StartupSpecialDateFilters.FeastOfTheImmaculateConception, new StartupSpecialItemValueCollection { { 2515, RequireWhitelistTagsFilters }, { 29224, RequireWhitelistTagsFilters }, { 6343, RequireWhitelistTagsFilters } }) },	// virginity, impregnation, pregnant
+			{ "12-25", new StartupSpecialItem(StartupSpecialDateFilters.Christmas, new StartupSpecialItemValueCollection { { 30811, DoNotCareTagsFilters } }) },	// chritsmas
 		};
 
 		public Configuration.ConfigGallery GallerySettings { get; }
@@ -81,16 +84,23 @@ namespace NHxD.Frontend.Winforms
 						{
 							continue;
 						}
-						// require tag to be not blacklisted.
+						// require tag to not be blacklisted.
 						else if (value.Item2.HasFlag(TagsFilters.Blacklist)
 							&& MetadataKeywordLists.Blacklist["tag"].Contains(tag.Name))
 						{
 							continue;
 						}
 
-						// require tag to be not ignorelisted.
+						// require tag to not be in the ignorelist.
 						if (value.Item2.HasFlag(TagsFilters.Ignorelist)
 							&& MetadataKeywordLists.Ignorelist["tag"].Contains(tag.Name))
+						{
+							continue;
+						}
+
+						// require tag to not be in the hidelist.
+						if (value.Item2.HasFlag(TagsFilters.Hidelist)
+							&& MetadataKeywordLists.Hidelist["tag"].Contains(tag.Name))
 						{
 							continue;
 						}
