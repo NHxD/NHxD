@@ -52,7 +52,8 @@ namespace NHxD.Frontend.Winforms
 			}
 			set
 			{
-				searchProgressArg = value; OnSearchProgressArgChanged();
+				searchProgressArg = value;
+				OnSearchProgressArgChanged();
 			}
 		}
 

@@ -238,6 +238,12 @@ function __onIgnorelistChanged(eventType, fieldType, fieldValue)
 	highlightTitles()
 }
 
+function __onHidelistChanged(eventType, fieldType, fieldValue)
+{
+	MetadataKeywordList.synchronizeList(eventType, fieldType, fieldValue, hidelist)
+	highlightTitles()
+}
+
 //
 // UI
 //

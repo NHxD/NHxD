@@ -198,6 +198,11 @@ table
 	text-decoration: line-through;
 }
 
+.tag-hidelist
+{
+	opacity: 0.5;
+}
+
 .tag-type span
 {
 	padding-right: 10px;

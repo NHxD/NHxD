@@ -274,15 +274,15 @@ namespace NHxD.Frontend.Winforms
 
 		private void AddItem(TreeNode categoryNode, TagInfo tag)
 		{
-			bool isInWhiteList = MetadataKeywordLists.Whitelist[tag.Type].Any(x => x.Equals(tag.Name, StringComparison.OrdinalIgnoreCase));
-			bool isInBlackList = MetadataKeywordLists.Blacklist[tag.Type].Any(x => x.Equals(tag.Name, StringComparison.OrdinalIgnoreCase));
-			bool isInIgnoreList = MetadataKeywordLists.Ignorelist[tag.Type].Any(x => x.Equals(tag.Name, StringComparison.OrdinalIgnoreCase));
+			bool isInWhitelist = MetadataKeywordLists.Whitelist[tag.Type].Any(x => x.Equals(tag.Name, StringComparison.OrdinalIgnoreCase));
+			bool isInBlacklist = MetadataKeywordLists.Blacklist[tag.Type].Any(x => x.Equals(tag.Name, StringComparison.OrdinalIgnoreCase));
+			bool isInIgnorelist = MetadataKeywordLists.Ignorelist[tag.Type].Any(x => x.Equals(tag.Name, StringComparison.OrdinalIgnoreCase));
+			bool isInHidelist = MetadataKeywordLists.Hidelist[tag.Type].Any(x => x.Equals(tag.Name, StringComparison.OrdinalIgnoreCase));
 
-			//string tagLabel = tag.Name;
 			string tagLabel = TagTextFormatter.Format(tag, TagsListSettings.LabelFormats.Tag);
 			TreeNode contentNode = new TreeNode(tagLabel);
 
-			if (isInIgnoreList)
+			if (isInIgnorelist)
 			{
 				if (strikethroughFont == null)
 				{
@@ -292,13 +292,17 @@ namespace NHxD.Frontend.Winforms
 				contentNode.NodeFont = strikethroughFont;
 			}
 
-			if (isInWhiteList)
+			if (isInWhitelist)
 			{
-				contentNode.ForeColor = Color.Blue;
+				contentNode.ForeColor = GetTreeNodeForeColor(TagsListSettings.Colors.Whitelist, isInHidelist);
 			}
-			else if (isInBlackList)
+			else if (isInBlacklist)
 			{
-				contentNode.ForeColor = Color.Red;
+				contentNode.ForeColor = GetTreeNodeForeColor(TagsListSettings.Colors.Blacklist, isInHidelist);
+			}
+			else
+			{
+				contentNode.ForeColor = GetTreeNodeForeColor(TagsListSettings.Colors.Default, isInHidelist);
 			}
 
 			contentNode.Tag = tag;
@@ -331,39 +335,88 @@ namespace NHxD.Frontend.Winforms
 			bool isInWhitelist = MetadataKeywordLists.Whitelist[tag.Type].Any(x => x.Equals(tag.Name, StringComparison.OrdinalIgnoreCase));
 			bool isInBlacklist = MetadataKeywordLists.Blacklist[tag.Type].Any(x => x.Equals(tag.Name, StringComparison.OrdinalIgnoreCase));
 			bool isInIgnorelist = MetadataKeywordLists.Ignorelist[tag.Type].Any(x => x.Equals(tag.Name, StringComparison.OrdinalIgnoreCase));
+			bool isInHidelist = MetadataKeywordLists.Hidelist[tag.Type].Any(x => x.Equals(tag.Name, StringComparison.OrdinalIgnoreCase));
 
 			if (isInWhitelist)
 			{
-				contentNode.ForeColor = Color.Blue;
-				contextMenu.MenuItems.Add(new MenuItem("&Remove from whitelist", (sender2, e2) => { contentNode.ForeColor = Color.FromKnownColor(KnownColor.ControlText); MetadataKeywordLists.Whitelist.Remove(tag); }) { Name = "whitelist_remove" });
+				contentNode.ForeColor = GetTreeNodeForeColor(TagsListSettings.Colors.Whitelist, isInHidelist);
+				contextMenu.MenuItems.Add(new MenuItem("&Remove from whitelist", (sender2, e2) =>
+				{
+					contentNode.ForeColor = GetTreeNodeForeColor(TagsListSettings.Colors.Default, isInHidelist);
+					MetadataKeywordLists.Whitelist.Remove(tag);
+				}) { Name = "whitelist_remove" });
 			}
 			else if (isInBlacklist)
 			{
-				contentNode.ForeColor = Color.Red;
-				contextMenu.MenuItems.Add(new MenuItem("&Remove from blacklist", (sender2, e2) => { contentNode.ForeColor = Color.FromKnownColor(KnownColor.ControlText); MetadataKeywordLists.Blacklist.Remove(tag); }) { Name = "blacklist_remove" });
+				contentNode.ForeColor = GetTreeNodeForeColor(TagsListSettings.Colors.Blacklist, isInHidelist);
+				contextMenu.MenuItems.Add(new MenuItem("&Remove from blacklist", (sender2, e2) =>
+				{
+					contentNode.ForeColor = GetTreeNodeForeColor(TagsListSettings.Colors.Default, isInHidelist);
+					MetadataKeywordLists.Blacklist.Remove(tag);
+				}) { Name = "blacklist_remove" });
 			}
 
 			if (isInIgnorelist)
 			{
 				contentNode.NodeFont = strikethroughFont;
-				contextMenu.MenuItems.Add(new MenuItem("&Remove from ignorelist", (sender2, e2) => { contentNode.NodeFont = null; MetadataKeywordLists.Ignorelist.Remove(tag); }) { Name = "ignorelist_remove" });
+				contextMenu.MenuItems.Add(new MenuItem("&Remove from ignorelist", (sender2, e2) =>
+				{
+					contentNode.NodeFont = null;
+					MetadataKeywordLists.Ignorelist.Remove(tag);
+				}) { Name = "ignorelist_remove" });
+			}
+
+			if (isInHidelist)
+			{
+				contextMenu.MenuItems.Add(new MenuItem("&Remove from hidelist", (sender2, e2) =>
+				{
+					Color hidelistColor = GetHidelistColor(isInWhitelist, isInBlacklist);
+
+					contentNode.ForeColor = GetTreeNodeForeColor(hidelistColor, false);
+					MetadataKeywordLists.Hidelist.Remove(tag);
+				}) { Name = "hidelist_remove" });
 			}
 
 			if (!isInWhitelist && !isInBlacklist)
 			{
-				contextMenu.MenuItems.Add(new MenuItem("&Add to whitelist", (sender2, e2) => { contentNode.ForeColor = Color.Blue; MetadataKeywordLists.Whitelist.Add(tag); }) { Name = "whitelist_add" });
-				contextMenu.MenuItems.Add(new MenuItem("&Add to blacklist", (sender2, e2) => { contentNode.ForeColor = Color.Red; MetadataKeywordLists.Blacklist.Add(tag); }) { Name = "blacklist_add" });
+				contextMenu.MenuItems.Add(new MenuItem("&Add to whitelist", (sender2, e2) =>
+				{
+					contentNode.ForeColor = GetTreeNodeForeColor(TagsListSettings.Colors.Whitelist, isInHidelist);
+					MetadataKeywordLists.Whitelist.Add(tag);
+				}) { Name = "whitelist_add" });
+
+				contextMenu.MenuItems.Add(new MenuItem("&Add to blacklist", (sender2, e2) =>
+				{
+					contentNode.ForeColor = GetTreeNodeForeColor(TagsListSettings.Colors.Blacklist, isInHidelist);
+					MetadataKeywordLists.Blacklist.Add(tag);
+				}) { Name = "blacklist_add" });
 			}
 
 			if (!isInIgnorelist)
 			{
-				contextMenu.MenuItems.Add(new MenuItem("&Add to ignorelist", (sender2, e2) => { contentNode.NodeFont = strikethroughFont; MetadataKeywordLists.Ignorelist.Add(tag); }) { Name = "ignorelist_add" });
+				contextMenu.MenuItems.Add(new MenuItem("&Add to ignorelist", (sender2, e2) =>
+				{
+					contentNode.NodeFont = strikethroughFont;
+					MetadataKeywordLists.Ignorelist.Add(tag);
+				}) { Name = "ignorelist_add" });
+			}
+
+			if (!isInHidelist)
+			{
+				contextMenu.MenuItems.Add(new MenuItem("&Add to hidelist", (sender2, e2) =>
+				{
+					Color hidelistColor = GetHidelistColor(isInWhitelist, isInBlacklist);
+
+					contentNode.ForeColor = GetTreeNodeForeColor(hidelistColor, true);
+					MetadataKeywordLists.Hidelist.Add(tag);
+				}) { Name = "hidelist_add" });
 			}
 
 			if (contextMenu.MenuItems.Count > 0)
 			{
 				contextMenu.MenuItems.Add("-");
 			}
+
 			contextMenu.MenuItems.Add(new MenuItem("&Add bookmark", (sender2, e2) => { BookmarkPromptUtility.ShowAddTaggedBookmarkPrompt(tag.Id, 1); }) { Name = "search_definition" });
 
 			if (tag.Type == TagType.Tag)
@@ -372,8 +425,29 @@ namespace NHxD.Frontend.Winforms
 				{
 					contextMenu.MenuItems.Add("-");
 				}
+
 				contextMenu.MenuItems.Add(new MenuItem("&Search for definition", (sender2, e2) => { TagDefinition tagDefinition = new TagDefinition(tag.Name, HttpClient); tagDefinition.Search(); }) { Name = "search_definition" });
 			}
+		}
+
+		private Color GetHidelistColor(bool isInWhitelist, bool isInBlacklist)
+		{
+			Color restoredColor;
+
+			if (isInWhitelist)
+			{
+				restoredColor = TagsListSettings.Colors.Whitelist;
+			}
+			else if (isInBlacklist)
+			{
+				restoredColor = TagsListSettings.Colors.Blacklist;
+			}
+			else
+			{
+				restoredColor = TagsListSettings.Colors.Default;
+			}
+
+			return restoredColor;
 		}
 
 		public TreeNode GetTagTreeNode(string categoryName, string tagName, int tagId)
@@ -517,28 +591,32 @@ namespace NHxD.Frontend.Winforms
 
 		private void Whitelist_Changed(object sender, MetadataKeywordListChangedEventArgs e)
 		{
+			bool isInHidelist = MetadataKeywordLists.Hidelist[e.TagType].Any(x => x.Equals(e.TagName, StringComparison.OrdinalIgnoreCase));
+
 			MetadataKeywordLists_ListChanged(sender, e,
 				(contentNode) =>
 				{
-					contentNode.ForeColor = Color.Blue;
+					contentNode.ForeColor = GetTreeNodeForeColor(TagsListSettings.Colors.Whitelist, isInHidelist);
 				},
 				(contentNode) =>
 				{
-					contentNode.ForeColor = Color.FromKnownColor(KnownColor.ControlText);
+					contentNode.ForeColor = GetTreeNodeForeColor(TagsListSettings.Colors.Default, isInHidelist);
 				}
 			);
 		}
 
 		private void Blacklist_Changed(object sender, MetadataKeywordListChangedEventArgs e)
 		{
+			bool isInHidelist = MetadataKeywordLists.Hidelist[e.TagType].Any(x => x.Equals(e.TagName, StringComparison.OrdinalIgnoreCase));
+
 			MetadataKeywordLists_ListChanged(sender, e,
 				(contentNode) =>
 				{
-					contentNode.ForeColor = Color.Red;
+					contentNode.ForeColor = GetTreeNodeForeColor(TagsListSettings.Colors.Blacklist, isInHidelist);
 				},
 				(contentNode) =>
 				{
-					contentNode.ForeColor = Color.FromKnownColor(KnownColor.ControlText);
+					contentNode.ForeColor = GetTreeNodeForeColor(TagsListSettings.Colors.Default, isInHidelist);
 				}
 			);
 		}
@@ -559,19 +637,38 @@ namespace NHxD.Frontend.Winforms
 
 		private void Hidelist_Changed(object sender, MetadataKeywordListChangedEventArgs e)
 		{
-			// TODO: finish implementing hidelist.
-			/*
-			MainForm_ListChanged(sender, e,
+			bool isInWhitelist = MetadataKeywordLists.Whitelist[e.TagType].Any(x => x.Equals(e.TagName, StringComparison.OrdinalIgnoreCase));
+			bool isInBlacklist = MetadataKeywordLists.Blacklist[e.TagType].Any(x => x.Equals(e.TagName, StringComparison.OrdinalIgnoreCase));
+
+			MetadataKeywordLists_ListChanged(sender, e,
 				(contentNode) =>
 				{
-					contentNode.NodeFont = tagsTreeView.StrikethroughFont;
+					contentNode.ForeColor = GetTreeNodeForeColor(GetHidelistColor(isInWhitelist, isInBlacklist), true);
 				},
 				(contentNode) =>
 				{
-					contentNode.NodeFont = null;
+					contentNode.ForeColor = GetTreeNodeForeColor(GetHidelistColor(isInWhitelist, isInBlacklist), false);
 				}
 			);
-			*/
+		}
+
+		private Color GetTreeNodeForeColor(Color baseColor, bool isInHidelist)
+		{
+			if (isInHidelist)
+			{
+				if (baseColor.GetBrightness() <= 0.1f)
+				{
+					return Color.Gray;
+				}
+				else
+				{
+					return ControlPaint.Light(baseColor, 25.0f);
+				}
+			}
+			else
+			{
+				return baseColor;
+			}
 		}
 
 		// TODO: handle the case of clicking inside the node (but outside the label) then releasing inside the label

@@ -715,6 +715,21 @@ namespace NHxD.Frontend.Winforms.Configuration
 
 		[JsonProperty("forceRuntimeUpdate")]
 		public bool ForceRuntimeUpdate { get; set; } = true;
+
+		[JsonProperty("colors")]
+		public ConfigTagsListColors Colors { get; set; } = new ConfigTagsListColors();
+	}
+
+	public class ConfigTagsListColors
+	{
+		[JsonProperty("whitelist")]
+		public Color Whitelist { get; set; } = Color.Blue;
+
+		[JsonProperty("blacklist")]
+		public Color Blacklist { get; set; } = Color.Red;
+
+		[JsonProperty("default")]
+		public Color Default { get; set; } = Color.FromKnownColor(KnownColor.ControlText);
 	}
 
 	public class ConfigTagsListLabelFormats

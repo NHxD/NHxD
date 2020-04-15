@@ -84,6 +84,7 @@ namespace NHxD.Frontend.Winforms
 			MetadataKeywordLists.WhitelistChanged += Form_WhiteListChanged;
 			MetadataKeywordLists.BlacklistChanged += Form_BlackListChanged;
 			MetadataKeywordLists.IgnorelistChanged += Form_IgnoreListChanged;
+			MetadataKeywordLists.HidelistChanged += Form_HideListChanged;
 
 			DetailsModel.MetadataChanged += DetailsModel_MetadataChanged;
 
@@ -121,6 +122,15 @@ namespace NHxD.Frontend.Winforms
 				
 				CoverDownloader.Download(cachedMetadata);
 			}
+		}
+		private void Form_HideListChanged(object sender, MetadataKeywordListChangedEventArgs e)
+		{
+			if (string.IsNullOrEmpty(WebBrowser.DocumentText))
+			{
+				return;
+			}
+
+			WebBrowser.Document?.InvokeScript("__onHidelistChanged", e.ToObjectArray());
 		}
 
 		private void Form_IgnoreListChanged(object sender, MetadataKeywordListChangedEventArgs e)

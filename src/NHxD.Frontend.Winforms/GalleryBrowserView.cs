@@ -3,6 +3,7 @@ using Ash.System.Windows.Forms;
 using Newtonsoft.Json;
 using Nhentai;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Globalization;
@@ -91,6 +92,7 @@ namespace NHxD.Frontend.Winforms
 			MetadataKeywordLists.WhitelistChanged += Form_WhiteListChanged;
 			MetadataKeywordLists.BlacklistChanged += Form_BlackListChanged;
 			MetadataKeywordLists.IgnorelistChanged += Form_IgnoreListChanged;
+			MetadataKeywordLists.HidelistChanged += Form_HideListChanged;
 
 			GalleryModel.SearchArgChanged += GalleryModel_SearchArgChanged;
 			GalleryModel.SearchProgressArgChanged += GalleryModel_SearchProgressArgChanged;
@@ -105,6 +107,16 @@ namespace NHxD.Frontend.Winforms
 		private void GalleryBrowserFilter_TextChanged(object sender, EventArgs e)
 		{
 			ApplyFilter(GalleryBrowserFilter.Text);
+		}
+
+		private void Form_HideListChanged(object sender, MetadataKeywordListChangedEventArgs e)
+		{
+			if (string.IsNullOrEmpty(WebBrowser.DocumentText))
+			{
+				return;
+			}
+
+			WebBrowser.Document?.InvokeScript("__onHidelistChanged", e.ToObjectArray());
 		}
 
 		private void Form_IgnoreListChanged(object sender, MetadataKeywordListChangedEventArgs e)
@@ -287,7 +299,7 @@ namespace NHxD.Frontend.Winforms
 				return;
 			}
 
-			SearchDoArg searchDoArg = new SearchDoArg(searchArg, TagsModel, SearchHandler, GalleryBrowserSettings.SortType, GalleryBrowserSettings.SortOrder);
+			SearchDoArg searchDoArg = new SearchDoArg(searchArg, TagsModel, SearchHandler, GalleryBrowserSettings.SortType, GalleryBrowserSettings.SortOrder, MetadataKeywordLists);
 
 			listBackgroundWorker.RunWorkerAsync(searchDoArg);
 		}
@@ -314,145 +326,52 @@ namespace NHxD.Frontend.Winforms
 			*/
 			try
 			{
-					if (!string.IsNullOrEmpty(searchArg.Query))
-					{
-						searchResult = searchDoArg.SearchHandler.Search(searchArg.Query, currentPage);
-					}
-					else if (searchArg.TagId >= 0)
-					{
-						searchResult = searchDoArg.SearchHandler.TaggedSearch(searchArg.TagId, currentPage);
-					}
-					else
-					{
-						searchResult = searchDoArg.SearchHandler.RecentSearch(currentPage);
-					}
-
-					if (searchResult == null)
-					{
-						e.Cancel = true;
-						return;
-					}
-
-					searchDoArg.TagsModel.CollectTags(searchResult);
-
-					searchProgressArg = new SearchProgressArg(searchArg, searchResult, currentPage);
-
-					backgroundWorker.ReportProgress(searchResult.NumPages > 0 ? (int)(currentPage / (float)searchResult.NumPages * 100) : 100, searchProgressArg);
-				}
-				catch (Exception ex)
+				if (!string.IsNullOrEmpty(searchArg.Query))
 				{
-					SearchErrorArg errorArg = new SearchErrorArg(searchArg, currentPage, (ex.InnerException != null) ? string.Format(CultureInfo.InvariantCulture, "{0}{1}{2}", ex.Message, Environment.NewLine, ex.InnerException.Message) : ex.Message);
-
-					backgroundWorker.ReportProgress(0, errorArg);
+					searchResult = searchDoArg.SearchHandler.Search(searchArg.Query, currentPage);
 				}
+				else if (searchArg.TagId >= 0)
+				{
+					searchResult = searchDoArg.SearchHandler.TaggedSearch(searchArg.TagId, currentPage);
+				}
+				else
+				{
+					searchResult = searchDoArg.SearchHandler.RecentSearch(currentPage);
+				}
+
+				if (searchResult == null)
+				{
+					e.Cancel = true;
+					return;
+				}
+
+				searchDoArg.TagsModel.CollectTags(searchResult);
+
+				searchProgressArg = new SearchProgressArg(searchArg, searchResult, currentPage, searchDoArg.MetadataKeywordLists, searchDoArg.SortType, searchDoArg.SortOrder);
+
+				backgroundWorker.ReportProgress(searchResult.NumPages > 0 ? (int)(currentPage / (float)searchResult.NumPages * 100) : 100, searchProgressArg);
+			}
+			catch (Exception ex)
+			{
+				SearchErrorArg errorArg = new SearchErrorArg(searchArg, currentPage, (ex.InnerException != null) ? string.Format(CultureInfo.InvariantCulture, "{0}{1}{2}", ex.Message, Environment.NewLine, ex.InnerException.Message) : ex.Message);
+
+				backgroundWorker.ReportProgress(0, errorArg);
+			}
 			/*
 			} while (loadAll
 				&& searchResult != null
 				&& ++currentPage < searchResult.NumPages);
 			*/
 
-			//
-			// TODO: remove result items according to hidelist.
-			//
-			/*
-			List<int> indices = new List<int>();
-
-			for (int i = 0; i < searchResult.Matches.Count; ++i)
-			{
-				if (searchDoArg.Hidelist.ContainsMetaddata(searchResult.Matches[i]))
-				{
-					indices.Add(i);
-				}
-			}
-
-			foreach (int index in indices)
-			{
-				searchResult.Matches.RemoveAt(indices[index]);
-			}
-			*/
-
 			if (searchResult != null
 				&& searchResult.Result != null)
 			{
-				if (searchDoArg.SortType == GallerySortType.Title)
+				/*if (searchDoArg.SortType != GallerySortType.None)
 				{
-					searchResult.Result = searchResult.Result.OrderBy(x => x.Title.Pretty, searchDoArg.SortOrder).ToList();
-				}
-				else if (searchDoArg.SortType == GallerySortType.Language)
-				{
-					searchResult.Result = searchResult.Result.OrderBy(x => string.Join(",", x.Tags.Where(y => y.Type == TagType.Language).Select(z => z.Name)), searchDoArg.SortOrder).ToList();
-				}
-				else if (searchDoArg.SortType == GallerySortType.Artist)
-				{
-					searchResult.Result = searchResult.Result.OrderBy(x => string.Join(",", x.Tags.Where(y => y.Type == TagType.Artist).Select(z => z.Name)), searchDoArg.SortOrder).ToList();
-				}
-				else if (searchDoArg.SortType == GallerySortType.Group)
-				{
-					searchResult.Result = searchResult.Result.OrderBy(x => string.Join(",", x.Tags.Where(y => y.Type == TagType.Group).Select(z => z.Name)), searchDoArg.SortOrder).ToList();
-				}
-				else if (searchDoArg.SortType == GallerySortType.Tag)
-				{
-					searchResult.Result = searchResult.Result.OrderBy(x => string.Join(",", x.Tags.Where(y => y.Type == TagType.Tag).Select(z => z.Name)), searchDoArg.SortOrder).ToList();
-				}
-				else if (searchDoArg.SortType == GallerySortType.Parody)
-				{
-					searchResult.Result = searchResult.Result.OrderBy(x => string.Join(",", x.Tags.Where(y => y.Type == TagType.Parody).Select(z => z.Name)), searchDoArg.SortOrder).ToList();
-				}
-				else if (searchDoArg.SortType == GallerySortType.Character)
-				{
-					searchResult.Result = searchResult.Result.OrderBy(x => string.Join(",", x.Tags.Where(y => y.Type == TagType.Character).Select(z => z.Name)), searchDoArg.SortOrder).ToList();
-				}
-				else if (searchDoArg.SortType == GallerySortType.Category)
-				{
-					searchResult.Result = searchResult.Result.OrderBy(x => string.Join(",", x.Tags.Where(y => y.Type == TagType.Category).Select(z => z.Name)), searchDoArg.SortOrder).ToList();
-				}
-				else if (searchDoArg.SortType == GallerySortType.Scanlator)
-				{
-					searchResult.Result = searchResult.Result.OrderBy(x => x.Scanlator, searchDoArg.SortOrder).ToList();
-				}
-				else if (searchDoArg.SortType == GallerySortType.UploadDate)
-				{
-					searchResult.Result = searchResult.Result.OrderBy(x => x.UploadDate, searchDoArg.SortOrder).ToList();
-				}
-				else if (searchDoArg.SortType == GallerySortType.NumPages)
-				{
-					searchResult.Result = searchResult.Result.OrderBy(x => x.NumPages, searchDoArg.SortOrder).ToList();
-				}
-				else if (searchDoArg.SortType == GallerySortType.NumFavorites)
-				{
-					searchResult.Result = searchResult.Result.OrderBy(x => x.NumFavorites, searchDoArg.SortOrder).ToList();
-				}
-				else if (searchDoArg.SortType == GallerySortType.Id)
-				{
-					searchResult.Result = searchResult.Result.OrderBy(x => x.Id, searchDoArg.SortOrder).ToList();
-				}
+					searchResult = OrderByMetadata(searchResult, searchDoArg.SortType, searchDoArg.SortOrder);
+				}*/
 
 				e.Result = new SearchResultArg(searchArg, searchResult);
-			}
-		}
-
-		private class SearchErrorArg
-		{
-			public SearchArg SearchArg { get; }
-			public int PageIndex { get; }
-			public string Error { get; }
-
-			public SearchErrorArg(SearchArg searchArg, int pageIndex, string error)
-			{
-				SearchArg = searchArg;
-				PageIndex = pageIndex;
-				Error = error;
-			}
-
-			public object[] ToObjectArray()
-			{
-				return new object[]
-				{
-					PageIndex,	//SearchArg?.PageIndex,
-					SearchArg?.TagId,
-					SearchArg?.Query,
-					Error,
-				};
 			}
 		}
 
@@ -532,7 +451,32 @@ namespace NHxD.Frontend.Winforms
 
 				if (searchProgressArg.PageIndex == searchProgressArg.SearchArg.PageIndex)
 				{
-					GalleryModel.SearchProgressArg = searchProgressArg;
+					if (searchResult.Result != null)
+					{
+						SearchResult customSearchResult = new SearchResult();
+
+						customSearchResult.NumPages = searchProgressArg.SearchResult.NumPages;
+						customSearchResult.PerPage = searchProgressArg.SearchResult.PerPage;
+
+						IEnumerable<Metadata> customResult;
+
+						customResult = searchProgressArg.SearchResult.Result.GetFilteredSearchResult(searchProgressArg.MetadataKeywordLists);
+
+						if (searchProgressArg.SortType != GallerySortType.None)
+						{
+							customResult = customResult.GetSortedSearchResult(searchProgressArg.SortType, searchProgressArg.SortOrder);
+						}
+
+						customSearchResult.Result = customResult.ToList();
+
+						SearchProgressArg customSearchProgressArg = new SearchProgressArg(searchProgressArg.SearchArg, customSearchResult, searchProgressArg.PageIndex, searchProgressArg.MetadataKeywordLists, searchProgressArg.SortType, searchProgressArg.SortOrder);
+
+						GalleryModel.SearchProgressArg = customSearchProgressArg;
+					}
+					else
+					{
+						GalleryModel.SearchProgressArg = searchProgressArg;
+					}
 				}
 
 				//
@@ -552,6 +496,31 @@ namespace NHxD.Frontend.Winforms
 			if (!e.Cancelled)
 			{
 
+			}
+		}
+
+		private class SearchErrorArg
+		{
+			public SearchArg SearchArg { get; }
+			public int PageIndex { get; }
+			public string Error { get; }
+
+			public SearchErrorArg(SearchArg searchArg, int pageIndex, string error)
+			{
+				SearchArg = searchArg;
+				PageIndex = pageIndex;
+				Error = error;
+			}
+
+			public object[] ToObjectArray()
+			{
+				return new object[]
+				{
+					PageIndex,	//SearchArg?.PageIndex,
+					SearchArg?.TagId,
+					SearchArg?.Query,
+					Error,
+				};
 			}
 		}
 	}
@@ -576,7 +545,6 @@ namespace NHxD.Frontend.Winforms
 		//Comicket,
 		//Censhorship
 	}
-
 
 	public class SearchArg : ISearchArg
 	{
@@ -609,18 +577,21 @@ namespace NHxD.Frontend.Winforms
 		public SearchHandler SearchHandler { get; }
 		public GallerySortType SortType { get; }
 		public SortOrder SortOrder { get; }
+		public MetadataKeywordLists MetadataKeywordLists { get; }
 
 		public SearchDoArg(SearchArg searchArg
 		, TagsModel tagsModel
 		, SearchHandler searchHandler
 		, GallerySortType sortType
-		, SortOrder sortOrder)
+		, SortOrder sortOrder
+		, MetadataKeywordLists metadataKeywordLists)
 		{
 			SearchArg = searchArg;
 			TagsModel = tagsModel;
 			SearchHandler = searchHandler;
 			SortType = sortType;
 			SortOrder = sortOrder;
+			MetadataKeywordLists = metadataKeywordLists;
 		}
 	}
 
@@ -629,12 +600,18 @@ namespace NHxD.Frontend.Winforms
 		public ISearchArg SearchArg { get; }
 		public SearchResult SearchResult { get; }
 		public int PageIndex { get; }
+		public MetadataKeywordLists MetadataKeywordLists { get; }
+		public GallerySortType SortType { get; }
+		public SortOrder SortOrder { get; }
 
-		public SearchProgressArg(ISearchArg searchArg, SearchResult searchResult, int pageIndex)
+		public SearchProgressArg(ISearchArg searchArg, SearchResult searchResult, int pageIndex, MetadataKeywordLists metadataKeywordLists, GallerySortType sortType, SortOrder sortOrder)
 		{
 			SearchArg = searchArg;
 			SearchResult = searchResult;
 			PageIndex = pageIndex;
+			MetadataKeywordLists = metadataKeywordLists;
+			SortType = sortType;
+			SortOrder = sortOrder;
 		}
 	}
 
@@ -647,6 +624,165 @@ namespace NHxD.Frontend.Winforms
 		{
 			SearchArg = searchArg;
 			SearchResult = searchResult;
+		}
+	}
+
+	public static class LibraryMetadataCollectionExtensionMethods
+	{
+		public static IEnumerable<Metadata> GetFilteredSearchResult(this IEnumerable<Metadata> result, MetadataKeywordLists metadataKeywordLists)
+		{
+			ICollection<Metadata> filteredResult = new List<Metadata>(result.Count());
+
+			foreach (Metadata metadata in result)
+			
+			{
+				if (!metadataKeywordLists.Hidelist.IsInMetadata(metadata))
+				{
+					filteredResult.Add(metadata);
+				}
+			}
+			/*
+			List<int> indices = new List<int>();
+
+			for (int i = 0, len = result.Count(); i < len; ++i)
+			{
+				if (metadataKeywordLists.Hidelist.IsInMetadata(searchResult.Result[i]))
+				{
+					indices.Add(i);
+				}
+			}
+
+			for (int i = indices.Count; i > 0; --i)
+			{
+				searchResult.Result.RemoveAt(indices[i - 1]);
+			}
+			*/
+			return filteredResult;
+		}
+
+		public static IEnumerable<Metadata> GetSortedSearchResult(this IEnumerable<Metadata> Result, GallerySortType sortType, SortOrder sortOrder)
+		{
+			IEnumerable<Metadata> orderedResult = new List<Metadata>(Result.Count());
+
+			if (sortType == GallerySortType.Title)
+			{
+				orderedResult = OrderByTitle(Result, sortOrder);
+			}
+			else if (sortType == GallerySortType.Language)
+			{
+				orderedResult = OrderByLanguage(Result, sortOrder);
+			}
+			else if (sortType == GallerySortType.Artist)
+			{
+				orderedResult = OrderByArtist(Result, sortOrder);
+			}
+			else if (sortType == GallerySortType.Group)
+			{
+				orderedResult = OrderByGroup(Result, sortOrder);
+			}
+			else if (sortType == GallerySortType.Tag)
+			{
+				orderedResult = OrderByTag(Result, sortOrder);
+			}
+			else if (sortType == GallerySortType.Parody)
+			{
+				orderedResult = OrderByParody(Result, sortOrder);
+			}
+			else if (sortType == GallerySortType.Character)
+			{
+				orderedResult = OrderByCharacter(Result, sortOrder);
+			}
+			else if (sortType == GallerySortType.Category)
+			{
+				orderedResult = OrderByCategory(Result, sortOrder);
+			}
+			else if (sortType == GallerySortType.Scanlator)
+			{
+				orderedResult = OrderByScanlator(Result, sortOrder);
+			}
+			else if (sortType == GallerySortType.UploadDate)
+			{
+				orderedResult = OrderByUploadDate(Result, sortOrder);
+			}
+			else if (sortType == GallerySortType.NumPages)
+			{
+				orderedResult = OrderByPageCount(Result, sortOrder);
+			}
+			else if (sortType == GallerySortType.NumFavorites)
+			{
+				orderedResult = OrderByFavoriteCount(Result, sortOrder);
+			}
+			else if (sortType == GallerySortType.Id)
+			{
+				orderedResult = OrderById(Result, sortOrder);
+			}
+
+			return orderedResult;
+		}
+
+		private static IEnumerable<Metadata> OrderByTitle(IEnumerable<Metadata> Result, SortOrder sortOrder)
+		{
+			return Result.OrderBy(x => x.Title.Pretty, sortOrder);
+		}
+
+		private static IEnumerable<Metadata> OrderByLanguage(IEnumerable<Metadata> Result, SortOrder sortOrder)
+		{
+			return Result.OrderBy(x => string.Join(",", x.Tags.Where(y => y.Type == TagType.Language).Select(z => z.Name)), sortOrder);
+		}
+
+		private static IEnumerable<Metadata> OrderByArtist(IEnumerable<Metadata> Result, SortOrder sortOrder)
+		{
+			return Result.OrderBy(x => string.Join(",", x.Tags.Where(y => y.Type == TagType.Artist).Select(z => z.Name)), sortOrder);
+		}
+
+		private static IEnumerable<Metadata> OrderByGroup(IEnumerable<Metadata> Result, SortOrder sortOrder)
+		{
+			return Result.OrderBy(x => string.Join(",", x.Tags.Where(y => y.Type == TagType.Group).Select(z => z.Name)), sortOrder);
+		}
+
+		private static IEnumerable<Metadata> OrderByTag(IEnumerable<Metadata> Result, SortOrder sortOrder)
+		{
+			return Result.OrderBy(x => string.Join(",", x.Tags.Where(y => y.Type == TagType.Tag).Select(z => z.Name)), sortOrder);
+		}
+
+		private static IEnumerable<Metadata> OrderByParody(IEnumerable<Metadata> Result, SortOrder sortOrder)
+		{
+			return Result.OrderBy(x => string.Join(",", x.Tags.Where(y => y.Type == TagType.Parody).Select(z => z.Name)), sortOrder);
+		}
+
+		private static IEnumerable<Metadata> OrderByCharacter(IEnumerable<Metadata> Result, SortOrder sortOrder)
+		{
+			return Result.OrderBy(x => string.Join(",", x.Tags.Where(y => y.Type == TagType.Character).Select(z => z.Name)), sortOrder);
+		}
+
+		private static IEnumerable<Metadata> OrderByCategory(IEnumerable<Metadata> Result, SortOrder sortOrder)
+		{
+			return Result.OrderBy(x => string.Join(",", x.Tags.Where(y => y.Type == TagType.Category).Select(z => z.Name)), sortOrder);
+		}
+
+		private static IEnumerable<Metadata> OrderByScanlator(IEnumerable<Metadata> Result, SortOrder sortOrder)
+		{
+			return Result.OrderBy(x => x.Scanlator, sortOrder);
+		}
+
+		private static IEnumerable<Metadata> OrderByUploadDate(IEnumerable<Metadata> Result, SortOrder sortOrder)
+		{
+			return Result.OrderBy(x => x.UploadDate, sortOrder);
+		}
+
+		private static IEnumerable<Metadata> OrderByPageCount(IEnumerable<Metadata> Result, SortOrder sortOrder)
+		{
+			return Result.OrderBy(x => x.NumPages, sortOrder);
+		}
+
+		private static IEnumerable<Metadata> OrderByFavoriteCount(IEnumerable<Metadata> Result, SortOrder sortOrder)
+		{
+			return Result.OrderBy(x => x.NumFavorites, sortOrder);
+		}
+
+		private static IEnumerable<Metadata> OrderById(IEnumerable<Metadata> Result, SortOrder sortOrder)
+		{
+			return Result.OrderBy(x => x.Id, sortOrder);
 		}
 	}
 }

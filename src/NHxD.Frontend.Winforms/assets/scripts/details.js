@@ -193,6 +193,14 @@ function __onIgnorelistChanged(eventType, fieldType, fieldValue)
 	highlightTitles()
 }
 
+function __onHidelistChanged(eventType, fieldType, fieldValue)
+{
+	MetadataKeywordList.synchronizeList(eventType, fieldType, fieldValue, hidelist)
+	applyCustomTagStyle(fieldType, -1, fieldValue)
+	highlightTitles()
+}
+
+
 function addTagToWhitelist()
 {
 	var tagType = tagContextMenu.target._tag.type
@@ -226,6 +234,17 @@ function addTagToIgnorelist()
 	tagContextMenu.close()
 }
 
+function addTagToHidelist()
+{
+	var tagType = tagContextMenu.target._tag.type
+	var tagName = tagContextMenu.target._tag.name
+	var tagId = tagContextMenu.target._tag.id
+
+	window.external.MetadataKeywordLists.Hidelist.AddTag(tagType, tagName, tagId)
+
+	tagContextMenu.close()
+}
+
 function removeTagFromWhitelist()
 {
 	var tagType = tagContextMenu.target._tag.type
@@ -255,6 +274,17 @@ function removeTagFromIgnorelist()
 	var tagId = tagContextMenu.target._tag.id
 
 	window.external.MetadataKeywordLists.Ignorelist.RemoveTag(tagType, tagName, tagId)
+
+	tagContextMenu.close()
+}
+
+function removeTagFromHidelist()
+{
+	var tagType = tagContextMenu.target._tag.type
+	var tagName = tagContextMenu.target._tag.name
+	var tagId = tagContextMenu.target._tag.id
+
+	window.external.MetadataKeywordLists.Hidelist.RemoveTag(tagType, tagName, tagId)
 
 	tagContextMenu.close()
 }
@@ -330,13 +360,16 @@ function TagContextMenu_OnBeforeOpenContextMenu(target)
 	var isInWhitelist = whitelist.tags[tagType].indexOf(tagName) !== -1
 	var isInBlacklist = blacklist.tags[tagType].indexOf(tagName) !== -1
 	var isInIgnorelist = ignorelist.tags[tagType].indexOf(tagName) !== -1
+	var isInHidelist = hidelist.tags[tagType].indexOf(tagName) !== -1
 
 	document.getElementById("menu-command-remove-whitelist").addOrRemoveClass("display-none", !isInWhitelist)
 	document.getElementById("menu-command-remove-blacklist").addOrRemoveClass("display-none", !(isInBlacklist))
 	document.getElementById("menu-command-remove-ignorelist").addOrRemoveClass("display-none", !(isInIgnorelist))
+	document.getElementById("menu-command-remove-hidelist").addOrRemoveClass("display-none", !(isInHidelist))
 	document.getElementById("menu-command-add-whitelist").addOrRemoveClass("display-none", !(!isInWhitelist && !isInBlacklist))
 	document.getElementById("menu-command-add-blacklist").addOrRemoveClass("display-none", !(!isInBlacklist && !isInWhitelist))
 	document.getElementById("menu-command-add-ignorelist").addOrRemoveClass("display-none", !(!isInIgnorelist))
+	document.getElementById("menu-command-add-hidelist").addOrRemoveClass("display-none", !(!isInHidelist))
 	document.getElementById("menu-command-add-tag-bookmark").addOrRemoveClass("display-none", false)
 	document.getElementById("menu-command-show-definition").addOrRemoveClass("display-none", !(tagType === "tag"))
 
@@ -431,10 +464,12 @@ function applyCustomTagStyle(tagType, tagId, tagName, button)
 	var isInWhitelist = whitelist.tags[tagType].indexOf(tagName) !== -1
 	var isInBlacklist = blacklist.tags[tagType].indexOf(tagName) !== -1
 	var isInIgnorelist = ignorelist.tags[tagType].indexOf(tagName) !== -1
+	var isInHidelist = hidelist.tags[tagType].indexOf(tagName) !== -1
 
 	button.addOrRemoveClass("tag-whitelist", isInWhitelist)
 	button.addOrRemoveClass("tag-blacklist", isInBlacklist)
 	button.addOrRemoveClass("tag-ignorelist", isInIgnorelist)
+	button.addOrRemoveClass("tag-hidelist", isInHidelist)
 }
 
 function initCover()

@@ -7,6 +7,7 @@
 	titleFormatter.whitelistRegex = null
 	titleFormatter.blacklistRegex = null
 	titleFormatter.ignorelistRegex = null
+	titleFormatter.hidelistRegex = null
 	// with "japanese | english" title:
 	//^(\(([^)]+)\)){0,1}\s*(\[([^\]]+)\]){0,1}\s*([^([$|]*)(?:\| ){0,1}\s*([^([$]*)\s*(\(([^)]+)\)){0,1}\s*(\[([^\]]+)\]){0,1}\s*((?:\[|{)([^\]}]+)(?:\]|})){0,1}\s*(\[([^\]]+)\]){0,1}
 
@@ -23,6 +24,11 @@
 	document.addEventListener("ignorelistchanged", function()
 	{
 		titleFormatter.ignorelistRegex = null
+	})
+
+	document.addEventListener("hidelistchanged", function()
+	{
+		titleFormatter.hidelistRegex = null
 	})
 
 	titleFormatter.format = function(title, name)
