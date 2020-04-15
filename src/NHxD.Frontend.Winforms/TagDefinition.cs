@@ -112,9 +112,6 @@ namespace NHxD.Frontend.Winforms
 				Exception ex = e.Result as Exception;
 				HttpResponseMessage response = e.Result as HttpResponseMessage;
 
-				searchResult.List = searchResult.List
-					.OrderByDescending(x => x.ThumbsUp - x.ThumbsDown).ToList();
-
 				if (searchResult != null)
 				{
 					if (searchResult.List.Count == 0)
@@ -123,6 +120,9 @@ namespace NHxD.Frontend.Winforms
 					}
 					else
 					{
+						searchResult.List = searchResult.List
+							.OrderByDescending(x => x.ThumbsUp - x.ThumbsDown).ToList();
+
 						ShowDefinition(searchResult, 0);
 					}
 				}
