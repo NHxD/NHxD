@@ -30,6 +30,11 @@
 		{
 			button.addClass("tag-ignorelist")
 		}
+
+		if (this.isInList(hidelist, metadata))
+		{
+			button.addClass("tag-hidelist")
+		}
 	}
 
 	MetadataKeywordList.applyToSearchResult = function(searchResult, elementSelector)

@@ -23,11 +23,12 @@
 			}
 		</style>
 		<script type="text/javascript">
-		    var metadata = {Metadata}
-		    var whitelist = {MetadataKeywordList.Whitelist}
-		    var blacklist = {MetadataKeywordList.Blacklist}
-		    var ignorelist = {MetadataKeywordList.Ignorelist}
-		    var uploadDate = metadata.upload_date
+			var metadata = {Metadata}
+			var whitelist = {MetadataKeywordList.Whitelist}
+			var blacklist = {MetadataKeywordList.Blacklist}
+			var ignorelist = {MetadataKeywordList.Ignorelist}
+			var hidelist = {MetadataKeywordList.Hidelist}
+			var uploadDate = metadata.upload_date
 
 			function markCoverAsLoaded(img)
 			{
@@ -119,9 +120,11 @@
 			<button id="menu-command-remove-whitelist" class="menu-command" onclick="removeTagFromWhitelist()"><span class="icon"></span>Remove from whitelist</button>
 			<button id="menu-command-remove-blacklist" class="menu-command" onclick="removeTagFromBlacklist()"><span class="icon"></span>Remove from blacklist</button>
 			<button id="menu-command-remove-ignorelist" class="menu-command" onclick="removeTagFromIgnorelist()"><span class="icon"></span>Remove from ignorelist</button>
+			<button id="menu-command-remove-hidelist" class="menu-command" onclick="removeTagFromHidelist()"><span class="icon"></span>Remove from hidelist</button>
 			<button id="menu-command-add-whitelist" class="menu-command" onclick="addTagToWhitelist()"><span class="icon"></span>Add to whitelist</button>
 			<button id="menu-command-add-blacklist" class="menu-command" onclick="addTagToBlacklist()"><span class="icon"></span>Add to blacklist</button>
 			<button id="menu-command-add-ignorelist" class="menu-command" onclick="addTagToIgnorelist()"><span class="icon"></span>Add to ignorelist</button>
+			<button id="menu-command-add-hidelist" class="menu-command" onclick="addTagToHidelist()"><span class="icon"></span>Add to hidelist</button>
 			<hr />
 			<button id="menu-command-show-definition" class="menu-command" onclick="showTagDefinition()"><span class="icon"></span>Search for definition</button>
 		</div>

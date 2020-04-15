@@ -20,6 +20,7 @@ namespace NHxD
 		private readonly FileSystemWatcher fileSystemWatcher;
 		private readonly Queue<LibraryEvent> events;
 
+		private ISearchProgressArg searchProgressArg;
 		private int pageIndex = 1;
 
 		public BindingList<string> Filters => filters;
@@ -39,10 +40,24 @@ namespace NHxD
 			}
 		}
 
+		public ISearchProgressArg SearchProgressArg
+		{
+			get
+			{
+				return searchProgressArg;
+			}
+			set
+			{
+				searchProgressArg = value;
+				OnSearchProgressArgChanged();
+			}
+		}
+
 		public ILibraryPollingTimer Timer { get; }
 
 		public event EventHandler FiltersChanged = delegate { };
 		public event EventHandler PageIndexChanged = delegate { };
+		public event EventHandler SearchProgressArgChanged = delegate { };
 		public event LibraryEventHandler Poll = delegate { };
 
 		public LibraryModel(string path, ILibraryPollingTimer timer)
@@ -131,6 +146,11 @@ namespace NHxD
 		protected virtual void OnPageIndexChanged()
 		{
 			PageIndexChanged.Invoke(this, EventArgs.Empty);
+		}
+
+		protected virtual void OnSearchProgressArgChanged()
+		{
+			SearchProgressArgChanged.Invoke(this, EventArgs.Empty);
 		}
 
 		public void EnablePolling()

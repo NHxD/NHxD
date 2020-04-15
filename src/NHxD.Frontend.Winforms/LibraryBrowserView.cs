@@ -95,16 +95,23 @@ namespace NHxD.Frontend.Winforms
 			MetadataKeywordLists.WhitelistChanged += Form_WhiteListChanged;
 			MetadataKeywordLists.BlacklistChanged += Form_BlackListChanged;
 			MetadataKeywordLists.IgnorelistChanged += Form_IgnoreListChanged;
+			MetadataKeywordLists.HidelistChanged += Form_HideListChanged;
 
 			//libraryModel.Poll += LibraryModel_Poll;
 
 			libraryBrowserFilter.TextChanged += LibraryBrowserFilter_TextChanged;
 
 			LibraryModel.PageIndexChanged += LibraryModel_PageIndexChanged;
+			LibraryModel.SearchProgressArgChanged += LibraryModel_SearchProgressArgChanged;
 
 			Controls.Add(webBrowser);
 
 			ResumeLayout(false);
+		}
+
+		private void LibraryModel_SearchProgressArgChanged(object sender, EventArgs e)
+		{
+			CoverLoader.Download(LibraryModel.SearchProgressArg.SearchResult);
 		}
 
 		private void LibraryModel_PageIndexChanged(object sender, EventArgs e)
@@ -115,6 +122,16 @@ namespace NHxD.Frontend.Winforms
 		private void LibraryBrowserFilter_TextChanged(object sender, EventArgs e)
 		{
 			ApplyFilter(LibraryBrowserFilter.Text);
+		}
+
+		private void Form_HideListChanged(object sender, MetadataKeywordListChangedEventArgs e)
+		{
+			if (string.IsNullOrEmpty(WebBrowser.DocumentText))
+			{
+				return;
+			}
+
+			WebBrowser.Document?.InvokeScript("__onHidelistChanged", e.ToObjectArray());
 		}
 
 		private void Form_IgnoreListChanged(object sender, MetadataKeywordListChangedEventArgs e)
@@ -380,7 +397,7 @@ namespace NHxD.Frontend.Winforms
 			if (!e.Cancelled)
 			{
 				LibraryLoadCompletedArg completedArg = e.Result as LibraryLoadCompletedArg;
-				SearchProgressArg searchProgressArg = new SearchProgressArg(completedArg.RunArg.SearchArg, completedArg.SearchResult, completedArg.RunArg.SearchArg.PageIndex);
+				SearchProgressArg searchProgressArg = new SearchProgressArg(completedArg.RunArg.SearchArg, completedArg.SearchResult, completedArg.RunArg.SearchArg.PageIndex, MetadataKeywordLists, completedArg.RunArg.SortType, completedArg.RunArg.SortOrder);
 
 				//searchResult = completedArg.SearchResult;
 
@@ -422,7 +439,7 @@ namespace NHxD.Frontend.Winforms
 					runArg.PathFormatter.IsEnabled ? dirInfo.EnumerateDirectories("*", SearchOption.AllDirectories)
 					: dirInfo.EnumerateDirectories();
 
-				dirInfos = OrderAllByTime(runArg, dirInfos);
+				dirInfos = dirInfos.OrderAllByTime(runArg.GlobalSortType, runArg.GlobalSortOrder);
 
 				int skipCount = (runArg.SearchArg.PageIndex - 1) * searchResult.PerPage;
 				int itemCount = 0;
@@ -475,167 +492,42 @@ namespace NHxD.Frontend.Winforms
 					searchResult.Result.Add(metadata);
 				}
 
-				OrderSelectionByMetadata(runArg, searchResult);
-
 				searchResult.NumPages = (int)Math.Ceiling(totalItemCount / (double)searchResult.PerPage);
 			}
 
-			LibraryLoadCompletedArg completedArg = new LibraryLoadCompletedArg(runArg, searchResult);
+			SearchResult finalSearchResult;
+
+			if (searchResult.Result != null
+				&& runArg.SortType != GallerySortType.None)
+			{
+				SearchResult customSearchResult = new SearchResult();
+
+				customSearchResult.NumPages = searchResult.NumPages;
+				customSearchResult.PerPage = searchResult.PerPage;
+
+				// NOTE: don't hide items in the library.
+				//IEnumerable<Metadata> customResult = searchResult.Result.GetFilteredSearchResult(runArg.MetadataKeywordLists);
+				IEnumerable<Metadata> customResult = searchResult.Result.GetSortedSearchResult(runArg.SortType, runArg.SortOrder);
+
+				customSearchResult.Result = customResult.ToList();
+
+				finalSearchResult = customSearchResult;
+			}
+			else
+			{
+				finalSearchResult = searchResult;
+			}
+
+			LibraryLoadCompletedArg completedArg = new LibraryLoadCompletedArg(runArg, finalSearchResult);
 
 			e.Result = completedArg;
-		}
-
-		private static void OrderSelectionByMetadata(LibraryLoadRunArg runArg, SearchResult searchResult)
-		{
-			if (runArg.SortType == GallerySortType.Title)
-			{
-				searchResult.Result = OrderByTitle(runArg, searchResult);
-			}
-			else if (runArg.SortType == GallerySortType.Scanlator)
-			{
-				searchResult.Result = OrderByScanlator(runArg, searchResult);
-			}
-			else if (runArg.SortType == GallerySortType.NumPages)
-			{
-				searchResult.Result = OrderByPageCount(runArg, searchResult);
-			}
-			else if (runArg.SortType == GallerySortType.NumFavorites)
-			{
-				searchResult.Result = OrderByFavoriteCount(runArg, searchResult);
-			}
-			else if (runArg.SortType == GallerySortType.UploadDate)
-			{
-				searchResult.Result = OrderByUploadDate(runArg, searchResult);
-			}
-			else if (runArg.SortType == GallerySortType.Language)
-			{
-				searchResult.Result = OrderByLanguage(runArg, searchResult);
-			}
-			else if (runArg.SortType == GallerySortType.Tag)
-			{
-				searchResult.Result = OrderByTag(runArg, searchResult);
-			}
-			else if (runArg.SortType == GallerySortType.Artist)
-			{
-				searchResult.Result = OrderByArtist(runArg, searchResult);
-			}
-			else if (runArg.SortType == GallerySortType.Group)
-			{
-				searchResult.Result = OrderByGroup(runArg, searchResult);
-			}
-			else if (runArg.SortType == GallerySortType.Parody)
-			{
-				searchResult.Result = OrderByParody(runArg, searchResult);
-			}
-			else if (runArg.SortType == GallerySortType.Character)
-			{
-				searchResult.Result = OrderByCharacter(runArg, searchResult);
-			}
-			else if (runArg.SortType == GallerySortType.Category)
-			{
-				searchResult.Result = OrderByCategory(runArg, searchResult);
-			}
-		}
-
-		private static List<Metadata> OrderByCategory(LibraryLoadRunArg runArg, SearchResult searchResult)
-		{
-			return searchResult.Result.OrderBy(x => string.Join(",", x.Tags.Where(y => y.Type == TagType.Category).Select(z => z.Name)), runArg.SortOrder).ToList();
-		}
-
-		private static List<Metadata> OrderByCharacter(LibraryLoadRunArg runArg, SearchResult searchResult)
-		{
-			return searchResult.Result.OrderBy(x => string.Join(",", x.Tags.Where(y => y.Type == TagType.Character).Select(z => z.Name)), runArg.SortOrder).ToList();
-		}
-
-		private static List<Metadata> OrderByParody(LibraryLoadRunArg runArg, SearchResult searchResult)
-		{
-			return searchResult.Result.OrderBy(x => string.Join(",", x.Tags.Where(y => y.Type == TagType.Parody).Select(z => z.Name)), runArg.SortOrder).ToList();
-		}
-
-		private static List<Metadata> OrderByGroup(LibraryLoadRunArg runArg, SearchResult searchResult)
-		{
-			return searchResult.Result.OrderBy(x => string.Join(",", x.Tags.Where(y => y.Type == TagType.Group).Select(z => z.Name)), runArg.SortOrder).ToList();
-		}
-
-		private static List<Metadata> OrderByArtist(LibraryLoadRunArg runArg, SearchResult searchResult)
-		{
-			return searchResult.Result.OrderBy(x => string.Join(",", x.Tags.Where(y => y.Type == TagType.Artist).Select(z => z.Name)), runArg.SortOrder).ToList();
-		}
-
-		private static List<Metadata> OrderByTag(LibraryLoadRunArg runArg, SearchResult searchResult)
-		{
-			return searchResult.Result.OrderBy(x => string.Join(",", x.Tags.Where(y => y.Type == TagType.Tag).Select(z => z.Name)), runArg.SortOrder).ToList();
-		}
-
-		private static List<Metadata> OrderByLanguage(LibraryLoadRunArg runArg, SearchResult searchResult)
-		{
-			return searchResult.Result.OrderBy(x => string.Join(",", x.Tags.Where(y => y.Type == TagType.Language).Select(z => z.Name)), runArg.SortOrder).ToList();
-		}
-
-		private static List<Metadata> OrderByUploadDate(LibraryLoadRunArg runArg, SearchResult searchResult)
-		{
-			return searchResult.Result.OrderBy(x => x.UploadDate, runArg.SortOrder).ToList();
-		}
-
-		private static List<Metadata> OrderByFavoriteCount(LibraryLoadRunArg runArg, SearchResult searchResult)
-		{
-			return searchResult.Result.OrderBy(x => x.NumFavorites, runArg.SortOrder).ToList();
-		}
-
-		private static List<Metadata> OrderByPageCount(LibraryLoadRunArg runArg, SearchResult searchResult)
-		{
-			return searchResult.Result.OrderBy(x => x.NumPages, runArg.SortOrder).ToList();
-		}
-
-		private static List<Metadata> OrderByScanlator(LibraryLoadRunArg runArg, SearchResult searchResult)
-		{
-			return searchResult.Result.OrderBy(x => x.Scanlator, runArg.SortOrder).ToList();
-		}
-
-		private static List<Metadata> OrderByTitle(LibraryLoadRunArg runArg, SearchResult searchResult)
-		{
-			return searchResult.Result.OrderBy(x => x.Title.Pretty, runArg.SortOrder).ToList();
-		}
-
-		private static IEnumerable<DirectoryInfo> OrderAllByTime(LibraryLoadRunArg runArg, IEnumerable<DirectoryInfo> dirInfos)
-		{
-			if (runArg.GlobalSortType == LibrarySortType.CreationTime)
-			{
-				dirInfos = OrderByCreationTime(runArg, dirInfos);
-			}
-			else if (runArg.GlobalSortType == LibrarySortType.LastWriteTime)
-			{
-				dirInfos = OrderByLastWriteTime(runArg, dirInfos);
-			}
-			else if (runArg.GlobalSortType == LibrarySortType.LastAccessTime)
-			{
-				dirInfos = OrderByLastAccessTime(runArg, dirInfos);
-			}
-
-			return dirInfos;
-		}
-
-		private static IOrderedEnumerable<DirectoryInfo> OrderByLastAccessTime(LibraryLoadRunArg runArg, IEnumerable<DirectoryInfo> dirInfos)
-		{
-			return dirInfos.OrderBy(x => x.LastAccessTime, runArg.GlobalSortOrder);
-		}
-
-		private static IOrderedEnumerable<DirectoryInfo> OrderByLastWriteTime(LibraryLoadRunArg runArg, IEnumerable<DirectoryInfo> dirInfos)
-		{
-			return dirInfos.OrderBy(x => x.LastWriteTime, runArg.GlobalSortOrder);
-		}
-
-		private static IOrderedEnumerable<DirectoryInfo> OrderByCreationTime(LibraryLoadRunArg runArg, IEnumerable<DirectoryInfo> dirInfos)
-		{
-			return dirInfos.OrderBy(x => x.CreationTime, runArg.GlobalSortOrder);
 		}
 
 		private void WebBrowser_LibraryDocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
 		{
 			SearchProgressArg searchProgressArg = webBrowser.Tag as SearchProgressArg;
 
-			//LibraryModel.SearchProgressArg = searchProgressArg;
-			CoverLoader.Download(searchProgressArg.SearchResult);
+			LibraryModel.SearchProgressArg = searchProgressArg;
 		}
 
 		private static int ExtractGalleryIdFromFileName(string fileName)
@@ -723,6 +615,42 @@ namespace NHxD.Frontend.Winforms
 				RunArg = runArg;
 				SearchResult = searchResult;
 			}
+		}
+	}
+
+	public static class LibraryItemCollectionExtensionMethods
+	{
+		public static IEnumerable<DirectoryInfo> OrderAllByTime(this IEnumerable<DirectoryInfo> dirInfos, LibrarySortType globalSortType, SortOrder globalSortOrder)
+		{
+			if (globalSortType == LibrarySortType.CreationTime)
+			{
+				dirInfos = OrderByCreationTime(dirInfos, globalSortOrder);
+			}
+			else if (globalSortType == LibrarySortType.LastWriteTime)
+			{
+				dirInfos = OrderByLastWriteTime(dirInfos, globalSortOrder);
+			}
+			else if (globalSortType == LibrarySortType.LastAccessTime)
+			{
+				dirInfos = OrderByLastAccessTime(dirInfos, globalSortOrder);
+			}
+
+			return dirInfos;
+		}
+
+		private static IOrderedEnumerable<DirectoryInfo> OrderByLastAccessTime(IEnumerable<DirectoryInfo> dirInfos, SortOrder globalSortOrder)
+		{
+			return dirInfos.OrderBy(x => x.LastAccessTime, globalSortOrder);
+		}
+
+		private static IOrderedEnumerable<DirectoryInfo> OrderByLastWriteTime(IEnumerable<DirectoryInfo> dirInfos, SortOrder globalSortOrder)
+		{
+			return dirInfos.OrderBy(x => x.LastWriteTime, globalSortOrder);
+		}
+
+		private static IOrderedEnumerable<DirectoryInfo> OrderByCreationTime(IEnumerable<DirectoryInfo> dirInfos, SortOrder globalSortOrder)
+		{
+			return dirInfos.OrderBy(x => x.CreationTime, globalSortOrder);
 		}
 	}
 }

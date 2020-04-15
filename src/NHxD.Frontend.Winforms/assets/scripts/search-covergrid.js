@@ -62,7 +62,11 @@ function setCover(metadata, coverPath, error)
 		{
 			img.onerror = null
 			img.src = "assets/images/cover/200x200/missing.png"
-			img.title = error
+
+			if (error !== "SKIP")
+			{
+				img.title = error
+			}
 		}
 		else
 		{
@@ -270,6 +274,12 @@ function __onIgnorelistChanged(eventType, fieldType, fieldValue)
 	updateBlurs()
 }
 
+function __onHidelistChanged(eventType, fieldType, fieldValue)
+{
+	MetadataKeywordList.synchronizeList(eventType, fieldType, fieldValue, hidelist)
+	updateHidden()
+}
+
 //
 // Misc.
 //
@@ -322,6 +332,46 @@ function updateBlurs()
 			button.removeClass("tag-ignorelist")
 		}
 	}
+}
+
+function updateHidden()
+{
+	//var dirtyIndices = []
+
+	for (var i = 0, len = searchResult.result.length; i < len; ++i)
+	{
+		var metadata = searchResult.result[i]
+		var button = document.getElementById("search-result-item-" + metadata.id)
+
+		if (button)
+		{
+			if (MetadataKeywordList.isInList(hidelist, metadata))
+			{
+				button.addClass("display-none")
+				//dirtyIndices.push(i)
+			}
+			else
+			{
+				button.removeClass("display-none")
+			}
+		}
+		// TODO: restore item. we could clone any other item and replace the values accordingly, but is it really worth all the trouble?
+		/*else
+		{
+			if (MetadataKeywordList.isInList(hidelist, metadata))
+			{
+			}
+		}
+		*/
+	}
+
+	/*for (var i = 0, len = dirtyIndices.length; i > len; --i)
+	{
+		// TODO: store the item somewhere, so that it can be restored later, if needed.
+		unusedResult.push(searchResult.result[dirtyIndices[i - 1]])
+
+		searchResult.result.slice(dirtyIndices[i - 1], dirtyIndices[i - 1] + 1)
+	}*/
 }
 
 //
@@ -620,6 +670,7 @@ function initCache()
 	window.external.Browsers.Gallery.ApplyFilter()
 	highlightMetadataKeywordLists()
 	highlightTitles()
+	updateHidden()
 	initContextMenus()
 	initCovers()
 	initCache()

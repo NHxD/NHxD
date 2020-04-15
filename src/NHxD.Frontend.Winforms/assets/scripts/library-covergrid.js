@@ -268,6 +268,11 @@ function __onIgnorelistChanged(eventType, fieldType, fieldValue)
 	updateBlurs()
 }
 
+function __onHidelistChanged(eventType, fieldType, fieldValue)
+{
+	MetadataKeywordList.synchronizeList(eventType, fieldType, fieldValue, hidelist)
+}
+
 //
 // Initialization
 //

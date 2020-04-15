@@ -2,38 +2,60 @@
 using Nhentai;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
 namespace NHxD
 {
 	public class MetadataKeywordList
 	{
+		private MetadataKeywordListTitles title;
+		private MetadataKeywordListTags tags;
+		private List<string> scanlator;
+		private List<string> uploadDate;
+		private List<string> numFavorites;
+		private List<string> numPages;
+		private List<string> id;
+		private List<string> mediaId;
+
 		[JsonProperty("title")]
-		public MetadataKeywordListTitles Title { get; } = new MetadataKeywordListTitles();
+		public MetadataKeywordListTitles Title => title;
 
 		[JsonProperty("tags")]
-		public MetadataKeywordListTags Tags { get; } = new MetadataKeywordListTags();
+		public MetadataKeywordListTags Tags => tags;
 
 		[JsonProperty("scanlator")]
-		public List<string> Scanlator { get; } = new List<string>();
+		public List<string> Scanlator => scanlator;
 
 		[JsonProperty("upload_date")]
-		public List<string> UploadDate { get; } = new List<string>();
+		public List<string> UploadDate => uploadDate;
 
 		[JsonProperty("num_favorites")]
-		public List<string> NumFavorites { get; } = new List<string>();
+		public List<string> NumFavorites => numFavorites;
 
 		[JsonProperty("num_pages")]
-		public List<string> NumPages { get; } = new List<string>();
+		public List<string> NumPages => numPages;
 
 		[JsonProperty("id")]
-		public List<string> Id { get; } = new List<string>();
+		public List<string> Id => id;
 
 		[JsonProperty("media_id")]
-		public List<string> MediaId { get; } = new List<string>();
+		public List<string> MediaId => mediaId;
 
 		public event MetadataKeywordListItemAddedEventHandler ItemAdded = delegate { };
 		public event MetadataKeywordListItemRemovedEventHandler ItemRemoved = delegate { };
+
+		public MetadataKeywordList()
+		{
+			title = new MetadataKeywordListTitles();
+			tags = new MetadataKeywordListTags();
+			scanlator = new List<string>();
+			uploadDate = new List<string>();
+			numFavorites = new List<string>();
+			numPages = new List<string>();
+			id = new List<string>();
+			mediaId = new List<string>();
+		}
 
 		protected virtual void OnItemAdded(TagEventArgs e)
 		{
@@ -81,6 +103,8 @@ namespace NHxD
 					}
 					else
 					{
+						// TODO: it'd be better if this was prefixed with "Tags." to avoid naming collision.
+
 						TagType tagType;
 
 						if (Enum.TryParse(fieldName, true, out tagType))
@@ -167,45 +191,135 @@ namespace NHxD
 
 			OnItemAdded(new TagEventArgs(tag));
 		}
+
+		public bool IsInMetadata(Metadata metadata)
+		{
+			if (metadata == null)
+			{
+				throw new ArgumentNullException("metadata");
+			}
+
+			return DoesListContain(Tags.Tag, metadata.Tags.Where(x => x.Type == TagType.Tag).Select(x => x.Name))
+				|| DoesListContain(Tags.Artist, metadata.Tags.Where(x => x.Type == TagType.Artist).Select(x => x.Name))
+				|| DoesListContain(Tags.Group, metadata.Tags.Where(x => x.Type == TagType.Group).Select(x => x.Name))
+				|| DoesListContain(Tags.Category, metadata.Tags.Where(x => x.Type == TagType.Category).Select(x => x.Name))
+				|| DoesListContain(Tags.Character, metadata.Tags.Where(x => x.Type == TagType.Character).Select(x => x.Name))
+				|| DoesListContain(Tags.Parody, metadata.Tags.Where(x => x.Type == TagType.Parody).Select(x => x.Name))
+				|| DoesListContain(Tags.Language, metadata.Tags.Where(x => x.Type == TagType.Language).Select(x => x.Name))
+				|| DoesListContain(Title.English, metadata.Title.English, StringComparison.InvariantCultureIgnoreCase)
+				|| DoesListContain(Title.Japanese, metadata.Title.Japanese, StringComparison.InvariantCultureIgnoreCase)
+				|| DoesListContain(Title.Pretty, metadata.Title.Pretty, StringComparison.InvariantCultureIgnoreCase)
+				|| DoesListContain(Scanlator, metadata.Scanlator, StringComparison.InvariantCultureIgnoreCase)
+				|| DoesListContain(UploadDate, metadata.UploadDate)
+				|| DoesListContain(NumFavorites, metadata.NumFavorites)
+				|| DoesListContain(NumPages, metadata.NumPages);
+		}
+
+		private bool DoesListContain(IEnumerable<string> list, IEnumerable<string> value)
+		{
+			foreach (string tagValue in value)
+			{
+				if (DoesListContain(list, tagValue, StringComparison.OrdinalIgnoreCase))
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		private bool DoesListContain(IEnumerable<string> list, int value)
+		{
+			return DoesListContain(list, value.ToString(CultureInfo.InvariantCulture), StringComparison.InvariantCultureIgnoreCase);
+		}
+
+		private bool DoesListContain(IEnumerable<string> list, long value)
+		{
+			string dateTimeShortString = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(value).ToShortDateString();
+
+			return DoesListContain(list, dateTimeShortString, StringComparison.OrdinalIgnoreCase);
+		}
+
+		private bool DoesListContain(IEnumerable<string> list, string value, StringComparison stringComparison)
+		{
+			foreach (string token in list)
+			{
+				if (list.Any(x => x.Equals(value, stringComparison)))
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
 	}
 
 	public delegate void MetadataKeywordListItemAddedEventHandler(object sender, TagEventArgs e);
 	public delegate void MetadataKeywordListItemRemovedEventHandler(object sender, TagEventArgs e);
 
-
 	public class MetadataKeywordListTitles
 	{
+		private List<string> english;
+		private List<string> japanese;
+		private List<string> pretty;
+
 		[JsonProperty("english")]
-		public List<string> English { get; } = new List<string>();
+		public List<string> English => english;
 
 		[JsonProperty("japanese")]
-		public List<string> Japanese { get; } = new List<string>();
+		public List<string> Japanese => japanese;
 
 		[JsonProperty("pretty")]
-		public List<string> Pretty { get; } = new List<string>();
+		public List<string> Pretty => pretty;
+
+		public MetadataKeywordListTitles()
+		{
+			english = new List<string>();
+			japanese = new List<string>();
+			pretty = new List<string>();
+		}
 	}
 
 	public class MetadataKeywordListTags
 	{
+		private List<string> tag;
+		private List<string> artist;
+		private List<string> group;
+		private List<string> category;
+		private List<string> character;
+		private List<string> parody;
+		private List<string> language;
+
 		[JsonProperty("tag")]
-		public List<string> Tag { get; } = new List<string>();
+		public List<string> Tag => tag;
 
 		[JsonProperty("artist")]
-		public List<string> Artist { get; } = new List<string>();
+		public List<string> Artist => artist;
 
 		[JsonProperty("group")]
-		public List<string> Group { get; } = new List<string>();
+		public List<string> Group => group;
 
 		[JsonProperty("category")]
-		public List<string> Category { get; } = new List<string>();
+		public List<string> Category => category;
 
 		[JsonProperty("character")]
-		public List<string> Character { get; } = new List<string>();
+		public List<string> Character => character;
 
 		[JsonProperty("parody")]
-		public List<string> Parody { get; } = new List<string>();
+		public List<string> Parody => parody;
 
 		[JsonProperty("language")]
-		public List<string> Language { get; } = new List<string>();
+		public List<string> Language => language;
+
+		public MetadataKeywordListTags()
+		{
+			tag = new List<string>();
+			artist = new List<string>();
+			group = new List<string>();
+			category = new List<string>();
+			character = new List<string>();
+			parody = new List<string>();
+			language = new List<string>();
+		}
 	}
 }
