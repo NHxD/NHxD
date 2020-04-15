@@ -20,12 +20,14 @@ namespace NHxD.Frontend.Winforms
 		public HttpClient HttpClient { get; }
 		public IPathFormatter PathFormatter { get; }
 		public SearchResult SearchResult { get; }
+		public MetadataKeywordLists MetadataKeywordLists { get; }
 
-		public CoverDownloaderJob(HttpClient httpClient, IPathFormatter pathFormatter, SearchResult searchResult)
+		public CoverDownloaderJob(HttpClient httpClient, IPathFormatter pathFormatter, MetadataKeywordLists metadataKeywordLists, SearchResult searchResult)
 		{
 			HttpClient = httpClient;
 			PathFormatter = pathFormatter;
 			SearchResult = searchResult;
+			MetadataKeywordLists = metadataKeywordLists;
 
 			BackgroundWorker.WorkerReportsProgress = true;
 			BackgroundWorker.WorkerSupportsCancellation = true;
@@ -65,7 +67,7 @@ namespace NHxD.Frontend.Winforms
 
 			OnCoversDownloadStarted(new CoversDownloadStartedEventArgs(SearchResult/*pageIndices, galleryId*/));
 
-			DownloadCoversRunArg runArg = new DownloadCoversRunArg(HttpClient, PathFormatter, SearchResult/*galleryId, pageIndices, SearchResultCache, GetCachedPageIndices*/);
+			DownloadCoversRunArg runArg = new DownloadCoversRunArg(HttpClient, PathFormatter, SearchResult, MetadataKeywordLists/*galleryId, pageIndices, SearchResultCache, GetCachedPageIndices*/);
 
 			BackgroundWorker.RunWorkerAsync(runArg);
 		}
@@ -90,6 +92,7 @@ namespace NHxD.Frontend.Winforms
 				}
 
 				Metadata metadata = searchResult.Result[i];
+				string error = "";
 				string coverCachedFilePath;
 				if (runArg.PathFormatter != null && runArg.PathFormatter.IsEnabled)
 				{
@@ -101,47 +104,55 @@ namespace NHxD.Frontend.Winforms
 						runArg.PathFormatter.GetCacheDirectory(), metadata.Id, metadata.Images.Cover.GetFileExtension());
 				}
 
-				string error = "";
-				++loadCount;
+				bool shouldFilter = ShouldFilter(metadata, runArg.MetadataKeywordLists);
 
-				if (!File.Exists(coverCachedFilePath))
+				if (shouldFilter)
 				{
-					try
+					error = "SKIP";
+				}
+				else
+				{
+					++loadCount;
+
+					if (!File.Exists(coverCachedFilePath))
 					{
-						string uri = string.Format(CultureInfo.InvariantCulture, "https://t.nhentai.net/galleries/{0}/{1}{2}", metadata.MediaId, "cover", metadata.Images.Cover.GetFileExtension());
-
-						using (HttpResponseMessage response = runArg.HttpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead).GetAwaiter().GetResult())
+						try
 						{
-							if (!response.IsSuccessStatusCode)
-							{
-								coverCachedFilePath = "";
-								response.EnsureSuccessStatusCode();
-								//error = string.Format(CultureInfo.InvariantCulture, "{0} ({1})", response.ReasonPhrase, response.StatusCode);
-								//continue;
-							}
-							else
-							{
-								try
-								{
-									byte[] imageData = response.Content.ReadAsByteArrayAsync().GetAwaiter().GetResult();
+							string uri = string.Format(CultureInfo.InvariantCulture, "https://t.nhentai.net/galleries/{0}/{1}{2}", metadata.MediaId, "cover", metadata.Images.Cover.GetFileExtension());
 
-									Directory.CreateDirectory(Path.GetDirectoryName(coverCachedFilePath));
-									File.WriteAllBytes(coverCachedFilePath, imageData);
-								}
-								catch (Exception ex)
+							using (HttpResponseMessage response = runArg.HttpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead).GetAwaiter().GetResult())
+							{
+								if (!response.IsSuccessStatusCode)
 								{
 									coverCachedFilePath = "";
-									error = ex.Message;
+									response.EnsureSuccessStatusCode();
+									//error = string.Format(CultureInfo.InvariantCulture, "{0} ({1})", response.ReasonPhrase, response.StatusCode);
 									//continue;
+								}
+								else
+								{
+									try
+									{
+										byte[] imageData = response.Content.ReadAsByteArrayAsync().GetAwaiter().GetResult();
+
+										Directory.CreateDirectory(Path.GetDirectoryName(coverCachedFilePath));
+										File.WriteAllBytes(coverCachedFilePath, imageData);
+									}
+									catch (Exception ex)
+									{
+										coverCachedFilePath = "";
+										error = ex.Message;
+										//continue;
+									}
 								}
 							}
 						}
-					}
-					catch (Exception ex)
-					{
-						coverCachedFilePath = "";
-						error = ex.Message;
-						//continue;
+						catch (Exception ex)
+						{
+							coverCachedFilePath = "";
+							error = ex.Message;
+							//continue;
+						}
 					}
 				}
 
@@ -195,17 +206,26 @@ namespace NHxD.Frontend.Winforms
 			IsDone = true;
 		}
 
+		private static bool ShouldFilter(Metadata metadata, MetadataKeywordLists metadataKeywordLists)
+		{
+			// FIXME: this breaks cached covers when revealing items (after removing tags from the hidelist)
+			//return metadataKeywordLists.Hidelist.IsInMetadata(metadata);
+			return false;
+		}
+
 		private class DownloadCoversRunArg
 		{
 			public HttpClient HttpClient { get; }
 			public IPathFormatter PathFormatter { get; }
 			public SearchResult SearchResult { get; }
+			public MetadataKeywordLists MetadataKeywordLists { get; }
 
-			public DownloadCoversRunArg(HttpClient httpClient, IPathFormatter pathFormatter, SearchResult searchResult)
+			public DownloadCoversRunArg(HttpClient httpClient, IPathFormatter pathFormatter, SearchResult searchResult, MetadataKeywordLists metadataKeywordLists)
 			{
 				HttpClient = httpClient;
 				PathFormatter = pathFormatter;
 				SearchResult = searchResult;
+				MetadataKeywordLists = metadataKeywordLists;
 			}
 		}
 

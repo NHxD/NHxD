@@ -15,6 +15,12 @@
 	MetadataFilter.statementSeparatorRegex = new RegExp("[^" + MetadataFilter.statementSeparators.join('') + "]+|" + MetadataFilter.statementSeparators.join('|'), "g")
 	MetadataFilter.conditionSeparatorRegex = /([^|&]+|\||&+)/g
 
+	// lazy. used mainly for quick debugging.
+	MetadataFilter.whitelist = whitelist
+	MetadataFilter.blacklist = blacklist
+	MetadataFilter.ignorelist = ignorelist
+	MetadataFilter.hidelist = hidelist
+
 	MetadataFilter.tagNames =
 	[
 		"tag",
@@ -381,6 +387,30 @@
 			var compare = this.parseNumberCondition(condition)
 
 			result = compare(metadata.media_id.toString())
+		}
+		else if (propertyFilter === "whitelist" && typeof MetadataKeywordList !== "undefined")
+		{
+			var compare = this.parseBooleanCondition(condition)
+
+			result = compare(MetadataKeywordList.isInList(this.whitelist, metadata))
+		}
+		else if (propertyFilter === "blacklist" && typeof MetadataKeywordList !== "undefined")
+		{
+			var compare = this.parseBooleanCondition(condition)
+
+			result = compare(MetadataKeywordList.isInList(this.blacklist, metadata))
+		}
+		else if (propertyFilter === "ignorelist" && typeof MetadataKeywordList !== "undefined")
+		{
+			var compare = this.parseBooleanCondition(condition)
+
+			result = compare(MetadataKeywordList.isInList(this.ignorelist, metadata))
+		}
+		else if (propertyFilter === "hidelist" && typeof MetadataKeywordList !== "undefined")
+		{
+			var compare = this.parseBooleanCondition(condition)
+
+			result = compare(MetadataKeywordList.isInList(this.hidelist, metadata))
 		}
 		else if (this.titlePartNames.any(function(x) { return x === propertyFilter }))
 		{

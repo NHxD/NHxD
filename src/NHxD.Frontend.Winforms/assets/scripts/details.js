@@ -41,7 +41,11 @@ function setCover(metadata, coverPath, error)
 		{
 			img.onerror = null
 			img.src = "assets/images/cover/200x200/missing.png"
-			img.title = error
+
+			if (error !== "SKIP")
+			{
+				img.title = error
+			}
 		}
 		else
 		{

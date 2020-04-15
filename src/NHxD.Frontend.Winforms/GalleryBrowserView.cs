@@ -454,12 +454,13 @@ namespace NHxD.Frontend.Winforms
 					if (searchResult.Result != null)
 					{
 						SearchResult customSearchResult = new SearchResult();
-
+						
 						customSearchResult.NumPages = searchProgressArg.SearchResult.NumPages;
 						customSearchResult.PerPage = searchProgressArg.SearchResult.PerPage;
 
 						IEnumerable<Metadata> customResult;
-
+						
+						// TODO: it might be better to let the cover download job and JS to filter on their own.
 						customResult = searchProgressArg.SearchResult.Result.GetFilteredSearchResult(searchProgressArg.MetadataKeywordLists);
 
 						if (searchProgressArg.SortType != GallerySortType.None)

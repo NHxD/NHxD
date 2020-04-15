@@ -15,11 +15,13 @@ namespace NHxD.Frontend.Winforms
 
 		public HttpClient HttpClient { get; }
 		public IPathFormatter PathFormatter { get; }
+		public MetadataKeywordLists MetadataKeywordLists { get; }
 
-		public CoverDownloader(HttpClient httpClient, IPathFormatter pathFormatter)
+		public CoverDownloader(HttpClient httpClient, IPathFormatter pathFormatter, MetadataKeywordLists metadataKeywordLists)
 		{
 			HttpClient = httpClient;
 			PathFormatter = pathFormatter;
+			MetadataKeywordLists = metadataKeywordLists;
 		}
 
 		public bool TryFindJob(int galleryId, out CoverDownloaderJob result)
@@ -59,7 +61,7 @@ namespace NHxD.Frontend.Winforms
 			searchResult.PerPage = 1;
 			searchResult.NumPages = 1;
 
-			job = new CoverDownloaderJob(HttpClient, PathFormatter, searchResult);
+			job = new CoverDownloaderJob(HttpClient, PathFormatter, MetadataKeywordLists, searchResult);
 
 			job.CoverDownloadReportProgress += Job_CoverDownloadReportProgress;
 			job.CoversDownloadStarted += Job_CoversDownloadStarted;
@@ -79,7 +81,7 @@ namespace NHxD.Frontend.Winforms
 				return;
 			}
 
-			job = new CoverDownloaderJob(HttpClient, PathFormatter, searchResult);
+			job = new CoverDownloaderJob(HttpClient, PathFormatter, MetadataKeywordLists, searchResult);
 
 			job.CoverDownloadReportProgress += Job_CoverDownloadReportProgress;
 			job.CoversDownloadStarted += Job_CoversDownloadStarted;

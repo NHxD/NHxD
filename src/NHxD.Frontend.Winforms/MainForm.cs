@@ -147,8 +147,8 @@ namespace NHxD.Frontend.Winforms
 
 			backgroundTaskWorker = new BackgroundTaskWorker() { IdleWaitTime = Settings.BackgroundWorkers.BackgroundTaskWorker.IdleWaitTime, MaxConcurrentJobCount = Settings.BackgroundWorkers.BackgroundTaskWorker.MaxConcurrentJobCount };
 			pageDownloader = new PageDownloader(staticHttpClient.Client, pathFormatter, searchResultCache, cacheFileSystem) { IdleWaitTime = Settings.BackgroundWorkers.PageDownloader.IdleWaitTime, MaxConcurrentJobCount = Settings.BackgroundWorkers.PageDownloader.MaxConcurrentJobCount };
-			coverDownloader = new CoverDownloader(staticHttpClient.Client, pathFormatter) { IdleWaitTime = Settings.BackgroundWorkers.CoverDownloader.IdleWaitTime, MaxConcurrentJobCount = Settings.BackgroundWorkers.CoverDownloader.MaxConcurrentJobCount };
-			coverLoader = new CoverDownloader(staticHttpClient.Client, pathFormatter) { IdleWaitTime = Settings.BackgroundWorkers.CoverLoader.IdleWaitTime, MaxConcurrentJobCount = Settings.BackgroundWorkers.CoverLoader.MaxConcurrentJobCount };
+			coverDownloader = new CoverDownloader(staticHttpClient.Client, pathFormatter, metadataKeywordLists) { IdleWaitTime = Settings.BackgroundWorkers.CoverDownloader.IdleWaitTime, MaxConcurrentJobCount = Settings.BackgroundWorkers.CoverDownloader.MaxConcurrentJobCount };
+			coverLoader = new CoverDownloader(staticHttpClient.Client, pathFormatter, metadataKeywordLists) { IdleWaitTime = Settings.BackgroundWorkers.CoverLoader.IdleWaitTime, MaxConcurrentJobCount = Settings.BackgroundWorkers.CoverLoader.MaxConcurrentJobCount };
 			galleryDownloader = new GalleryDownloader(staticHttpClient.Client, pathFormatter, searchResultCache) { IdleWaitTime = Settings.BackgroundWorkers.GalleryDownloader.IdleWaitTime, MaxConcurrentJobCount = Settings.BackgroundWorkers.GalleryDownloader.MaxConcurrentJobCount };
 
 			detailsTabControl = new TabControlEx();
