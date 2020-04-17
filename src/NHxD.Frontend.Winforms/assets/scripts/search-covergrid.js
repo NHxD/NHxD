@@ -336,6 +336,9 @@ function updateBlurs()
 
 function updateHidden()
 {
+	// FIXME: disable hidelist for now because it collides with the metadata filter.
+	return
+
 	//var dirtyIndices = []
 
 	for (var i = 0, len = searchResult.result.length; i < len; ++i)
