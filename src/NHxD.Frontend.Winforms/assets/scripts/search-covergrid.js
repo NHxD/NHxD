@@ -616,9 +616,13 @@ function Navigation_gotoPage(pageIndex)
 	{
 		window.external.Search.RunTaggedSearch(search.tag_id, pageIndex)
 	}
-	else
+	else if (search.query !== "")
 	{
 		window.external.Search.RunSearch(search.query, pageIndex)
+	}
+	else
+	{
+		window.external.Search.RunRecentSearch(pageIndex)
 	}
 }
 
