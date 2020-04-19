@@ -38,6 +38,7 @@ namespace NHxD.Frontend.Winforms
 			webBrowser.IsWebBrowserContextMenuEnabled = false;
 			webBrowser.WebBrowserShortcutsEnabled = false;
 			webBrowser.ScriptErrorsSuppressed = true;
+			webBrowser.ScrollBarsEnabled = false;
 			webBrowser.DocumentText = StartupTemplate.GetFormattedText();
 
 			Controls.Add(webBrowser);

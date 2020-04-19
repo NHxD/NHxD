@@ -663,6 +663,9 @@ namespace NHxD.Frontend.Winforms.Configuration
 	{
 		[JsonProperty("reloadDocumentOnCoverClicked")]
 		public bool ReloadDocumentOnCoverClicked { get; set; } = false;
+
+		[JsonProperty("coverLoadBlockAction"), JsonConverter(typeof(StringEnumConverter))]
+		public DetailsCoverLoadBlockAction CoverLoadBlockAction { get; set; } = DetailsCoverLoadBlockAction.Confirm;
 	}
 
 	public class ConfigDownloadBrowserView : ConfigBrowserView
@@ -710,8 +713,8 @@ namespace NHxD.Frontend.Winforms.Configuration
 		[JsonProperty("LanguageNames")]
 		public string[] LanguageNames { get; set; } = { "english", "japanese", "korean", "chinese", "cebuano" };
 
-		[JsonProperty("blockBlacklistActions")]
-		public bool BlockBlacklistActions { get; set; } = true;
+		[JsonProperty("blockActions"), JsonConverter(typeof(StringEnumConverter))]
+		public TagsFilters BlockActions { get; set; } = TagsFilters.Blacklist | TagsFilters.Ignorelist | TagsFilters.Hidelist;
 
 		[JsonProperty("forceRuntimeUpdate")]
 		public bool ForceRuntimeUpdate { get; set; } = true;

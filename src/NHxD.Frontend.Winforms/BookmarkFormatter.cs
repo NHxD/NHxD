@@ -43,7 +43,7 @@ namespace NHxD.Frontend.Winforms
 
 		public string GetLibraryText(int pageIndex)
 		{
-			return GetBookmarkFormatter(new SearchArg("#library", pageIndex)).Format(BookmarkListSettings.LabelFormats.Library);
+			return GetBookmarkFormatter(new SearchArg(pageIndex, true)).Format(BookmarkListSettings.LabelFormats.Library);
 		}
 
 		public string GetDetailsText(Metadata metadata)

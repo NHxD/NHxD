@@ -126,7 +126,25 @@
 
 		if (item)
 		{
-			item.addOrRemoveClass("display-none", !result)
+			item.addOrRemoveClass("filter", !result)
+
+			if (result)
+			{
+				// NOTE: force recalculation of the image height because it's bugged on win10/Edge.
+				var img = document.getElementById("item-cover-" + metadata.id)
+
+				if (img)
+				{
+					var cover = metadata.images.cover
+
+					if (cover.w > 0)
+					{
+						var adjustedHeight = cover.h * img.width / cover.w
+
+						img.style.height = adjustedHeight + "px"
+					}
+				}
+			}
 		}
 	}
 

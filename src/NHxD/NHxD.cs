@@ -18,6 +18,15 @@ namespace NHxD
 		int TagId { get; }
 		string Query { get; }
 		int PageIndex { get; }
+		SearchTarget Target { get; }
+	}
+
+	public enum SearchTarget
+	{
+		Recent,
+		Query,
+		Tagged,
+		Library
 	}
 
 	public interface ISearchResultCacheItem

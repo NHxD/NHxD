@@ -60,26 +60,24 @@ function setCover(metadata, coverPath, error)
 	{
 		if (error)
 		{
-			img.onerror = null
-			img.src = "assets/images/cover/200x200/missing.png"
+			//img.onerror = null
+			//img.src = "assets/images/cover/200x200/missing.png"
 
 			if (error !== "SKIP")
 			{
 				img.title = error
 			}
 		}
-		else
+
+		img.src = coverPath
+
+		var cover = metadata.images.cover
+
+		if (cover.w > 0)
 		{
-			img.src = coverPath
+			var adjustedHeight = cover.h * img.width / cover.w
 
-			var cover = metadata.images.cover
-
-			if (cover.w > 0)
-			{
-				var adjustedHeight = cover.h * img.width / cover.w
-
-				img.style.height = adjustedHeight + "px"
-			}
+			img.style.height = adjustedHeight + "px"
 		}
 
 		// force an update of some context menu items
@@ -336,26 +334,38 @@ function updateBlurs()
 
 function updateHidden()
 {
-	// FIXME: disable hidelist for now because it collides with the metadata filter.
-	return
-
 	//var dirtyIndices = []
 
 	for (var i = 0, len = searchResult.result.length; i < len; ++i)
 	{
 		var metadata = searchResult.result[i]
-		var button = document.getElementById("search-result-item-" + metadata.id)
+		var item = document.getElementById("search-result-item-" + metadata.id)
 
-		if (button)
+		if (item)
 		{
 			if (MetadataKeywordList.isInList(hidelist, metadata))
 			{
-				button.addClass("display-none")
+				item.addClass("hidelist")
 				//dirtyIndices.push(i)
 			}
 			else
 			{
-				button.removeClass("display-none")
+				item.removeClass("hidelist")
+
+				// NOTE: force recalculation of the image height because it's bugged on win10/Edge.
+				var img = document.getElementById("item-cover-" + metadata.id)
+
+				if (img)
+				{
+					var cover = metadata.images.cover
+
+					if (cover.w > 0)
+					{
+						var adjustedHeight = cover.h * img.width / cover.w
+
+						img.style.height = adjustedHeight + "px"
+					}
+				}
 			}
 		}
 		// TODO: restore item. we could clone any other item and replace the values accordingly, but is it really worth all the trouble?
@@ -615,17 +625,21 @@ function initProgress()
 
 function Navigation_gotoPage(pageIndex)
 {
-	if (search.tag_id !== -1)
+	if (search.target === "tagged")
 	{
 		window.external.Search.RunTaggedSearch(search.tag_id, pageIndex)
 	}
-	else if (search.query !== "")
+	else if (search.target === "query")
 	{
 		window.external.Search.RunSearch(search.query, pageIndex)
 	}
-	else
+	else if (search.target === "recent")
 	{
 		window.external.Search.RunRecentSearch(pageIndex)
+	}
+	else if (search.target === "library")
+	{
+		window.external.Search.BrowseLibrary(pageIndex)
 	}
 }
 
@@ -677,9 +691,9 @@ function initCache()
 	window.external.Browsers.Gallery.ApplyFilter()
 	highlightMetadataKeywordLists()
 	highlightTitles()
-	updateHidden()
 	initContextMenus()
 	initCovers()
 	initCache()
+	updateHidden()
 	initZoom()
 })()

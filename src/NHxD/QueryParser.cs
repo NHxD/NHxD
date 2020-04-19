@@ -36,6 +36,11 @@ namespace NHxD.Frontend.Winforms
 				throw NewArgumentCountException(tokens.Length, 2);
 			}
 
+			if (string.IsNullOrEmpty(tokens[1]))
+			{
+				throw NewEmptyQueryException();
+			}
+
 			query = tokens[1];
 			pageIndex = 1;
 
@@ -79,7 +84,7 @@ namespace NHxD.Frontend.Winforms
 
 			if (TagsModel == null)
 			{
-				throw new InvalidOperationException("Tags are unset");
+				throw new InvalidOperationException("Tags are unset.");
 			}
 
 			if (TagsModel.AllTags.Any(x => SanitizeTagName(x.Name).Equals(tokens[1], StringComparison.OrdinalIgnoreCase)))
@@ -316,6 +321,11 @@ namespace NHxD.Frontend.Winforms
 		private static Exception NewInvalidTagTypeException(string tagType)
 		{
 			return new ArgumentOutOfRangeException("tagType", tagType, "Tag Type must be one of: " + string.Join(", ", Enum.GetNames(typeof(TagType))));
+		}
+
+		private static Exception NewEmptyQueryException()
+		{
+			return new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Query must contain one or more characters."));
 		}
 	}
 }

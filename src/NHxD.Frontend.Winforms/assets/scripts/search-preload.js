@@ -4,9 +4,10 @@ var totalProgress
 // Search download
 //
 
-function __onSearchError(pageIndex, tagId, query, error)
+function __onSearchError(pageIndex, tagId, query, target, error)
 {
 	if (search.page_index !== pageIndex
+		|| search.target !== target
 		|| (tagId !== -1 && search.tag_id !== tagId)
 		|| (query && search.query !== query))
 	{
@@ -22,9 +23,10 @@ function __onSearchError(pageIndex, tagId, query, error)
 	status.innerText = error
 }
 
-function __onSearchResultLoaded(pageIndex, tagId, query, progressPercentage, current, total, metadata)
+function __onSearchResultLoaded(pageIndex, tagId, query, target, progressPercentage, current, total, metadata)
 {
 	if (search.page_index !== pageIndex
+		|| search.target !== target
 		|| (tagId !== -1 && search.tag_id !== tagId)
 		|| (query && search.query !== query))
 	{
@@ -52,8 +54,7 @@ function initDocument()
 
 function initZoom()
 {
-	// TODO: preload is reused between the search and library views so a context should be provided.
-	var isLibrary = (search.query === "#library")
+	var isLibrary = (search.target === "library")
 	var browserObject = isLibrary ? window.external.Browsers.LibraryPreload : window.external.Browsers.GalleryPreload
 
 	zoom.init(browserObject.GetZoomRatio())

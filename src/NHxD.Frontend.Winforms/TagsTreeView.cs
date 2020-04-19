@@ -6,6 +6,7 @@ using System.Data;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net.Http;
 using System.Windows.Forms;
 
@@ -205,12 +206,47 @@ namespace NHxD.Frontend.Winforms
 
 			if (tagInfo != null)
 			{
-				if (TagsListSettings.BlockBlacklistActions
-					&& MetadataKeywordLists.Blacklist[tagInfo.Type].Any(x => x.Equals(tagInfo.Name, StringComparison.OrdinalIgnoreCase)))
+				if (TagsListSettings.BlockActions != TagsFilters.None)
 				{
-					if (MessageBox.Show(string.Format(CultureInfo.CurrentUICulture, "The tag \"{0}\" is currently blacklisted. Are you sure you want to open this link?", tagInfo.Name), "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+					bool isInWhitelist = MetadataKeywordLists.Whitelist[tagInfo.Type].Any(x => x.Equals(tagInfo.Name, StringComparison.OrdinalIgnoreCase));
+					bool isInBlacklist = MetadataKeywordLists.Blacklist[tagInfo.Type].Any(x => x.Equals(tagInfo.Name, StringComparison.OrdinalIgnoreCase));
+					bool isInIgnorelist = MetadataKeywordLists.Ignorelist[tagInfo.Type].Any(x => x.Equals(tagInfo.Name, StringComparison.OrdinalIgnoreCase));
+					bool isInHidelist = MetadataKeywordLists.Hidelist[tagInfo.Type].Any(x => x.Equals(tagInfo.Name, StringComparison.OrdinalIgnoreCase));
+
+					if (TagsListSettings.BlockActions.HasFlag(TagsFilters.Blacklist)
+						&& isInBlacklist)
 					{
-						return;
+						if (MessageBox.Show(string.Format(CultureInfo.CurrentUICulture, "The tag \"{0}\" is currently blacklisted. Are you sure you want to open this link?", tagInfo.Name), "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+						{
+							return;
+						}
+					}
+					else if (TagsListSettings.BlockActions.HasFlag(TagsFilters.Ignorelist)
+						&& isInIgnorelist)
+					{
+						if (MessageBox.Show(string.Format(CultureInfo.CurrentUICulture, "The tag \"{0}\" is currently ignored. Are you sure you want to open this link?", tagInfo.Name), "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+						{
+							return;
+						}
+					}
+					else if (TagsListSettings.BlockActions.HasFlag(TagsFilters.Hidelist)
+						&& isInHidelist)
+					{
+						if (MessageBox.Show(string.Format(CultureInfo.CurrentUICulture, "The tag \"{0}\" is currently hidden. Are you sure you want to open this link?", tagInfo.Name), "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+						{
+							return;
+						}
+					}
+					else if (TagsListSettings.BlockActions.HasFlag(TagsFilters.Other)
+						&& !isInWhitelist
+						&& !isInBlacklist
+						&& !isInIgnorelist
+						&& !isInHidelist)
+					{
+						if (MessageBox.Show(string.Format(CultureInfo.CurrentUICulture, "The tag \"{0}\" is currently unfiltered. Are you sure you want to open this link?", tagInfo.Name), "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+						{
+							return;
+						}
 					}
 				}
 

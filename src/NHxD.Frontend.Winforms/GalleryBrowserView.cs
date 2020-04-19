@@ -282,7 +282,7 @@ namespace NHxD.Frontend.Winforms
 		{
 			SearchProgressArg searchProgressArg = webBrowser.Tag as SearchProgressArg;
 
-			CoverDownloader.Download(searchProgressArg.SearchResult);
+			CoverDownloader.Download(searchProgressArg.SearchResult, CoverDownloaderFilters.All);
 		}
 
 		private void GalleryWebBrowser_PreloadDocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
@@ -326,15 +326,15 @@ namespace NHxD.Frontend.Winforms
 			*/
 			try
 			{
-				if (!string.IsNullOrEmpty(searchArg.Query))
+				if (searchArg.Target == SearchTarget.Query)
 				{
 					searchResult = searchDoArg.SearchHandler.Search(searchArg.Query, currentPage);
 				}
-				else if (searchArg.TagId >= 0)
+				else if (searchArg.Target == SearchTarget.Tagged)
 				{
 					searchResult = searchDoArg.SearchHandler.TaggedSearch(searchArg.TagId, currentPage);
 				}
-				else
+				else if (searchArg.Target == SearchTarget.Recent)
 				{
 					searchResult = searchDoArg.SearchHandler.RecentSearch(currentPage);
 				}
@@ -441,6 +441,7 @@ namespace NHxD.Frontend.Winforms
 							searchProgressArg.SearchArg.PageIndex,
 							searchProgressArg.SearchArg.TagId,
 							searchProgressArg.SearchArg.Query ?? "",
+							searchProgressArg.SearchArg.Target.ToString().ToLowerInvariant(),
 							e.ProgressPercentage,
 							i + 1,
 							searchResult.Result.Count,
@@ -451,22 +452,21 @@ namespace NHxD.Frontend.Winforms
 
 				if (searchProgressArg.PageIndex == searchProgressArg.SearchArg.PageIndex)
 				{
-					if (searchResult.Result != null)
+					if (searchResult.Result != null
+						&& searchProgressArg.SortType != GallerySortType.None)
 					{
 						SearchResult customSearchResult = new SearchResult();
 						
 						customSearchResult.NumPages = searchProgressArg.SearchResult.NumPages;
 						customSearchResult.PerPage = searchProgressArg.SearchResult.PerPage;
 
+						/*
 						IEnumerable<Metadata> customResult;
 						
-						// TODO: it might be better to let the cover download job and JS to filter on their own.
 						customResult = searchProgressArg.SearchResult.Result.GetFilteredSearchResult(searchProgressArg.MetadataKeywordLists);
-
-						if (searchProgressArg.SortType != GallerySortType.None)
-						{
-							customResult = customResult.GetSortedSearchResult(searchProgressArg.SortType, searchProgressArg.SortOrder);
-						}
+						customResult = customResult.GetSortedSearchResult(searchProgressArg.SortType, searchProgressArg.SortOrder);
+						*/
+						IEnumerable<Metadata> customResult = searchProgressArg.SearchResult.Result.GetSortedSearchResult(searchProgressArg.SortType, searchProgressArg.SortOrder);
 
 						customSearchResult.Result = customResult.ToList();
 
@@ -519,7 +519,8 @@ namespace NHxD.Frontend.Winforms
 				{
 					PageIndex,	//SearchArg?.PageIndex,
 					SearchArg?.TagId,
-					SearchArg?.Query,
+					SearchArg?.Query ?? "",
+					SearchArg?.Target.ToString().ToLowerInvariant(),
 					Error,
 				};
 			}
@@ -552,22 +553,32 @@ namespace NHxD.Frontend.Winforms
 		public int TagId { get; } = -1;
 		public string Query { get; }
 		public int PageIndex { get; }
+		public SearchTarget Target { get; }
 
 		public SearchArg(int tagId, int pageIndex)
 		{
 			TagId = tagId;
 			PageIndex = pageIndex;
+			Target = SearchTarget.Tagged;
 		}
 
 		public SearchArg(string query, int pageIndex)
 		{
 			Query = query;
 			PageIndex = pageIndex;
+			Target = SearchTarget.Query;
 		}
 
 		public SearchArg(int pageIndex)
 		{
 			PageIndex = pageIndex;
+			Target = SearchTarget.Recent;
+		}
+
+		public SearchArg(int pageIndex, bool isLibrary)
+		{
+			PageIndex = pageIndex;
+			Target = isLibrary ? SearchTarget.Library : SearchTarget.Recent;
 		}
 	}
 

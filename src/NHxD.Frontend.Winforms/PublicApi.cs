@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Nhentai;
+using NHxD.Frontend.Winforms.Configuration;
 using NHxD.Plugin;
 using NHxD.Plugin.ArchiveWriter;
 using NHxD.Plugin.MetadataConverter;
@@ -21,7 +22,11 @@ namespace NHxD.Frontend.Winforms
 	[ComVisible(true), InterfaceType(ComInterfaceType.InterfaceIsIDispatch)]
 	public interface ISettingsApi
 	{
+		bool HasBlockActions();
 		bool ShouldBlockBlacklistActions();
+		bool ShouldBlockIgnorelistActions();
+		bool ShouldBlockHidelistActions();
+		bool ShouldBlockUnfilteredActions();
 	}
 
 	[ComDefaultInterface(typeof(ISettingsApi)), ComVisible(true), ClassInterface(ClassInterfaceType.None), PermissionSet(SecurityAction.Demand, Name = "FullTrust")]
@@ -34,9 +39,25 @@ namespace NHxD.Frontend.Winforms
 			Settings = settings;
 		}
 
+		public bool HasBlockActions()
+		{
+			return Settings.Lists.Tags.BlockActions != TagsFilters.None;
+		}
 		public bool ShouldBlockBlacklistActions()
 		{
-			return Settings.Lists.Tags.BlockBlacklistActions;
+			return Settings.Lists.Tags.BlockActions.HasFlag(TagsFilters.Blacklist);
+		}
+		public bool ShouldBlockIgnorelistActions()
+		{
+			return Settings.Lists.Tags.BlockActions.HasFlag(TagsFilters.Ignorelist);
+		}
+		public bool ShouldBlockHidelistActions()
+		{
+			return Settings.Lists.Tags.BlockActions.HasFlag(TagsFilters.Hidelist);
+		}
+		public bool ShouldBlockUnfilteredActions()
+		{
+			return Settings.Lists.Tags.BlockActions.HasFlag(TagsFilters.Other);
 		}
 	}
 
@@ -1493,8 +1514,6 @@ namespace NHxD.Frontend.Winforms
 			SearchHandler.RunRecentSearch(pageIndex);
 		}
 	}
-
-	//BlockBlacklistActions
 
 	[ComVisible(true), InterfaceType(ComInterfaceType.InterfaceIsIDispatch)]
 	public interface IPublicApi

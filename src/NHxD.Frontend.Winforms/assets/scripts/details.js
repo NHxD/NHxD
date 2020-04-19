@@ -39,18 +39,16 @@ function setCover(metadata, coverPath, error)
 	{
 		if (error)
 		{
-			img.onerror = null
-			img.src = "assets/images/cover/200x200/missing.png"
+			//img.onerror = null
+			//img.src = "assets/images/cover/200x200/missing.png"
 
 			if (error !== "SKIP")
 			{
 				img.title = error
 			}
 		}
-		else
-		{
-			img.src = coverPath
-		}
+
+		img.src = coverPath
 
 		// force an update of some context menu items
 		if (!coverContextMenu.element.hasClass("display-none"))
@@ -582,13 +580,50 @@ function createTagElements()
 
 				button.addEventListener("click", function(e)
 				{
-					if (window.external.Settings.ShouldBlockBlacklistActions())
+					if (window.external.Settings.HasBlockActions())
 					{
+						var isInWhitelist = whitelist.tags[this._tag.type].indexOf(this._tag.name) !== -1
 						var isInBlacklist = blacklist.tags[this._tag.type].indexOf(this._tag.name) !== -1
+						var isInIgnorelist = ignorelist.tags[this._tag.type].indexOf(this._tag.name) !== -1
+						var isInHidelist = hidelist.tags[this._tag.type].indexOf(this._tag.name) !== -1
 
-						if (isInBlacklist)
+						if (window.external.Settings.ShouldBlockBlacklistActions()
+							&& isInBlacklist)
 						{
 							var dialogResult = window.confirm("The tag \"" + this._tag.name + "\" is currently blacklisted. Are you sure you want to open this link?")
+
+							if (!dialogResult)
+							{
+								return
+							}
+						}
+						else if (window.external.Settings.ShouldBlockIgnorelistActions()
+							&& isInIgnorelist)
+						{
+							var dialogResult = window.confirm("The tag \"" + this._tag.name + "\" is currently ignored. Are you sure you want to open this link?")
+
+							if (!dialogResult)
+							{
+								return
+							}
+						}
+						else if (window.external.Settings.ShouldBlockHidelistActions()
+							&& isInHidelist)
+						{
+							var dialogResult = window.confirm("The tag \"" + this._tag.name + "\" is currently hidden. Are you sure you want to open this link?")
+
+							if (!dialogResult)
+							{
+								return
+							}
+						}
+						else if (window.external.Settings.ShouldBlockUnfilteredActions()
+							&& !isInWhitelist
+							&& !isInBlacklist
+							&& !isInIgnorelist
+							&& !isInHidelist)
+						{
+							var dialogResult = window.confirm("The tag \"" + this._tag.name + "\" is currently unfiltered. Are you sure you want to open this link?")
 
 							if (!dialogResult)
 							{

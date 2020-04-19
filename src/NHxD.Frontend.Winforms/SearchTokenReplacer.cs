@@ -35,11 +35,11 @@ namespace NHxD.Frontend.Winforms
 					}
 					else if (namespaces[1].Equals("Query", StringComparison.OrdinalIgnoreCase))
 					{
-						if (!string.IsNullOrEmpty(SearchArg.Query))
+						if (SearchArg.Target == SearchTarget.Query)
 						{
-							result = SearchArg.Query;
+							result = SearchArg.Query ?? "";
 						}
-						else if (SearchArg.TagId >= 0)
+						else if (SearchArg.Target == SearchTarget.Tagged)
 						{
 							result = SearchArg.TagId.ToString(CultureInfo.InvariantCulture);
 						}
@@ -47,6 +47,10 @@ namespace NHxD.Frontend.Winforms
 						{
 							result = "";
 						}
+					}
+					else if (namespaces[1].Equals("Target", StringComparison.OrdinalIgnoreCase))
+					{
+						result = SearchArg.Target.ToString().ToLowerInvariant();
 					}
 				}
 			}

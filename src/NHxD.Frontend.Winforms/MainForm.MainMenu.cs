@@ -70,19 +70,12 @@ namespace NHxD.Frontend.Winforms
 			Padding = Padding.Empty;
 		}
 
-		private void ApplicationMenuStrip_MenuActivate(object sender, EventArgs e)
-		{
-			listToolStripMenuItem.Checked = !Settings.Panels.Lists.IsCollapsed;
-			detailsToolStripMenuItem.Checked = !Settings.Panels.Details.IsCollapsed;
-			fullScreenToolStripMenuItem.Checked = Settings.Window.FullScreen.IsActive;
-		}
-
-		private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
+		private void MainMenuStrip_Exit(object sender, EventArgs e)
 		{
 			Application.Exit();
 		}
 
-		private void ListToolStripMenuItem_Click(object sender, EventArgs e)
+		private void MainMenuStrip_ToggleListsPanel(object sender, EventArgs e)
 		{
 			Settings.Panels.Lists.IsCollapsed = !Settings.Panels.Lists.IsCollapsed;
 
@@ -93,7 +86,7 @@ namespace NHxD.Frontend.Winforms
 			fullScreenRestoreState.IsListPanelVisible = null;
 		}
 
-		private void DetailsToolStripMenuItem_Click(object sender, EventArgs e)
+		private void MainMenuStrip_ToggleDetailsPanel(object sender, EventArgs e)
 		{
 			Settings.Panels.Details.IsCollapsed = !Settings.Panels.Details.IsCollapsed;
 
@@ -104,7 +97,7 @@ namespace NHxD.Frontend.Winforms
 			fullScreenRestoreState.IsDetailsPanelVisible = null;
 		}
 
-		private void FullScreenToolStripMenuItem_Click(object sender, EventArgs e)
+		private void MainMenuStrip_ToggleFullScreen(object sender, EventArgs e)
 		{
 			Settings.Window.FullScreen.IsActive = !Settings.Window.FullScreen.IsActive;
 
@@ -122,7 +115,7 @@ namespace NHxD.Frontend.Winforms
 			ResumeLayout(false);
 		}
 
-		private void PluginsToolStripMenuItem_Click(object sender, EventArgs e)
+		private void MainMenuStrip_ShowPlugins(object sender, EventArgs e)
 		{
 			List<IPlugin> plugins = new List<IPlugin>();
 
@@ -171,7 +164,7 @@ namespace NHxD.Frontend.Winforms
 			}
 		}
 
-		private void AboutToolStripMenuItem_Click(object sender, EventArgs e)
+		private void MainMenuStrip_ShowAbout(object sender, EventArgs e)
 		{
 			using (AboutForm dialog = new AboutForm(aboutTextFormatter, documentTemplates.About, Settings.About.Size))
 			{

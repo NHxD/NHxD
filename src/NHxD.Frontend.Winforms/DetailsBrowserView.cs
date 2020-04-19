@@ -119,10 +119,33 @@ namespace NHxD.Frontend.Winforms
 			if (!CacheFileSystem.DoesCoverExists(galleryId))
 			{
 				Metadata cachedMetadata = SearchResultCache.Find(galleryId);
-				
-				CoverDownloader.Download(cachedMetadata);
+				CoverDownloaderFilters filters;
+
+				if (DetailsBrowserSettings.CoverLoadBlockAction == DetailsCoverLoadBlockAction.None)
+				{
+					filters = CoverDownloaderFilters.All;
+				}
+				else if (DetailsBrowserSettings.CoverLoadBlockAction == DetailsCoverLoadBlockAction.Confirm)
+				{
+					bool isInHidelist = MetadataKeywordLists.Hidelist.IsInMetadata(cachedMetadata);
+
+					if (isInHidelist
+						&& MessageBox.Show("This gallery is currently hidden. Do you want to download the cover?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+					{
+						return;
+					}
+
+					filters = CoverDownloaderFilters.All & ~CoverDownloaderFilters.Hidelist;
+				}
+				else
+				{
+					filters = CoverDownloaderFilters.None;
+				}
+
+				CoverDownloader.Download(cachedMetadata, filters);
 			}
 		}
+
 		private void Form_HideListChanged(object sender, MetadataKeywordListChangedEventArgs e)
 		{
 			if (string.IsNullOrEmpty(WebBrowser.DocumentText))
@@ -187,11 +210,11 @@ namespace NHxD.Frontend.Winforms
 
 			if (DetailsModel.Target == DetailsTarget.Download)
 			{
-				documentTemplate = DetailsTemplate;
+				documentTemplate = DownloadTemplate;
 			}
 			else
 			{
-				documentTemplate = DownloadTemplate;
+				documentTemplate = DetailsTemplate;
 			}
 
 			WebBrowser.Tag = e.Metadata.Id;
@@ -329,5 +352,12 @@ namespace NHxD.Frontend.Winforms
 				webBrowser.ZoomFactor = DetailsBrowserSettings.ZoomRatio;
 			}
 		}
+	}
+
+	public enum DetailsCoverLoadBlockAction
+	{
+		None,
+		Always,
+		Confirm,
 	}
 }

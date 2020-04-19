@@ -8,6 +8,7 @@ using NHxD.Plugin.MetadataConverter;
 using NHxD.Plugin.MetadataProcessor;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 //using System.Runtime.InteropServices;
 using System.Windows.Forms;
@@ -83,6 +84,9 @@ namespace NHxD.Frontend.Winforms
 		private readonly TabControlEx detailsTabControl;
 		private readonly TabPage detailsTabPage;
 		private readonly TabPage downloadTabPage;
+		private readonly SplitContainerEx splitContainer1;
+		private readonly SplitContainerEx splitContainer2;
+		private readonly SplitContainerEx splitContainer3;
 		private readonly WebBrowserTreeNodeToolTip webBrowserToolTip;
 		private readonly StartupWebBrowserView startupWebBrowser;
 		private readonly Theme theme;
@@ -92,6 +96,7 @@ namespace NHxD.Frontend.Winforms
 		private readonly SearchHandler searchHandler;
 		private readonly BookmarkFormatter bookmarkFormatter;
 		private readonly BookmarkPromptUtility bookmarkPromptUtility;
+		private readonly MainMenuStrip mainMenuStrip;
 		private readonly FullScreenRestoreState fullScreenRestoreState;
 		private readonly StartupSpecialHandler startupSpecialHandler;
 
@@ -210,6 +215,7 @@ namespace NHxD.Frontend.Winforms
 			theme = new Theme();
 			applicationLoader = new ApplicationLoader();
 			fullScreenRestoreState = new FullScreenRestoreState();
+			mainMenuStrip = new MainMenuStrip(Settings);
 			startupSpecialHandler = new StartupSpecialHandler(Settings.Gallery, tagsModel, metadataKeywordLists, searchHandler);
 
 			publicApi = new PublicApi(staticHttpClient.Client
@@ -231,6 +237,21 @@ namespace NHxD.Frontend.Winforms
 				, metadataKeywordLists
 				, Settings
 				);
+
+			splitContainer1 = new SplitContainerEx();
+			splitContainer2 = new SplitContainerEx();
+			splitContainer3 = new SplitContainerEx();
+
+			splitContainer1.BeginInit();
+			splitContainer1.Panel2.SuspendLayout();
+			splitContainer1.SuspendLayout();
+
+			splitContainer2.BeginInit();
+			splitContainer2.Panel1.SuspendLayout();
+			splitContainer2.SuspendLayout();
+
+			splitContainer3.BeginInit();
+			splitContainer3.SuspendLayout();
 
 			SuspendLayout();
 
@@ -436,6 +457,7 @@ namespace NHxD.Frontend.Winforms
 			//
 			//
 			galleryBrowserView.Dock = DockStyle.Fill;
+			galleryBrowserView.WebBrowser.ObjectForScripting = publicApi;
 
 			//
 			//
@@ -454,6 +476,7 @@ namespace NHxD.Frontend.Winforms
 			//
 			//
 			libraryBrowserView.Dock = DockStyle.Fill;
+			libraryBrowserView.WebBrowser.ObjectForScripting = publicApi;
 
 			//
 			//
@@ -479,6 +502,7 @@ namespace NHxD.Frontend.Winforms
 			//
 			//
 			detailsBrowserView.Dock = DockStyle.Fill;
+			detailsBrowserView.WebBrowser.ObjectForScripting = publicApi;
 
 			//
 			//
@@ -486,24 +510,80 @@ namespace NHxD.Frontend.Winforms
 			detailsTabPage.Controls.Add(detailsBrowserView);
 			detailsTabPage.Controls.Add(detailsToolStrip);
 
+			// 
+			// splitContainer1
+			// 
+			splitContainer1.Dock = DockStyle.Fill;
+			splitContainer1.FixedPanel = FixedPanel.Panel1;
+			splitContainer1.Margin = new Padding(0);
+			splitContainer1.Name = "splitContainer1";
+			splitContainer1.Orientation = Orientation.Horizontal;
+			splitContainer1.Panel1MinSize = 22;
+
+			// 
+			// splitContainer1.Panel2
+			// 
+			splitContainer1.Panel2.Controls.Add(splitContainer2);
+			splitContainer1.Size = new Size(1364, 637);
+			splitContainer1.SplitterDistance = 25;
+			splitContainer1.SplitterIncrement = 22;
+			splitContainer1.SplitterWidth = 7;
+			splitContainer1.TabIndex = 2;
+
+			// 
+			// splitContainer2
+			// 
+			splitContainer2.Dock = DockStyle.Fill;
+			splitContainer2.FixedPanel = FixedPanel.Panel2;
+			splitContainer2.Margin = new Padding(0);
+			splitContainer2.Name = "splitContainer2";
+
+			// 
+			// splitContainer2.Panel1
+			// 
+			splitContainer2.Panel1.Controls.Add(splitContainer3);
+			splitContainer2.Size = new Size(1364, 605);
+			splitContainer2.SplitterDistance = 1214;
+			splitContainer2.SplitterWidth = 7;
+			splitContainer2.TabIndex = 1;
+
+			// 
+			// splitContainer3
+			// 
+			splitContainer3.Dock = DockStyle.Fill;
+			splitContainer3.FixedPanel = FixedPanel.Panel1;
+			splitContainer3.Margin = new Padding(0);
+			splitContainer3.Name = "splitContainer3";
+			splitContainer3.Size = new Size(1214, 605);
+			splitContainer3.SplitterDistance = 200;
+			splitContainer3.SplitterWidth = 7;
+			splitContainer3.TabIndex = 0;
+
 			//
+			// applicationMenuStrip
 			//
+			mainMenuStrip.Exit += MainMenuStrip_Exit;
+			mainMenuStrip.ToggleListsPanel += MainMenuStrip_ToggleListsPanel;
+			mainMenuStrip.ToggleDetailsPanel += MainMenuStrip_ToggleDetailsPanel;
+			mainMenuStrip.ToggleFullScreen += MainMenuStrip_ToggleFullScreen;
+			mainMenuStrip.ShowAbout += MainMenuStrip_ShowAbout;
+			mainMenuStrip.ShowPlugins += MainMenuStrip_ShowPlugins;
+
 			//
+			// this
+			//
+			Controls.Add(splitContainer1);
+			Controls.Add(mainMenuStrip);
 			Controls.Add(webBrowserToolTip);
 			webBrowserToolTip.BringToFront();
-
+			MainMenuStrip = mainMenuStrip;
+			Padding = new Padding(0);
+			Text = aboutTextFormatter.Format(Settings.Window.TextFormat);
+			Enabled = false;
+			
 			//
+			// splash screen
 			//
-			//
-			splitContainer1.Margin = Padding.Empty;
-			splitContainer2.Margin = Padding.Empty;
-			splitContainer3.Margin = Padding.Empty;
-			Padding = Padding.Empty;
-
-			galleryBrowserView.WebBrowser.ObjectForScripting = publicApi;
-			libraryBrowserView.WebBrowser.ObjectForScripting = publicApi;
-			detailsBrowserView.WebBrowser.ObjectForScripting = publicApi;
-
 			if (Settings.SplashScreen.IsVisible)
 			{
 				startupWebBrowser = new StartupWebBrowserView(coreTextFormatter, documentTemplates.Startup, applicationLoader);
@@ -524,23 +604,23 @@ namespace NHxD.Frontend.Winforms
 
 			pageDownloader.PagesDownloadCompleted += PageDownloader_PagesDownloadCompleted;
 
-			//
-			//
-			//
-			applicationMenuStrip.MenuActivate += ApplicationMenuStrip_MenuActivate;
-
-			//
-			//
-			//
-			Text = aboutTextFormatter.Format(Settings.Window.TextFormat);
-			Enabled = false;
-			//MouseClick += MainForm_MouseClick;
-
 			ReadTheme();
 			ApplyTheme();
 			ApplyVisualStyles();
+
+			splitContainer1.Panel2.ResumeLayout(false);
+			splitContainer1.EndInit();
+			splitContainer1.ResumeLayout(false);
+
+			splitContainer2.Panel1.ResumeLayout(false);
+			splitContainer2.EndInit();
+			splitContainer2.ResumeLayout(false);
+
+			splitContainer3.EndInit();
+			splitContainer3.ResumeLayout(false);
 			
 			ResumeLayout(false);
+			PerformLayout();
 		}
 
 		protected override CreateParams CreateParams
@@ -558,10 +638,6 @@ namespace NHxD.Frontend.Winforms
 			}
 		}
 		
-		private void MainForm_Load(object sender, EventArgs e)
-		{
-		}
-
 		// doesn't work.
 		/*
 		private void ListsPanel_VisibleChanged(object sender, EventArgs e)

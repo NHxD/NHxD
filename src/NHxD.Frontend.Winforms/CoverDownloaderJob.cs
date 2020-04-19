@@ -21,13 +21,15 @@ namespace NHxD.Frontend.Winforms
 		public IPathFormatter PathFormatter { get; }
 		public SearchResult SearchResult { get; }
 		public MetadataKeywordLists MetadataKeywordLists { get; }
+		public CoverDownloaderFilters Filters { get; }
 
-		public CoverDownloaderJob(HttpClient httpClient, IPathFormatter pathFormatter, MetadataKeywordLists metadataKeywordLists, SearchResult searchResult)
+		public CoverDownloaderJob(HttpClient httpClient, IPathFormatter pathFormatter, MetadataKeywordLists metadataKeywordLists, SearchResult searchResult, CoverDownloaderFilters filters)
 		{
 			HttpClient = httpClient;
 			PathFormatter = pathFormatter;
 			SearchResult = searchResult;
 			MetadataKeywordLists = metadataKeywordLists;
+			Filters = filters;
 
 			BackgroundWorker.WorkerReportsProgress = true;
 			BackgroundWorker.WorkerSupportsCancellation = true;
@@ -67,7 +69,7 @@ namespace NHxD.Frontend.Winforms
 
 			OnCoversDownloadStarted(new CoversDownloadStartedEventArgs(SearchResult/*pageIndices, galleryId*/));
 
-			DownloadCoversRunArg runArg = new DownloadCoversRunArg(HttpClient, PathFormatter, SearchResult, MetadataKeywordLists/*galleryId, pageIndices, SearchResultCache, GetCachedPageIndices*/);
+			DownloadCoversRunArg runArg = new DownloadCoversRunArg(HttpClient, PathFormatter, SearchResult, MetadataKeywordLists, Filters/*galleryId, pageIndices, SearchResultCache, GetCachedPageIndices*/);
 
 			BackgroundWorker.RunWorkerAsync(runArg);
 		}
@@ -104,7 +106,7 @@ namespace NHxD.Frontend.Winforms
 						runArg.PathFormatter.GetCacheDirectory(), metadata.Id, metadata.Images.Cover.GetFileExtension());
 				}
 
-				bool shouldFilter = ShouldFilter(metadata, runArg.MetadataKeywordLists);
+				bool shouldFilter = ShouldFilter(metadata, runArg.MetadataKeywordLists, runArg.Filters);
 
 				if (shouldFilter)
 				{
@@ -206,10 +208,14 @@ namespace NHxD.Frontend.Winforms
 			IsDone = true;
 		}
 
-		private static bool ShouldFilter(Metadata metadata, MetadataKeywordLists metadataKeywordLists)
+		private static bool ShouldFilter(Metadata metadata, MetadataKeywordLists metadataKeywordLists, CoverDownloaderFilters filters)
 		{
-			// FIXME: this breaks cached covers when revealing items (after removing tags from the hidelist)
-			//return metadataKeywordLists.Hidelist.IsInMetadata(metadata);
+			if (filters.HasFlag(CoverDownloaderFilters.Hidelist)
+				&& metadataKeywordLists.Hidelist.IsInMetadata(metadata))
+			{
+				return true;
+			}
+
 			return false;
 		}
 
@@ -219,13 +225,15 @@ namespace NHxD.Frontend.Winforms
 			public IPathFormatter PathFormatter { get; }
 			public SearchResult SearchResult { get; }
 			public MetadataKeywordLists MetadataKeywordLists { get; }
+			public CoverDownloaderFilters Filters { get; }
 
-			public DownloadCoversRunArg(HttpClient httpClient, IPathFormatter pathFormatter, SearchResult searchResult, MetadataKeywordLists metadataKeywordLists)
+			public DownloadCoversRunArg(HttpClient httpClient, IPathFormatter pathFormatter, SearchResult searchResult, MetadataKeywordLists metadataKeywordLists, CoverDownloaderFilters filters)
 			{
 				HttpClient = httpClient;
 				PathFormatter = pathFormatter;
 				SearchResult = searchResult;
 				MetadataKeywordLists = metadataKeywordLists;
+				Filters = filters;
 			}
 		}
 
@@ -274,6 +282,14 @@ namespace NHxD.Frontend.Winforms
 				SearchResult = searchResult;
 			}
 		}
+	}
+
+	[Flags]
+	public enum CoverDownloaderFilters
+	{
+		None,
+		Hidelist = 1,
+		All = Hidelist
 	}
 
 	public delegate void CoverDownloadStartedEventHandler(object sender, CoversDownloadStartedEventArgs e);

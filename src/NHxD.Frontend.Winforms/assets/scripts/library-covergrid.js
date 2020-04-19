@@ -69,22 +69,24 @@ function setCover(metadata, coverPath, error)
 	{
 		if (error)
 		{
-			img.onerror = null
-			img.src = "assets/images/cover/200x200/missing.png"
-			img.title = error
-		}
-		else
-		{
-			img.src = coverPath
+			//img.onerror = null
+			//img.src = "assets/images/cover/200x200/missing.png"
 
-			var cover = metadata.images.cover
-
-			if (cover.w > 0)
+			if (error !== "SKIP")
 			{
-				var adjustedHeight = cover.h * img.width / cover.w
-
-				img.style.height = adjustedHeight + "px"
+				img.title = error
 			}
+		}
+
+		img.src = coverPath
+
+		var cover = metadata.images.cover
+
+		if (cover.w > 0)
+		{
+			var adjustedHeight = cover.h * img.width / cover.w
+
+			img.style.height = adjustedHeight + "px"
 		}
 
 		// force an update of some context menu items.

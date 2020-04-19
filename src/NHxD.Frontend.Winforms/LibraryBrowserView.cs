@@ -111,7 +111,7 @@ namespace NHxD.Frontend.Winforms
 
 		private void LibraryModel_SearchProgressArgChanged(object sender, EventArgs e)
 		{
-			CoverLoader.Download(LibraryModel.SearchProgressArg.SearchResult);
+			CoverLoader.Download(LibraryModel.SearchProgressArg.SearchResult, CoverDownloaderFilters.None);
 		}
 
 		private void LibraryModel_PageIndexChanged(object sender, EventArgs e)
@@ -347,7 +347,7 @@ namespace NHxD.Frontend.Winforms
 
 		public void Search()
 		{
-			SearchArg searchArg = new SearchArg("#library", LibraryModel.PageIndex);
+			SearchArg searchArg = new SearchArg(LibraryModel.PageIndex, true);
 
 			webBrowser.Tag = searchArg;
 			webBrowser.DocumentText = LibraryPreloadTemplate.GetFormattedText(searchArg);
@@ -415,6 +415,7 @@ namespace NHxD.Frontend.Winforms
 				progressArg?.RunArg?.SearchArg?.PageIndex,
 				progressArg?.RunArg?.SearchArg?.TagId,
 				progressArg?.RunArg?.SearchArg?.Query ?? "",
+				progressArg?.RunArg?.SearchArg?.Target.ToString().ToLowerInvariant(),
 				e.ProgressPercentage,
 				progressArg?.CurrentLoadCount,
 				progressArg?.TotalLoadCount,

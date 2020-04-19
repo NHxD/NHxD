@@ -38,14 +38,16 @@ function __onCoverDownloadReportProgress(selectedCoverIndices, itemIndex, galler
 	{
 		if (error)
 		{
-			img.onerror = null
-			img.src = "assets/images/cover/200x200/missing.png"
-			img.title = error
+			//img.onerror = null
+			//img.src = "assets/images/cover/200x200/missing.png"
+
+			if (error !== "SKIP")
+			{
+				img.title = error
+			}
 		}
-		else
-		{
-			img.src = coverPath
-		}
+
+		img.src = coverPath
 
 		// force an update of some context menu items.
 		if (!coverContextMenu.element.hasClass("display-none"))

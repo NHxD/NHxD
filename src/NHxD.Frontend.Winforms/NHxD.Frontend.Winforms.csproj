@@ -166,6 +166,9 @@
     <Compile Include="GalleryBrowserToolStrip.Designer.cs">
       <DependentUpon>GalleryBrowserToolStrip.cs</DependentUpon>
     </Compile>
+    <Compile Include="MainMenuStrip.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="StartupSpecialHandler.cs" />
     <Compile Include="StaticHttpClient.cs" />
     <Compile Include="JsonUtility.cs" />

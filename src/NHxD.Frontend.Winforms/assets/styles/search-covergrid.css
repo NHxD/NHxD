@@ -61,6 +61,16 @@ nav
 	padding-bottom: 20px;
 }
 
+.search-result-item.hidelist
+{
+	display: none;
+}
+
+.search-result-item.filter
+{
+	display: none;
+}
+
 .search-result-item:hover
 {
 	background-color: #334;
