@@ -49,7 +49,7 @@ namespace NHxD.Frontend.Winforms
 				httpClientHandler.Proxy = webProxy;
 			}
 
-			if (networkSettings.Client.Proxy.HasCredentials)
+			if (networkSettings.Client.HasCredentials)
 			{
 				httpClientHandler.UseDefaultCredentials = false;
 				httpClientHandler.Credentials = new NetworkCredential(networkSettings.Client.Credentials.UserName, networkSettings.Client.Credentials.Password);
