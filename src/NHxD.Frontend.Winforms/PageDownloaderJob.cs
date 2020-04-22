@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace NHxD.Frontend.Winforms
@@ -158,7 +159,7 @@ namespace NHxD.Frontend.Winforms
 						{
 							string uri = string.Format(CultureInfo.InvariantCulture, "https://i.nhentai.net/galleries/{0}/{1}{2}", metadata.MediaId, i + 1, metadata.Images.Pages[i].GetFileExtension());
 
-							using (HttpResponseMessage response = runArg.HttpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead).GetAwaiter().GetResult())
+							using (HttpResponseMessage response = Task.Run(() => runArg.HttpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead)).GetAwaiter().GetResult())
 							{
 								if (!response.IsSuccessStatusCode)
 								{
@@ -169,7 +170,7 @@ namespace NHxD.Frontend.Winforms
 								{
 									try
 									{
-										byte[] imageData = response.Content.ReadAsByteArrayAsync().GetAwaiter().GetResult();
+										byte[] imageData = Task.Run(() => response.Content.ReadAsByteArrayAsync()).GetAwaiter().GetResult();
 
 										// TODO: the issue is that I have designed things to be immutable so metadatas can't change.
 										// but even if I do change the metadata and replace it in the searchResult,
@@ -410,7 +411,7 @@ namespace NHxD.Frontend.Winforms
 					LoadCount,
 					LoadTotal,
 					CacheCount,
-					Metadata?.Images?.Pages?.Count,
+					Metadata?.Images?.Pages?.Count ?? 0,
 					PageIndex,
 					Metadata?.Id,
 					PageCachedFilePath,
@@ -444,7 +445,7 @@ namespace NHxD.Frontend.Winforms
 					LoadCount,
 					LoadTotal,
 					CacheCount,
-					Metadata?.Images?.Pages?.Count,
+					Metadata?.Images?.Pages?.Count ?? 0,
 					Metadata?.Id
 			};
 		}

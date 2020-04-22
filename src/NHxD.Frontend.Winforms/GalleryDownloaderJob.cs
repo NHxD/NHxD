@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace NHxD.Frontend.Winforms
@@ -102,7 +103,7 @@ namespace NHxD.Frontend.Winforms
 				{
 					string uri = string.Format(CultureInfo.InvariantCulture, "https://nhentai.net/api/gallery/{0}", runArg.Id);
 
-					using (HttpResponseMessage response = runArg.HttpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead).GetAwaiter().GetResult())
+					using (HttpResponseMessage response = Task.Run(() => runArg.HttpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead)).GetAwaiter().GetResult())
 					{
 						if (!response.IsSuccessStatusCode)
 						{
@@ -113,7 +114,7 @@ namespace NHxD.Frontend.Winforms
 						{
 							try
 							{
-								string jsonText = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+								string jsonText = Task.Run(() => response.Content.ReadAsStringAsync()).GetAwaiter().GetResult();
 
 								// TODO: show actual download progress...
 								{

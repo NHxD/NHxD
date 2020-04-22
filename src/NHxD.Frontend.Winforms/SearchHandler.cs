@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Net.Http;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace NHxD.Frontend.Winforms
@@ -172,7 +173,7 @@ namespace NHxD.Frontend.Winforms
 
 			try
 			{
-				using (HttpResponseMessage response = HttpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead).GetAwaiter().GetResult())
+				using (HttpResponseMessage response = Task.Run(() => HttpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead)).GetAwaiter().GetResult())
 				{
 					if (!response.IsSuccessStatusCode)
 					{
@@ -181,7 +182,7 @@ namespace NHxD.Frontend.Winforms
 						return null;
 					}
 
-					string jsonText = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+					string jsonText = Task.Run(() => response.Content.ReadAsStringAsync()).GetAwaiter().GetResult();
 
 					searchResult = JsonConvert.DeserializeObject<SearchResult>(jsonText);
 

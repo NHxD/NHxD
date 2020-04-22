@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using UrbanDictionary;
 
@@ -148,7 +149,7 @@ namespace NHxD.Frontend.Winforms
 
 			try
 			{
-				using (HttpResponseMessage response = runArg.HttpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead).GetAwaiter().GetResult())
+				using (HttpResponseMessage response = Task.Run(() => runArg.HttpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead)).GetAwaiter().GetResult())
 				{
 					if (!response.IsSuccessStatusCode)
 					{
@@ -160,7 +161,7 @@ namespace NHxD.Frontend.Winforms
 					{
 						try
 						{
-							string jsonText = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+							string jsonText = Task.Run(() => response.Content.ReadAsStringAsync()).GetAwaiter().GetResult();
 
 							e.Result = JsonConvert.DeserializeObject<SearchResult>(jsonText);
 							return;

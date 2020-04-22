@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace NHxD.Frontend.Winforms
@@ -122,7 +123,7 @@ namespace NHxD.Frontend.Winforms
 						{
 							string uri = string.Format(CultureInfo.InvariantCulture, "https://t.nhentai.net/galleries/{0}/{1}{2}", metadata.MediaId, "cover", metadata.Images.Cover.GetFileExtension());
 
-							using (HttpResponseMessage response = runArg.HttpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead).GetAwaiter().GetResult())
+							using (HttpResponseMessage response = Task.Run(() => runArg.HttpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead)).GetAwaiter().GetResult())
 							{
 								if (!response.IsSuccessStatusCode)
 								{
@@ -135,7 +136,7 @@ namespace NHxD.Frontend.Winforms
 								{
 									try
 									{
-										byte[] imageData = response.Content.ReadAsByteArrayAsync().GetAwaiter().GetResult();
+										byte[] imageData = Task.Run(() => response.Content.ReadAsByteArrayAsync()).GetAwaiter().GetResult();
 
 										Directory.CreateDirectory(Path.GetDirectoryName(coverCachedFilePath));
 										File.WriteAllBytes(coverCachedFilePath, imageData);
