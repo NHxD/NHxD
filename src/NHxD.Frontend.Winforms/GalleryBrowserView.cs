@@ -518,9 +518,9 @@ namespace NHxD.Frontend.Winforms
 				return new object[]
 				{
 					PageIndex,	//SearchArg?.PageIndex,
-					SearchArg?.TagId,
+					SearchArg?.TagId ?? -1,
 					SearchArg?.Query ?? "",
-					SearchArg?.Target.ToString().ToLowerInvariant(),
+					SearchArg?.Target.ToString().ToLowerInvariant() ?? "",
 					Error,
 				};
 			}

@@ -412,13 +412,13 @@ namespace NHxD.Frontend.Winforms
 
 			webBrowser.Document.InvokeScript("__onSearchResultLoaded", new object[]
 			{
-				progressArg?.RunArg?.SearchArg?.PageIndex,
-				progressArg?.RunArg?.SearchArg?.TagId,
+				progressArg?.RunArg?.SearchArg?.PageIndex ?? 0,
+				progressArg?.RunArg?.SearchArg?.TagId ?? -1,
 				progressArg?.RunArg?.SearchArg?.Query ?? "",
-				progressArg?.RunArg?.SearchArg?.Target.ToString().ToLowerInvariant(),
+				progressArg?.RunArg?.SearchArg?.Target.ToString().ToLowerInvariant() ?? "",
 				e.ProgressPercentage,
-				progressArg?.CurrentLoadCount,
-				progressArg?.TotalLoadCount,
+				progressArg?.CurrentLoadCount ?? 0,
+				progressArg?.TotalLoadCount ?? 0,
 				JsonConvert.SerializeObject(progressArg?.Metadata)
 			});
 		}
