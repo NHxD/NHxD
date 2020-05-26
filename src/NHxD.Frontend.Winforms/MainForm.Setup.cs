@@ -189,6 +189,8 @@ namespace NHxD.Frontend.Winforms
 			splitContainer2.Panel2Collapsed = Settings.Panels.Details.IsCollapsed;
 			splitContainer1.Panel1Collapsed = Settings.Panels.Console.IsCollapsed;
 
+			taskbar.WindowHandle = Handle;
+
 			loadTimer.Start();
 		}
 

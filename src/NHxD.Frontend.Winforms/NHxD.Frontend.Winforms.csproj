@@ -263,6 +263,7 @@
       <DependentUpon>TagsTreeView.cs</DependentUpon>
     </Compile>
     <Compile Include="TagTextFormatter.cs" />
+    <Compile Include="Taskbar.cs" />
     <Compile Include="Theme.cs" />
     <Compile Include="WebBrowserToolTip.cs">
       <SubType>UserControl</SubType>
@@ -332,6 +333,10 @@
     <ProjectReference Include="..\Ash.System.Windows.Forms\Ash.System.Windows.Forms.csproj">
       <Project>{da96c8a5-404b-4ce8-99b1-0549a490778c}</Project>
       <Name>Ash.System.Windows.Forms</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Ash.System.Windows.ShellProvider\Ash.System.Windows.ShellProvider.csproj">
+      <Project>{8b6a10c8-2980-4b0b-921b-a68d67e63874}</Project>
+      <Name>Ash.System.Windows.ShellProvider</Name>
     </ProjectReference>
     <ProjectReference Include="..\NHxD.Formatting.TokenModifiers\NHxD.Formatting.TokenModifiers.csproj">
       <Project>{5aa9855c-5d6d-4743-a61a-69dea8ca5564}</Project>

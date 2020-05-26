@@ -43,6 +43,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NHentai", "NHentai\NHentai.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UrbanDictionary", "UrbanDictionary\UrbanDictionary.csproj", "{3641FDE6-C3CE-4312-8C46-BC526B202B62}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ash.System.Windows.ShellProvider", "Ash.System.Windows.ShellProvider\Ash.System.Windows.ShellProvider.csproj", "{8B6A10C8-2980-4B0B-921B-A68D67E63874}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -147,6 +149,14 @@ Global
 		{3641FDE6-C3CE-4312-8C46-BC526B202B62}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3641FDE6-C3CE-4312-8C46-BC526B202B62}.Release|x64.ActiveCfg = Release|x64
 		{3641FDE6-C3CE-4312-8C46-BC526B202B62}.Release|x64.Build.0 = Release|x64
+		{8B6A10C8-2980-4B0B-921B-A68D67E63874}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B6A10C8-2980-4B0B-921B-A68D67E63874}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B6A10C8-2980-4B0B-921B-A68D67E63874}.Debug|x64.ActiveCfg = Debug|x64
+		{8B6A10C8-2980-4B0B-921B-A68D67E63874}.Debug|x64.Build.0 = Debug|x64
+		{8B6A10C8-2980-4B0B-921B-A68D67E63874}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B6A10C8-2980-4B0B-921B-A68D67E63874}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B6A10C8-2980-4B0B-921B-A68D67E63874}.Release|x64.ActiveCfg = Release|x64
+		{8B6A10C8-2980-4B0B-921B-A68D67E63874}.Release|x64.Build.0 = Release|x64
 		{7BDFCD11-4EA5-4794-970E-806DD34FC485}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7BDFCD11-4EA5-4794-970E-806DD34FC485}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7BDFCD11-4EA5-4794-970E-806DD34FC485}.Debug|x64.ActiveCfg = Debug|x64

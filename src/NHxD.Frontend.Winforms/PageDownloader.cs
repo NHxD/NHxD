@@ -11,6 +11,7 @@ namespace NHxD.Frontend.Winforms
 		public event PageDownloadStartedEventHandler PagesDownloadStarted = delegate { };
 		public event PageDownloadCompletedEventHandler PagesDownloadCancelled = delegate { };
 		public event PageDownloadCompletedEventHandler PagesDownloadCompleted = delegate { };
+		public event PageDownloadStartedEventHandler PagesDownloadEnqueued = delegate { };
 
 		public HttpClient HttpClient { get; }
 		public IPathFormatter PathFormatter { get; }
@@ -48,6 +49,8 @@ namespace NHxD.Frontend.Winforms
 			job.PagesDownloadCompleted += Job_PagesDownloadCompleted;
 
 			AddJob(job);
+
+			PagesDownloadEnqueued.Invoke(this, new PagesDownloadStartedEventArgs(pageIndices, galleryId));
 		}
 
 		public void CancelAll()

@@ -1,5 +1,6 @@
 ﻿using Ash.System.Diagnostics;
 using Ash.System.Windows.Forms;
+using Ash.System.Windows.ShellProvider;
 using Nhentai;
 using NHxD.Formatting;
 using NHxD.Formatting.TokenModifiers;
@@ -99,6 +100,7 @@ namespace NHxD.Frontend.Winforms
 		private readonly MainMenuStrip mainMenuStrip;
 		private readonly FullScreenRestoreState fullScreenRestoreState;
 		private readonly StartupSpecialHandler startupSpecialHandler;
+		private readonly Taskbar taskbar;
 
 		public MainForm()
 		{
@@ -217,6 +219,7 @@ namespace NHxD.Frontend.Winforms
 			fullScreenRestoreState = new FullScreenRestoreState();
 			mainMenuStrip = new MainMenuStrip(Settings);
 			startupSpecialHandler = new StartupSpecialHandler(Settings.Gallery, tagsModel, metadataKeywordLists, searchHandler);
+			taskbar = new Taskbar(coverDownloader, galleryDownloader, pageDownloader, searchResultCache, cacheFileSystem);
 
 			publicApi = new PublicApi(staticHttpClient.Client
 				, pathFormatter
