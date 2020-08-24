@@ -83,7 +83,7 @@ namespace NHxD.Frontend.Winforms.Configuration
 		[JsonProperty("log")]
 		public ConfigLog Log { get; set; } = new ConfigLog();
 
-		[JsonProperty("Process")]
+		[JsonProperty("process")]
 		public ConfigProcess Process { get; set; } = new ConfigProcess();
 	}
 
