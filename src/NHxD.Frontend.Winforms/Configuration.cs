@@ -166,6 +166,9 @@ namespace NHxD.Frontend.Winforms.Configuration
 	{
 		[JsonProperty("checkLegalAge")]
 		public bool CheckLegalAge { get; set; } = true;
+
+		[JsonProperty("pleadArtistSupport")]
+		public bool PleadArtistSupport { get; set; } = true;
 	}
 
 	public class ConfigPlugins

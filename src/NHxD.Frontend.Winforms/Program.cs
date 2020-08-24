@@ -80,6 +80,13 @@ namespace NHxD.Frontend.Winforms
 					Settings.Eula.CheckLegalAge = false;
 				}
 
+				if (Settings.Eula.PleadArtistSupport)
+				{
+					MessageBox.Show("If you find something you really like, please consider buying a copy to support the artist!", "NHxD", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+					Settings.Eula.PleadArtistSupport = false;
+				}
+
 				if (Settings.Log.Filters != LogFilters.None)
 				{
 					PathFormatter PathFormatter = new PathFormatter(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), Directory.GetCurrentDirectory(), Settings.PathFormatter.Custom, Settings.PathFormatter, Settings.Lists.Tags.LanguageNames, Settings.PathFormatter.IsEnabled);

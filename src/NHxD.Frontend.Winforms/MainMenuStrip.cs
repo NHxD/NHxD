@@ -1,5 +1,6 @@
 ﻿using NHxD.Frontend.Winforms.Configuration;
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -18,6 +19,11 @@ namespace NHxD.Frontend.Winforms
 		private readonly ToolStripMenuItem detailsToolStripMenuItem;
 		private readonly ToolStripSeparator toolStripSeparator2;
 		private readonly ToolStripMenuItem fullScreenToolStripMenuItem;
+		private readonly ToolStripSeparator toolStripSeparator3;
+		private readonly ToolStripMenuItem linksToolStripMenuItem;
+		private readonly ToolStripMenuItem linkDlsiteToolStripMenuItem;
+		private readonly ToolStripMenuItem linkJlistToolStripMenuItem;
+		private readonly ToolStripMenuItem linkFakkuToolStripMenuItem;
 
 		public Settings Settings { get; }
 
@@ -47,6 +53,11 @@ namespace NHxD.Frontend.Winforms
 			pluginsToolStripMenuItem = new ToolStripMenuItem();
 			toolStripSeparator1 = new ToolStripSeparator();
 			aboutToolStripMenuItem = new ToolStripMenuItem();
+			toolStripSeparator3 = new ToolStripSeparator();
+			linksToolStripMenuItem = new ToolStripMenuItem();
+			linkDlsiteToolStripMenuItem = new ToolStripMenuItem();
+			linkJlistToolStripMenuItem = new ToolStripMenuItem();
+			linkFakkuToolStripMenuItem = new ToolStripMenuItem();
 
 			SuspendLayout();
 
@@ -115,10 +126,50 @@ namespace NHxD.Frontend.Winforms
 			{
 				pluginsToolStripMenuItem,
 				toolStripSeparator1,
+				linksToolStripMenuItem,
+				toolStripSeparator3,
 				aboutToolStripMenuItem
 			});
 			helpToolStripMenuItem.Name = "helpToolStripMenuItem";
 			helpToolStripMenuItem.Text = "&Help";
+
+			// 
+			// linksToolStripMenuItem
+			// 
+			linksToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[]
+			{
+				linkDlsiteToolStripMenuItem,
+				linkJlistToolStripMenuItem,
+				linkFakkuToolStripMenuItem
+			});
+			linksToolStripMenuItem.Name = "linksToolStripMenuItem";
+			linksToolStripMenuItem.Text = "&Links";
+
+			// 
+			// linkDlsiteStripMenuItem
+			// 
+			linkDlsiteToolStripMenuItem.Name = "linkDlsiteStripMenuItem";
+			linkDlsiteToolStripMenuItem.Text = "Visit &DLsite...";
+			linkDlsiteToolStripMenuItem.Click += new EventHandler(VisitDlsiteToolStripMenuItem_Click);
+
+			// 
+			// linkJlistStripMenuItem
+			// 
+			linkJlistToolStripMenuItem.Name = "linkJlistStripMenuItem";
+			linkJlistToolStripMenuItem.Text = "Visit &J-List...";
+			linkJlistToolStripMenuItem.Click += new EventHandler(VisitJlistToolStripMenuItem_Click);
+
+			// 
+			// linkFakkuStripMenuItem
+			// 
+			linkFakkuToolStripMenuItem.Name = "linkFakkuStripMenuItem";
+			linkFakkuToolStripMenuItem.Text = "Visit &FAKKU...";
+			linkFakkuToolStripMenuItem.Click += new EventHandler(VisitFakkuToolStripMenuItem_Click);
+
+			// 
+			// toolStripSeparator3
+			// 
+			toolStripSeparator3.Name = "toolStripSeparator3";
 
 			// 
 			// pluginsToolStripMenuItem
@@ -189,6 +240,21 @@ namespace NHxD.Frontend.Winforms
 		private void AboutToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			ShowAbout.Invoke(this, e);
+		}
+
+		private void VisitDlsiteToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			Process.Start("https://www.dlsite.com/ecchi-eng/fsr/=/work_category/doujin/work_type_category/comic");
+		}
+
+		private void VisitJlistToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			Process.Start("https://www.jlist.com/category/doujin-and-touhou/doujinshi-books");
+		}
+
+		private void VisitFakkuToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			Process.Start("https://www.fakku.net/doujin");
 		}
 	}
 }
