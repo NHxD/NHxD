@@ -16,6 +16,7 @@ namespace NHxD.Frontend.Winforms
 		public static Logger Logger { get; private set; }
 		public static string ApplicationPath { get; private set; }
 		public static string SourcePath { get; private set; }
+		public static int InstanceIndex { get; private set; }
 
 		/// <summary>
 		/// The main entry point for the application.
@@ -25,20 +26,6 @@ namespace NHxD.Frontend.Winforms
 		{
 			try
 			{
-				string currentProcessName = Process.GetCurrentProcess().ProcessName;
-				Process[] activeProcesses = Process.GetProcessesByName(currentProcessName);
-
-				if (activeProcesses.Length > 1)
-				{
-					IntPtr hWnd = IntPtr.Zero;
-
-					hWnd = activeProcesses[0].MainWindowHandle;
-					User32.NativeMethods.ShowWindowAsync(new HandleRef(null, hWnd), User32.NativeMethods.SW_RESTORE);
-					User32.NativeMethods.SetForegroundWindow(activeProcesses[0].MainWindowHandle);
-
-					return;
-				}
-
 				string assemblyLocation = Assembly.GetEntryAssembly().Location;
 				string assemblyDirectory = Path.GetDirectoryName(assemblyLocation).Replace('\\', '/');
 
@@ -67,6 +54,23 @@ namespace NHxD.Frontend.Winforms
 						Settings.PathFormatter.Custom["SettingsPath"] = StartupSettings.SettingsPath;
 					}
 				}
+
+				string currentProcessName = Process.GetCurrentProcess().ProcessName;
+				Process[] activeProcesses = Process.GetProcessesByName(currentProcessName);
+
+				if (!Settings.Process.AllowMultipleInstances
+					&& activeProcesses.Length > 1)
+				{
+					IntPtr hWnd = IntPtr.Zero;
+
+					hWnd = activeProcesses[0].MainWindowHandle;
+					User32.NativeMethods.ShowWindowAsync(new HandleRef(null, hWnd), User32.NativeMethods.SW_RESTORE);
+					User32.NativeMethods.SetForegroundWindow(activeProcesses[0].MainWindowHandle);
+
+					return;
+				}
+
+				InstanceIndex = activeProcesses.Length - 1;
 
 				if (Settings.Eula.CheckLegalAge)
 				{

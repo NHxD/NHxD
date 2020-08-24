@@ -64,6 +64,7 @@
   <ItemGroup>
     <Compile Include="BackgroundTokenReplacer.cs" />
     <Compile Include="FileVersionInfoTokenReplacer.cs" />
+    <Compile Include="ProcessTokenReplacer.cs" />
     <Compile Include="TokenReplacers.cs" />
     <Compile Include="MetadataKeywordListTokenReplacer.cs" />
     <Compile Include="MetadataTokenReplacer.cs" />

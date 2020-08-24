@@ -82,6 +82,15 @@ namespace NHxD.Frontend.Winforms.Configuration
 
 		[JsonProperty("log")]
 		public ConfigLog Log { get; set; } = new ConfigLog();
+
+		[JsonProperty("Process")]
+		public ConfigProcess Process { get; set; } = new ConfigProcess();
+	}
+
+	public class ConfigProcess
+	{
+		[JsonProperty("allowMultipleInstances")]
+		public bool AllowMultipleInstances { get; set; } = false;
 	}
 
 	public class ConfigCache

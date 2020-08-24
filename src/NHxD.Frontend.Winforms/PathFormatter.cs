@@ -289,6 +289,12 @@ namespace NHxD.Frontend.Winforms
 
 							result = replacer.Replace(tokens, namespaces);
 						}
+						else if (namespaces[0].Equals(ProcessTokenReplacer.Namespace, StringComparison.OrdinalIgnoreCase))
+						{
+							ProcessTokenReplacer replacer = new ProcessTokenReplacer(Program.InstanceIndex);
+							
+							result = replacer.Replace(tokens, namespaces);
+						}
 						else if (contextMapping != null)
 						{
 							string value;
