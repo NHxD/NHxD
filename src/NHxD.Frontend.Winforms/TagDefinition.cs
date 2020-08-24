@@ -149,7 +149,7 @@ namespace NHxD.Frontend.Winforms
 
 			try
 			{
-				using (HttpResponseMessage response = Task.Run(() => runArg.HttpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead)).GetAwaiter().GetResult())
+				using (HttpResponseMessage response = Task.Run(() => runArg.HttpClient?.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead)).GetAwaiter().GetResult())
 				{
 					if (!response.IsSuccessStatusCode)
 					{

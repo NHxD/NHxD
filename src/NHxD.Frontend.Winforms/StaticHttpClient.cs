@@ -16,7 +16,11 @@ namespace NHxD.Frontend.Winforms
 		public StaticHttpClient(Configuration.ConfigNetwork networkSettings)
 		{
 			webProxy = GetWebProxy(networkSettings);
-			client = new HttpClient(GetHttpClientHandler(networkSettings, webProxy), true);
+
+			if (!networkSettings.Offline)
+			{
+				client = new HttpClient(GetHttpClientHandler(networkSettings, webProxy), true);
+			}
 		}
 
 		private static WebProxy GetWebProxy(Configuration.ConfigNetwork networkSettings)

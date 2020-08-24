@@ -444,6 +444,9 @@ namespace NHxD.Frontend.Winforms.Configuration
 
 	public class ConfigNetwork
 	{
+		[JsonProperty("offline")]
+		public bool Offline { get; set; } = false;
+
 		[JsonProperty("connectionTimeout")]
 		public int ConnectionTimeout { get; set; } = -1;
 

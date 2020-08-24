@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NHxD.Frontend.Winforms.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -12,14 +13,16 @@ namespace NHxD.Frontend.Winforms
 		public int RecentSearchLifeSpan { get; set; }
 		public int QuerySearchLifeSpan { get; set; }
 		public int TaggedSearchLifeSpan { get; set; }
+		public ConfigNetwork NetworkSettings { get; set; }
 
-		public SessionManager(IPathFormatter pathFormatter, ISearchResultCache searchResultCache, int recentSearchLifeSpan, int querySearchLifeSpan, int taggedSearchLifeSpan)
+		public SessionManager(IPathFormatter pathFormatter, ISearchResultCache searchResultCache, int recentSearchLifeSpan, int querySearchLifeSpan, int taggedSearchLifeSpan, ConfigNetwork networkSettings)
 		{
 			PathFormatter = pathFormatter;
 			SearchResultCache = searchResultCache;
 			RecentSearchLifeSpan = recentSearchLifeSpan;
 			QuerySearchLifeSpan = querySearchLifeSpan;
 			TaggedSearchLifeSpan = taggedSearchLifeSpan;
+			NetworkSettings = networkSettings;
 		}
 
 		public string GetSessionQuery(int pageIndex)
@@ -56,6 +59,11 @@ namespace NHxD.Frontend.Winforms
 
 		public void ForgetSession(int tagId, int pageIndex)
 		{
+			if (NetworkSettings.Offline)
+			{
+				return;
+			}
+
 			string sessionId = GetSessionQuery(tagId, pageIndex);
 
 			if (SearchResultCache.Items.ContainsKey(sessionId))
@@ -66,6 +74,11 @@ namespace NHxD.Frontend.Winforms
 
 		public void ForgetSession(string query, int pageIndex)
 		{
+			if (NetworkSettings.Offline)
+			{
+				return;
+			}
+
 			string sessionId = GetSessionQuery(query, pageIndex);
 
 			if (SearchResultCache.Items.ContainsKey(sessionId))
@@ -76,6 +89,11 @@ namespace NHxD.Frontend.Winforms
 
 		public void ForgetSession(int pageIndex)
 		{
+			if (NetworkSettings.Offline)
+			{
+				return;
+			}
+
 			string sessionId = GetSessionQuery(pageIndex);
 
 			if (SearchResultCache.Items.ContainsKey(sessionId))
@@ -87,6 +105,11 @@ namespace NHxD.Frontend.Winforms
 
 		public void DeleteSession(int tagId, int pageIndex)
 		{
+			if (NetworkSettings.Offline)
+			{
+				return;
+			}
+
 			string filePath = GetSessionFileName(tagId, pageIndex);
 
 			if (!File.Exists(filePath))
@@ -99,6 +122,11 @@ namespace NHxD.Frontend.Winforms
 
 		public void DeleteSession(string query, int pageIndex)
 		{
+			if (NetworkSettings.Offline)
+			{
+				return;
+			}
+
 			string filePath = GetSessionFileName(query, pageIndex);
 
 			if (!File.Exists(filePath))
@@ -111,6 +139,11 @@ namespace NHxD.Frontend.Winforms
 
 		public void DeleteSession(int pageIndex)
 		{
+			if (NetworkSettings.Offline)
+			{
+				return;
+			}
+
 			string filePath = GetSessionFileName(pageIndex);
 
 			if (!File.Exists(filePath))
@@ -123,6 +156,11 @@ namespace NHxD.Frontend.Winforms
 
 		public void DeleteExpiredSessions()
 		{
+			if (NetworkSettings.Offline)
+			{
+				return;
+			}
+
 			DeleteExpiredSessions(RecentSearchLifeSpan, PathFormatter.GetSessionDirectory("all"));
 			DeleteExpiredSessions(QuerySearchLifeSpan, PathFormatter.GetSessionDirectory("search"));
 			DeleteExpiredSessions(TaggedSearchLifeSpan, PathFormatter.GetSessionDirectory("tagged"));
@@ -130,6 +168,11 @@ namespace NHxD.Frontend.Winforms
 
 		public void DeleteExpiredSessions(int lifetime, string searchPath)
 		{
+			if (NetworkSettings.Offline)
+			{
+				return;
+			}
+
 			if (lifetime <= 0)
 			{
 				return;

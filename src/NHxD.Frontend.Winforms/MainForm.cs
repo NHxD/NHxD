@@ -105,6 +105,7 @@ namespace NHxD.Frontend.Winforms
 		public MainForm()
 		{
 			InitializeComponent();
+			ProcessCommandLine();
 
 			staticHttpClient = new StaticHttpClient(Settings.Network);
 
@@ -148,7 +149,7 @@ namespace NHxD.Frontend.Winforms
 
 			metadataCache = new MetadataCache();
 			searchResultCache = new SearchResultCache(metadataCache);
-			sessionManager = new SessionManager(pathFormatter, searchResultCache, Settings.Cache.Session.RecentLifeSpan, Settings.Cache.Session.SearchLifeSpan, Settings.Cache.Session.TaggedLifeSpan);
+			sessionManager = new SessionManager(pathFormatter, searchResultCache, Settings.Cache.Session.RecentLifeSpan, Settings.Cache.Session.SearchLifeSpan, Settings.Cache.Session.TaggedLifeSpan, Settings.Network);
 			cacheFileSystem = new CacheFileSystem(pathFormatter, searchResultCache, archiveWriters);
 			pluginSystem = new PluginSystem(Logger, pathFormatter, cacheFileSystem, archiveWriters, metadataConverters, metadataProcessors);
 
@@ -187,7 +188,9 @@ namespace NHxD.Frontend.Winforms
 				, queryParser
 				, galleryModel
 				, detailsModel
-				, galleryDownloader);
+				, galleryDownloader
+				, sessionManager
+				, Settings.Network);
 
 			bookmarkPromptUtility = new BookmarkPromptUtility(bookmarksModel, Settings.Lists.Bookmarks);
 
@@ -582,6 +585,10 @@ namespace NHxD.Frontend.Winforms
 			MainMenuStrip = mainMenuStrip;
 			Padding = new Padding(0);
 			Text = aboutTextFormatter.Format(Settings.Window.TextFormat);
+			if (Settings.Network.Offline)
+			{
+				Text += " [OFFLINE]";
+			}
 			Enabled = false;
 			
 			//
@@ -624,6 +631,22 @@ namespace NHxD.Frontend.Winforms
 			
 			ResumeLayout(false);
 			PerformLayout();
+		}
+
+		private void ProcessCommandLine()
+		{
+			string[] args = Environment.GetCommandLineArgs();
+
+			Settings.Network.Offline = false;
+
+			for (int i = 1; i < args.Length; ++i)
+			{
+				if (args[i].Equals("--offline", StringComparison.OrdinalIgnoreCase))
+				{
+					Settings.Network.Offline = true;
+					break;
+				}
+			}
 		}
 
 		protected override CreateParams CreateParams

@@ -2,6 +2,7 @@
 using Ash.System.Windows.Forms;
 using Newtonsoft.Json;
 using Nhentai;
+using NHxD.Frontend.Winforms.Configuration;
 using System;
 using System.Globalization;
 using System.IO;
@@ -31,6 +32,8 @@ namespace NHxD.Frontend.Winforms
 		public GalleryModel GalleryModel { get; }
 		public DetailsModel DetailsModel { get; }
 		public GalleryDownloader GalleryDownloader { get; }
+		public ISessionManager SessionManager { get; }
+		public ConfigNetwork NetworkSettings { get; }
 
 		public SearchHandler(
 			LibraryModel libraryModel
@@ -46,7 +49,9 @@ namespace NHxD.Frontend.Winforms
 			, IQueryParser queryParser
 			, GalleryModel galleryModel
 			, DetailsModel detailsModel
-			, GalleryDownloader galleryDownloader)
+			, GalleryDownloader galleryDownloader
+			, ISessionManager sessionManager
+			, ConfigNetwork networkSettings)
 		{
 			LibraryModel = libraryModel;
 			MainViewTabControl = mainViewTabControl;
@@ -62,6 +67,8 @@ namespace NHxD.Frontend.Winforms
 			GalleryModel = galleryModel;
 			DetailsModel = detailsModel;
 			GalleryDownloader = galleryDownloader;
+			SessionManager = sessionManager;
+			NetworkSettings = networkSettings;
 		}
 
 
@@ -141,13 +148,15 @@ namespace NHxD.Frontend.Winforms
 			if (File.Exists(cachedSearchResultsFilePath))
 			{
 				if (checkSession
-					&& lifetime > 0)
+					&& lifetime > 0
+					&& !NetworkSettings.Offline)
 				{
 					FileInfo cachedSessionFileInfo = new FileInfo(cachedSearchResultsFilePath);
 					DateTime now = DateTime.Now;
 
 					if ((now - cachedSessionFileInfo.CreationTime).TotalMilliseconds > lifetime)
 					{
+						//SessionManager.DeleteSession(cachedSearchResultsFilePath);
 						File.Delete(cachedSearchResultsFilePath);
 					}
 				}
@@ -168,12 +177,19 @@ namespace NHxD.Frontend.Winforms
 					return searchResult;
 				}
 			}
+			else
+			{
+				if (NetworkSettings.Offline)
+				{
+					throw new InvalidHttpResponseException("This page does not exist in the cache and is thus unavailable while in offline mode.");
+				}
+			}
 
 			Logger.InfoLineFormat("Downloading SearchResult: {0}", searchQuery);
 
 			try
 			{
-				using (HttpResponseMessage response = Task.Run(() => HttpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead)).GetAwaiter().GetResult())
+				using (HttpResponseMessage response = Task.Run(() => HttpClient?.GetAsync(url, HttpCompletionOption.ResponseHeadersRead)).GetAwaiter().GetResult())
 				{
 					if (!response.IsSuccessStatusCode)
 					{

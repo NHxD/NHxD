@@ -123,7 +123,7 @@ namespace NHxD.Frontend.Winforms
 						{
 							string uri = string.Format(CultureInfo.InvariantCulture, "https://t.nhentai.net/galleries/{0}/{1}{2}", metadata.MediaId, "cover", metadata.Images.Cover.GetFileExtension());
 
-							using (HttpResponseMessage response = Task.Run(() => runArg.HttpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead)).GetAwaiter().GetResult())
+							using (HttpResponseMessage response = Task.Run(() => runArg.HttpClient?.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead)).GetAwaiter().GetResult())
 							{
 								if (!response.IsSuccessStatusCode)
 								{

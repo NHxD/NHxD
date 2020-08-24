@@ -358,15 +358,23 @@ namespace NHxD.Frontend.Winforms
 
 		private void InitializeHttp()
 		{
+			if (Settings.Network.Offline)
+			{
+				return;
+			}
+
 			bool hasCustomMaxIdleTime = Settings.Network.MaxIdleTime > Timeout.Infinite;
 			bool hasCustomConnectionLeaseTimeout = Settings.Network.ConnectionLeaseTimeout > Timeout.Infinite;
 
 			if (!string.IsNullOrEmpty(Settings.Network.Client.UserAgent))
 			{
-				staticHttpClient.Client.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", Settings.Network.Client.UserAgent);
+				staticHttpClient.Client?.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", Settings.Network.Client.UserAgent);
 			}
 
-			staticHttpClient.Client.DefaultRequestHeaders.CacheControl = new System.Net.Http.Headers.CacheControlHeaderValue() { NoCache = true, NoStore = true };
+			if (staticHttpClient.Client != null)
+			{
+				staticHttpClient.Client.DefaultRequestHeaders.CacheControl = new System.Net.Http.Headers.CacheControlHeaderValue() { NoCache = true, NoStore = true };
+			}
 
 			//ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
@@ -389,7 +397,10 @@ namespace NHxD.Frontend.Winforms
 
 			if (Settings.Network.ConnectionTimeout > 0)
 			{
-				staticHttpClient.Client.Timeout = TimeSpan.FromMilliseconds(Settings.Network.ConnectionTimeout);
+				if (staticHttpClient.Client != null)
+				{
+					staticHttpClient.Client.Timeout = TimeSpan.FromMilliseconds(Settings.Network.ConnectionTimeout);
+				}
 			}
 		}
 
