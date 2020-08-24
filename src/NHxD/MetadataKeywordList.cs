@@ -9,14 +9,14 @@ namespace NHxD
 {
 	public class MetadataKeywordList
 	{
-		private MetadataKeywordListTitles title;
-		private MetadataKeywordListTags tags;
-		private List<string> scanlator;
-		private List<string> uploadDate;
-		private List<string> numFavorites;
-		private List<string> numPages;
-		private List<string> id;
-		private List<string> mediaId;
+		private readonly MetadataKeywordListTitles title;
+		private readonly MetadataKeywordListTags tags;
+		private readonly List<string> scanlator;
+		private readonly List<string> uploadDate;
+		private readonly List<string> numFavorites;
+		private readonly List<string> numPages;
+		private readonly List<string> id;
+		private readonly List<string> mediaId;
 
 		[JsonProperty("title")]
 		public MetadataKeywordListTitles Title => title;
@@ -259,9 +259,9 @@ namespace NHxD
 
 	public class MetadataKeywordListTitles
 	{
-		private List<string> english;
-		private List<string> japanese;
-		private List<string> pretty;
+		private readonly List<string> english;
+		private readonly List<string> japanese;
+		private readonly List<string> pretty;
 
 		[JsonProperty("english")]
 		public List<string> English => english;
@@ -282,13 +282,13 @@ namespace NHxD
 
 	public class MetadataKeywordListTags
 	{
-		private List<string> tag;
-		private List<string> artist;
-		private List<string> group;
-		private List<string> category;
-		private List<string> character;
-		private List<string> parody;
-		private List<string> language;
+		private readonly List<string> tag;
+		private readonly List<string> artist;
+		private readonly List<string> group;
+		private readonly List<string> category;
+		private readonly List<string> character;
+		private readonly List<string> parody;
+		private readonly List<string> language;
 
 		[JsonProperty("tag")]
 		public List<string> Tag => tag;
