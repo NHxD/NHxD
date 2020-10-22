@@ -105,7 +105,8 @@ namespace NHxD.Frontend.Winforms
 
 		protected virtual void OnInputValuesChanged()
 		{
-			if (inputComboBox != null)
+			if (inputComboBox != null
+				&& inputValues != null)
 			{
 				inputComboBox.Items.AddRange(inputValues.Cast<object>().ToArray());
 			}

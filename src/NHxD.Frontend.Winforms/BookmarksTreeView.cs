@@ -1,7 +1,10 @@
 ﻿using Ash.System.Windows.Forms;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
@@ -12,6 +15,7 @@ namespace NHxD.Frontend.Winforms
 	{
 		private readonly TreeViewEx treeView;
 		private readonly ContextMenu treeViewContextMenu;
+		private readonly BookmarksTreeViewNodeSorter treeViewNodeSorter;
 
 		public TreeView TreeView => treeView;
 
@@ -42,6 +46,7 @@ namespace NHxD.Frontend.Winforms
 
 			treeView = new TreeViewEx();
 			treeViewContextMenu = new ContextMenu();
+			treeViewNodeSorter = new BookmarksTreeViewNodeSorter();
 
 			SuspendLayout();
 
@@ -64,15 +69,264 @@ namespace NHxD.Frontend.Winforms
 			treeView.NodeSelected += TreeView_NodeSelected;
 			treeView.AfterExpand += TreeView_AfterExpand;
 			treeView.AfterCollapse += TreeView_AfterCollapse;
+			treeView.ItemDrag += TreeView_ItemDrag;
+			treeView.DragDrop += TreeView_DragDrop;
+			treeView.DragOver += TreeView_DragOver;
+			treeView.DragEnter += TreeView_DragEnter;
+			treeView.AllowDrop = true;
 
 			//
 			// this
 			//
 			Controls.Add(treeView);
 
+			BookmarksModel.FolderAdded += BookmarksModel_FolderAdded;
 			bookmarksFilter.TextChanged += BookmarksFilter_TextChanged;
 
 			ResumeLayout(false);
+		}
+
+		private void BookmarksModel_FolderAdded(object sender, BookmarkFolderChangeEventArgs e)
+		{
+			AddFolder(e.Path, false);
+		}
+
+		private void TreeView_ItemDrag(object sender, ItemDragEventArgs e)
+		{
+			DoDragDrop(e.Item, DragDropEffects.Move | DragDropEffects.Copy);
+		}
+
+		private void TreeView_DragDrop(object sender, DragEventArgs e)
+		{
+			if (e.Effect == DragDropEffects.None)
+			{
+				return;
+			}
+
+			if (e.Data.GetDataPresent(typeof(TreeNode)))
+			{
+				TreeView_DragDropTreeNode(sender, e);
+			}
+		}
+
+		private void TreeView_DragDropTreeNode(object sender, DragEventArgs e)
+		{
+			TreeView treeView = (TreeView)sender;
+			TreeNode draggedNode = (TreeNode)e.Data.GetData(typeof(TreeNode));
+			Point targetPoint = treeView.PointToClient(new Point(e.X, e.Y));
+			TreeNode targetNode = treeView.GetNodeAt(targetPoint);
+
+			if (draggedNode.Equals(targetNode))
+			{
+				return;
+			}
+
+			BookmarkFolder draggedFolder = draggedNode.Tag as BookmarkFolder;
+			AddBookmarkItemTask draggedBookmark = draggedNode.Tag as AddBookmarkItemTask;
+			BookmarkFolder targetFolder = targetNode?.Tag as BookmarkFolder;
+			AddBookmarkItemTask targetBookmark = targetNode?.Tag as AddBookmarkItemTask;
+
+			if (draggedFolder != null)
+			{
+				string targetPath = null;
+
+				if (targetFolder != null)
+				{
+					targetPath = targetFolder.Path;
+				}
+				else if (targetBookmark != null)
+				{
+					// Error: dropping a folder on a bookmark is not allowed.
+				}
+				else
+				{
+					targetPath = "";
+				}
+
+				if (targetPath != null)
+				{
+					if (e.Effect.HasFlag(DragDropEffects.Copy))
+					{
+						BookmarksModel.CopyBookmarks(draggedNode.Level, draggedFolder.Path, targetPath);
+					}
+					else if (e.Effect.HasFlag(DragDropEffects.Move))
+					{
+						BookmarksModel.MoveBookmarks(draggedNode.Level, draggedFolder.Path, targetPath);
+						BookmarksModel.RemovePath(draggedFolder.Path);
+						draggedNode.Remove();
+					}
+				}
+			}
+			else if (draggedBookmark != null)
+			{
+				string targetPath = null;
+
+				if (targetFolder != null)
+				{
+					targetPath = targetFolder.Path;
+				}
+				else if (targetBookmark != null)
+				{
+					// Error: dropping a bookmark on another bookmark is not allowed.
+				}
+				else
+				{
+					targetPath = "";
+				}
+
+				if (targetPath != null)
+				{
+					if (e.Effect.HasFlag(DragDropEffects.Copy))
+					{
+						BookmarksModel.CopyBookmark(draggedBookmark.Path, targetPath);
+					}
+					else if (e.Effect.HasFlag(DragDropEffects.Move))
+					{
+						BookmarksModel.MoveBookmark(draggedBookmark.Path, targetPath);
+						draggedNode.Remove();
+					}
+				}
+			}
+		}
+
+		private void TreeView_DragOver(object sender, DragEventArgs e)
+		{
+			if (e.Data.GetDataPresent(typeof(TreeNode))
+				&& CanDragTreeNodeOver(sender, e))
+			{
+				if ((e.KeyState & 8) == 8)
+				{
+					e.Effect = DragDropEffects.Copy;
+				}
+				else
+				{
+					e.Effect = DragDropEffects.Move;
+				}
+			}
+			else
+			{
+				e.Effect = DragDropEffects.None;
+			}
+		}
+
+		private void TreeView_DragEnter(object sender, DragEventArgs e)
+		{
+			if (e.Data.GetDataPresent(typeof(TreeNode))
+				&& CanDragTreeNodeOver(sender, e))
+			{
+				if ((e.KeyState & 8) == 8)
+				{
+					e.Effect = DragDropEffects.Copy;
+				}
+				else
+				{
+					e.Effect = DragDropEffects.Move;
+				}
+			}
+			else
+			{
+				e.Effect = DragDropEffects.None;
+			}
+		}
+
+		private bool CanDragTreeNodeOver(object sender, DragEventArgs e)
+		{
+			TreeView treeView = (TreeView)sender;
+			TreeNode draggedNode = (TreeNode)e.Data.GetData(typeof(TreeNode));
+			Point targetPoint = treeView.PointToClient(new Point(e.X, e.Y));
+			TreeNode targetNode = treeView.GetNodeAt(targetPoint);
+			
+			if (draggedNode.Equals(targetNode))
+			{
+				return false;
+			}
+
+			BookmarkFolder draggedFolder = draggedNode.Tag as BookmarkFolder;
+			AddBookmarkItemTask draggedBookmark = draggedNode.Tag as AddBookmarkItemTask;
+			BookmarkFolder targetFolder = targetNode?.Tag as BookmarkFolder;
+			AddBookmarkItemTask targetBookmark = targetNode?.Tag as AddBookmarkItemTask;
+
+			if (draggedFolder != null)
+			{
+				string targetPath = null;
+
+				if (targetFolder != null)
+				{
+					targetPath = targetFolder.Path;
+				}
+				else if (targetBookmark != null)
+				{
+					return false;
+				}
+				else
+				{
+					targetPath = "";
+				}
+
+				if (targetPath != null)
+				{
+					// can't move folder onto itself.
+					if (draggedFolder.Path.Equals(targetPath, StringComparison.InvariantCulture))
+					{
+						return false;
+					}
+
+					// can't move folder to any of its own child subfolders.
+					if (!string.IsNullOrEmpty(targetPath)
+						&& targetPath.StartsWith(draggedFolder.Path, StringComparison.InvariantCulture))
+					{
+						return false;
+					}
+
+					int lastPathSeparatorIndex = draggedFolder.Path.LastIndexOf('/');
+
+					// can't move folder to its own parent folder.
+					if (lastPathSeparatorIndex != -1
+						&& !string.IsNullOrEmpty(targetPath)
+						&& draggedFolder.Path.Substring(0, lastPathSeparatorIndex).Equals(targetPath, StringComparison.InvariantCulture))
+					{
+						return false;
+					}
+				}
+			}
+			else if (draggedBookmark != null)
+			{
+				string targetPath = null;
+
+				if (targetFolder != null)
+				{
+					targetPath = targetFolder.Path;
+				}
+				else if (targetBookmark != null)
+				{
+					return false;
+				}
+				else
+				{
+					targetPath = "";
+				}
+
+				if (targetPath != null)
+				{
+					// can't move bookmark to its own parent folder.
+					if (draggedNode.Level > 0
+						&& !string.IsNullOrEmpty(targetPath)
+						&& draggedBookmark.Path.Substring(0, draggedBookmark.Path.LastIndexOf('/')).Equals(targetPath, StringComparison.InvariantCulture))
+					{
+						return false;
+					}
+
+					string combinedTargetPath = string.IsNullOrEmpty(targetPath) ? draggedBookmark.Item.Value : string.Format("{0}/{1}", targetPath, draggedBookmark.Item.Value);
+
+					// can't move bookmark to a folder containing the same bookmark value.
+					if (BookmarksModel.Bookmarks.ContainsKey(combinedTargetPath))
+					{
+						return false;
+					}
+				}
+			}
+
+			return true;
 		}
 
 		private void BookmarksFilter_TextChanged(object sender, EventArgs e)
@@ -209,6 +463,7 @@ namespace NHxD.Frontend.Winforms
 						node.Text = parts[i];
 					}
 
+					node.ForeColor = Color.DarkBlue;
 					node.ToolTipText = subPath;
 
 					ContextMenu folderNodeContextMenu = new ContextMenu();
@@ -337,16 +592,38 @@ namespace NHxD.Frontend.Winforms
 
 			contextMenu.MenuItems.Clear();
 
+			contextMenu.MenuItems.Add(new MenuItem(folder == null ? "&Add Folder..." : "&Add Subfolder...", (sender2, e2) =>
+			{
+				string dialogResult = PromptBox.Show("Folder path:", folder == null ? "" : (folder.Path + "/"), "Add subfolder", null);
+
+				if (dialogResult != null)
+				{
+					BookmarksModel.RegisterPath(dialogResult);
+				}
+			})
+			{ Name = "folder_add" });
+
 			if (folder != null)
 			{
-				contextMenu.MenuItems.Add(new MenuItem("&Edit Folder", (sender2, e2) =>
+				contextMenu.MenuItems.Add(new MenuItem("&Edit Folder...", (sender2, e2) =>
 				{
-					string dialogResult = PromptBox.Show("Change name to:", folder.Text, "Bookmark folder name", (new string[] { folder.Text, GetPathFileName(folder.Path) }).Distinct().Where(x => !string.IsNullOrEmpty(x)).ToArray());
+					string folderPath = GetPathFileName(folder.Path);
+					string dialogResult = PromptBox.Show("Change name to:", folder.Text, string.Format("Edit Bookmark folder - {0}", folder.Path), (new string[] {
+						folder.Text,
+						CultureInfo.CurrentCulture?.TextInfo?.ToTitleCase(folder.Text),
+						folder.Text.ToLower(),
+						folder.Text.ToUpper(),
+						folderPath,
+						CultureInfo.CurrentCulture?.TextInfo?.ToTitleCase(folderPath),
+						folderPath.ToLower(),
+						folderPath.ToUpper(),
+					}).Distinct().Where(x => !string.IsNullOrEmpty(x)).ToArray());
 
 					if (dialogResult != null)
 					{
 						folder.Text = dialogResult;
 						treeNode.Text = dialogResult;
+						treeView.Sort(treeNode.Parent, treeViewNodeSorter);
 					}
 				}) { Name = "folder_edit" });
 
@@ -507,6 +784,17 @@ namespace NHxD.Frontend.Winforms
 					e.Node.ToggleCollapse();
 				}
 			}
+		}
+	}
+
+	public class BookmarksTreeViewNodeSorter : IComparer
+	{
+		public int Compare(object x, object y)
+		{
+			TreeNode lhs = (TreeNode)x;
+			TreeNode rhs = (TreeNode)y;
+
+			return string.Compare(lhs.Text, rhs.Text);
 		}
 	}
 }

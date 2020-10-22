@@ -2,13 +2,12 @@
 using Nhentai;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Text;
 
 // TODO: don't append Uri to Path, instead use a FullPath property (which is just an alias for Path + Uri).
-// TODO: allow for editing the path for a folder node (it changes the folder's and its children's path).
-// TODO: allow for editing the path for a bookmark node.
 
 namespace NHxD
 {
@@ -23,6 +22,10 @@ namespace NHxD
 		public event BookmarkItemChangeEventHandler ItemChanged = delegate { };
 		public event BookmarkItemChangeEventHandler ItemAdded = delegate { };
 		public event BookmarkItemChangeEventHandler ItemRemoved = delegate { };
+		public event BookmarkFolderChangeEventHandler FolderChanged = delegate { };
+		public event BookmarkFolderCancelEventHandler FolderAdding = delegate { };
+		public event BookmarkFolderChangeEventHandler FolderAdded = delegate { };
+		public event BookmarkFolderChangeEventHandler FolderRemoved = delegate { };
 
 		public TagsModel TagsModel { get; }
 		public IBookmarkFormatter BookmarkFormatter { get; }
@@ -51,6 +54,135 @@ namespace NHxD
 			ItemRemoved.Invoke(this, e);
 		}
 
+		protected virtual void OnFolderChanged(BookmarkFolderChangeEventArgs e)
+		{
+			FolderChanged.Invoke(this, e);
+		}
+
+		protected virtual void OnFolderAdded(BookmarkFolderChangeEventArgs e)
+		{
+			FolderAdded.Invoke(this, e);
+		}
+
+		protected virtual void OnFolderAdding(BookmarkFolderCancelEventArgs e)
+		{
+			FolderAdding.Invoke(this, e);
+		}
+
+		protected virtual void OnFolderRemoved(BookmarkFolderChangeEventArgs e)
+		{
+			FolderRemoved.Invoke(this, e);
+		}
+
+		public void CopyBookmarks(int level, string sourcePath, string targetPath)
+		{
+			if (sourcePath.Equals(targetPath, StringComparison.InvariantCulture))
+			{
+				return;
+			}
+
+			if (targetPath.StartsWith(sourcePath, StringComparison.InvariantCulture))
+			{
+				return;
+			}
+
+			foreach (KeyValuePair<string, BookmarkFolder> kvp in BookmarkFolders
+				.Where(x => x.Key.StartsWith(sourcePath)).OrderBy(x => x.Key.Length).ToList())
+			{
+				string[] sourcePathParts = kvp.Key.Split(new char[] { '/' }).Skip(level).ToArray();
+				string relativeSourcePath = string.Join("/", sourcePathParts);
+				string combinedTargetPath = string.IsNullOrEmpty(targetPath) ? relativeSourcePath : (targetPath + "/" + relativeSourcePath);
+				
+				RegisterPath(combinedTargetPath, kvp.Value.Text);
+			}
+
+			foreach (string key in Bookmarks
+				.Where(x => x.Key.StartsWith(sourcePath))
+				.Select(x => x.Key).ToList())
+			{
+				string combinedTargetPath = CombineBookmarkPath(level, key, targetPath);
+
+				CopyBookmark(key, combinedTargetPath);
+			}
+		}
+
+		public string CombineBookmarkPath(int level, string key, string targetPath)
+		{
+			int lastPathSeparatorIndex = key.LastIndexOf('/');
+			string keyPath = lastPathSeparatorIndex == -1 ? key : key.Substring(0, lastPathSeparatorIndex);
+			string[] sourcePathParts = keyPath.Split(new char[] { '/' }).Skip(level).ToArray();
+			string relativeSourcePath = string.Join("/", sourcePathParts);
+			string combinedTargetPath = string.IsNullOrEmpty(targetPath) ? relativeSourcePath : (targetPath + "/" + relativeSourcePath);
+
+			return combinedTargetPath;
+		}
+
+		public void MoveBookmarks(int level, string sourcePath, string targetPath)
+		{
+			if (sourcePath.Equals(targetPath, StringComparison.InvariantCulture))
+			{
+				return;
+			}
+
+			if (targetPath.StartsWith(sourcePath, StringComparison.InvariantCulture))
+			{
+				return;
+			}
+
+			CopyBookmarks(level, sourcePath, targetPath);
+			RemoveBookmarks(sourcePath);
+		}
+
+		public void RemoveBookmarks(string sourcePath)
+		{
+			foreach (string key in Bookmarks
+				.Where(x => x.Key.StartsWith(sourcePath))
+				.Select(x => x.Key).ToList())
+			{
+				RemoveBookmark(key);
+			}
+		}
+
+		public void CopyBookmark(string sourcePath, string targetPath)
+		{
+			if (sourcePath.Equals(targetPath, StringComparison.InvariantCulture))
+			{
+				return;
+			}
+
+			BookmarkNode sourceBookmark;
+
+			if (!Bookmarks.TryGetValue(sourcePath, out sourceBookmark))
+			{
+				return;
+			}
+
+			RegisterPath(targetPath);
+
+			string value = sourceBookmark.Value;
+			string fullPath = string.IsNullOrEmpty(targetPath) ? value : string.Format(CultureInfo.InvariantCulture, "{0}/{1}", targetPath, value);
+			BookmarkNode bookmark = new BookmarkNode();
+
+			bookmark.Path = fullPath;
+			bookmark.Value = sourceBookmark.Value;
+			bookmark.Text = sourceBookmark.Text;
+
+			Bookmarks.Add(fullPath, bookmark);
+
+			OnItemAdded(new BookmarkItemChangeEventArgs(fullPath, bookmark));
+		}
+
+		public void MoveBookmark(string sourcePath, string targetPath)
+		{
+			if (!Bookmarks.ContainsKey(sourcePath))
+			{
+				return;
+			}
+
+			CopyBookmark(sourcePath, targetPath);
+			RemoveBookmark(sourcePath);
+		}
+
 		public void RemovePath(string path)
 		{
 			foreach (string key in Bookmarks
@@ -63,6 +195,8 @@ namespace NHxD
 			if (BookmarkFolders.ContainsKey(path))
 			{
 				BookmarkFolders.Remove(path);
+
+				OnFolderRemoved(new BookmarkFolderChangeEventArgs(path, null));
 			}
 
 			foreach (string key in Bookmarks
@@ -77,10 +211,17 @@ namespace NHxD
 				.Select(x => x.Key).ToList())
 			{
 				BookmarkFolders.Remove(key);
+
+				OnFolderRemoved(new BookmarkFolderChangeEventArgs(key, null));
 			}
 		}
 
 		public BookmarkFolder RegisterPath(string path)
+		{
+			return RegisterPath(path, null);
+		}
+
+		public BookmarkFolder RegisterPath(string path, string customText)
 		{
 			if (string.IsNullOrEmpty(path))
 			{
@@ -108,9 +249,20 @@ namespace NHxD
 
 				if (!BookmarkFolders.TryGetValue(subPath, out folder))
 				{
-					folder = new BookmarkFolder() { Path = subPath, Text = part };
+					folder = new BookmarkFolder() { Path = subPath, Text = customText ?? part };
+
+					BookmarkFolderCancelEventArgs e = new BookmarkFolderCancelEventArgs(subPath, folder);
+
+					OnFolderAdding(e);
+
+					if (e.Cancel)
+					{
+						return null;
+					}
 
 					BookmarkFolders.Add(subPath, folder);
+
+					OnFolderAdded(new BookmarkFolderChangeEventArgs(subPath, folder));
 				}
 			}
 
@@ -425,6 +577,33 @@ namespace NHxD
 			BookmarkNode bookmark;
 
 			return Bookmarks.TryGetValue(fullPath, out bookmark);
+		}
+	}
+
+	public delegate void BookmarkFolderChangeEventHandler(object sender, BookmarkFolderChangeEventArgs e);
+	public delegate void BookmarkFolderCancelEventHandler(object sender, BookmarkFolderCancelEventArgs e);
+
+	public class BookmarkFolderChangeEventArgs : EventArgs
+	{
+		public string Path { get; }
+		public BookmarkFolder Value { get; }
+
+		public BookmarkFolderChangeEventArgs(string path, BookmarkFolder value)
+		{
+			Path = path;
+			Value = value;
+		}
+	}
+
+	public class BookmarkFolderCancelEventArgs : CancelEventArgs
+	{
+		public string Path { get; }
+		public BookmarkFolder Value { get; }
+
+		public BookmarkFolderCancelEventArgs(string path, BookmarkFolder value)
+		{
+			Path = path;
+			Value = value;
 		}
 	}
 

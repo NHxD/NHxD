@@ -79,6 +79,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="TreeNode.cs" />
+    <Compile Include="TreeView.cs" />
     <Compile Include="TreeViewEx.cs">
       <SubType>Component</SubType>
     </Compile>
