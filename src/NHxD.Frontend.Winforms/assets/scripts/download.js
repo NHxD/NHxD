@@ -422,7 +422,7 @@ function validateCount(count)
 	if (isNaN(count))
 	{
 		self.alert("Please enter a valid number between " + 0 + " and " + metadata.images.pages.length)
-		return Number.isNaN
+		return count
 	}
 
 	if (count < 0)
