@@ -172,7 +172,7 @@ namespace NHxD.Frontend.Winforms
 			libraryBrowserViewTabPage = new TabPage();
 			downloadsListViewTabPage = new TabPage();
 			webBrowserToolTip = new WebBrowserTreeNodeToolTip(pathFormatter, documentTemplates.GalleryTooltip);
-			loadTimer = new Timer();
+			loadTimer = new Timer(components);
 
 			searchHandler = new SearchHandler(
 				libraryModel

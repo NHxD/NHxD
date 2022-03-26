@@ -69,7 +69,7 @@ namespace NHxD.Frontend.Winforms
 			sortTypeLastWriteTimeButton = new ToolStripMenuItem();
 			sortOrderAscendingButton = new ToolStripMenuItem();
 			sortOrderDescendingButton = new ToolStripMenuItem();
-			filterTimer = new Timer();
+			filterTimer = new Timer(components);
 
 			SuspendLayout();
 

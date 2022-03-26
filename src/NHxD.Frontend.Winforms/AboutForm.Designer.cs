@@ -28,6 +28,8 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
+			components = new System.ComponentModel.Container();
+
 			this.tableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
 			this.webBrowser = new Ash.System.Windows.Forms.WebBrowserEx();
 			this.okButton = new System.Windows.Forms.Button();

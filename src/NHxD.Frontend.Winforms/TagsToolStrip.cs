@@ -65,7 +65,7 @@ namespace NHxD.Frontend.Winforms
 			sortTypeCountButton = new ToolStripMenuItem();
 			sortOrderAscendingButton = new ToolStripMenuItem();
 			sortOrderDescendingButton = new ToolStripMenuItem();
-			filterTimer = new Timer();
+			filterTimer = new Timer(components);
 
 			SuspendLayout();
 

@@ -42,6 +42,7 @@
 		private void InitializeComponent()
 		{
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
+			components = new System.ComponentModel.Container();
 
 			this.SuspendLayout();
 			// 

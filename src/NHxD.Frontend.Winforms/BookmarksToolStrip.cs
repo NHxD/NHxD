@@ -52,7 +52,7 @@ namespace NHxD.Frontend.Winforms
 			filterDetailsButton = new ToolStripMenuItem();
 			filterDownloadButton = new ToolStripMenuItem();
 			toolStrip = new ToolStrip();
-			filterTimer = new Timer();
+			filterTimer = new Timer(components);
 
 			SuspendLayout();
 
