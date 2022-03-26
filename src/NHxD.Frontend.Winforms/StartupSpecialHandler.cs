@@ -21,7 +21,7 @@ namespace NHxD.Frontend.Winforms
 			{ "10-31", new StartupSpecialItem(StartupSpecialDateFilters.Halloween, new StartupSpecialItemValueCollection { { 7546, DoNotCareTagsFilters } }) },	// witch
 			{ "11-19", new StartupSpecialItem(StartupSpecialDateFilters.WorldToiletDay, new StartupSpecialItemValueCollection { { 32282, RequireWhitelistTagsFilters }, { 10476, RequireWhitelistTagsFilters }, { 2820, RequireWhitelistTagsFilters }, { 8391, RequireWhitelistTagsFilters } }) },	// piss drinking, urination, scat, public use
 			{ "12-8", new StartupSpecialItem(StartupSpecialDateFilters.FeastOfTheImmaculateConception, new StartupSpecialItemValueCollection { { 2515, RequireWhitelistTagsFilters }, { 29224, RequireWhitelistTagsFilters }, { 6343, RequireWhitelistTagsFilters } }) },	// virginity, impregnation, pregnant
-			{ "12-25", new StartupSpecialItem(StartupSpecialDateFilters.Christmas, new StartupSpecialItemValueCollection { { 30811, DoNotCareTagsFilters } }) },	// chritsmas
+			{ "12-25", new StartupSpecialItem(StartupSpecialDateFilters.Christmas, new StartupSpecialItemValueCollection { { 30811, DoNotCareTagsFilters } }) },	// christmas
 		};
 
 		public Configuration.ConfigGallery GallerySettings { get; }
