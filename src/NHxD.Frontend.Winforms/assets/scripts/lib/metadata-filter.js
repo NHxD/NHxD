@@ -239,51 +239,124 @@
 		return BooleanComparer.equals(BooleanComparer.parseBool(condition))
 	}
 
+	MetadataFilter.relativeRegex = /^\s*(\d+|last|l|past|p|t|this)\s*(\w+)\s*(ago)?$/i
+	MetadataFilter.yRegex = /^\s*(\d+)\s*$/gi
+	MetadataFilter.ymRegex = /^\s*(\d+)\D+(\d+)\s*$/gi
+	MetadataFilter.ymdRegex = /^\s*(\d+)\D+(\d+)\D+(\d+)\s*$/gi
+	MetadataFilter.dateSeparator = "-/\\ ."
+
 	MetadataFilter.parseDate = function(text)
 	{
-		var yRegex = /^\s*(\d+)\s*$/gi
-		var ymRegex = /^\s*(\d+)\D+(\d+)\s*$/gi
-		var ymdRegex = /^\s*(\d+)\D+(\d+)\D+(\d+)\s*$/gi
-		var dateSeparator = "-/\\ ."
+		var m
+		var d = null
 
-		if (yRegex.test(text))
+		if (text === "today")
 		{
-			var y = text.splitMultiple(dateSeparator)
-			var d = new Date()
-
-			d.setUTCFullYear(parseInt(y[0]))
-			d.hasYear = true
-
-			return d
-		}
-		else if (ymRegex.test(text))
-		{
-			//[ '-', '/', '\\', '.' ]
-			var ym = text.splitMultiple(dateSeparator)
-			var d = new Date()
-
-			d.setUTCFullYear(parseInt(ym[0]), parseInt(ym[1]) - 1)
+			d = new Date()
+			d.setDate(d.getDate())
 			d.hasYear = true
 			d.hasMonth = true
-
-			return d
+			d.hasDate = true
 		}
-		else if (ymdRegex.test(text))
+		else if (text === "yesterday")
 		{
-			var ymd = text.splitMultiple(dateSeparator)
-			var d = new Date()
+			d = new Date()
+			d.setDate(d.getDate() - 1)
+			d.hasYear = true
+			d.hasMonth = true
+			d.hasDate = true
+		}
+		else if (m = text.match(MetadataFilter.relativeRegex))
+		{
+			var a = m[1].toLowerCase()
+			var b = m[2].toLowerCase()
+			var n = a.startsWith("l") ? 1 : parseInt(a)
 
-			d.setUTCFullYear(parseInt(ymd[0]), parseInt(ymd[1]) - 1, parseInt(ymd[2]))
+			if (b.startsWith("l"))
+			{
+				n = 1
+			}
+			else if (b.startsWith("t"))
+			{
+				n = 0
+			}
+			else
+			{
+				n = parseInt(a)
+			}
+
+			if (b.startsWith("y"))
+			{
+				d = new Date()
+				d.setUTCFullYear(d.getUTCFullYear() - n)
+				d.hasYear = true
+			}
+			else if (b.startsWith("m"))
+			{
+				d = new Date()
+				d.setUTCFullYear(d.getUTCFullYear(), d.getUTCMonth() - n)
+				d.hasYear = true
+				d.hasMonth = true
+			}
+			else if (b.startsWith("d"))
+			{
+				d = new Date()
+				d.setUTCFullYear(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - n)
+				d.hasYear = true
+				d.hasMonth = true
+				d.hasDate = true
+			}
+			/*
+			else if (b.startsWith("w"))
+			{
+				n = 6
+				d = new Date()
+				d.setUTCFullYear(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - n)
+				d.hasYear = true
+				d.hasMonth = true
+				d.hasDate = true
+			}
+			*/
+		}
+		else if (m = text.match(MetadataFilter.yRegex))
+		{
+			var yy = parseInt(m[1])
+
+			d = new Date()
+			d.setUTCFullYear(yy)
+			d.hasYear = true
+		}
+		else if (m = text.match(MetadataFilter.ymRegex))
+		{
+			var yy = parseInt(m[1])
+			var mm = parseInt(m[2])
+
+			d = new Date()
+			d.setUTCFullYear(yy, mm - 1)
+			d.hasYear = true
+			d.hasMonth = true
+		}
+		else if (m = text.match(MetadataFilter.ymdRegex))
+		{
+			var yy = parseInt(m[1])
+			var mm = parseInt(m[2])
+			var dd = parseInt(m[3])
+
+			d = new Date()
+			d.setUTCFullYear(yy, mm - 1, dd)
 			d.hasYear = true
 			d.hasMonth = true
 			d.hasDate = true
 
 			return d
 		}
-		else
+
+		if (d == null)
 		{
-			return new Date(text)
+			d = new Date(text)
 		}
+
+		return d
 	}
 
 	MetadataFilter.parseDateCondition = function(condition)
