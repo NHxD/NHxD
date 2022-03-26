@@ -376,7 +376,7 @@ namespace NHxD.Frontend.Winforms
 				staticHttpClient.Client.DefaultRequestHeaders.CacheControl = new System.Net.Http.Headers.CacheControlHeaderValue() { NoCache = true, NoStore = true };
 			}
 
-			//ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+			ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
 			if (hasCustomMaxIdleTime || hasCustomConnectionLeaseTimeout)
 			{

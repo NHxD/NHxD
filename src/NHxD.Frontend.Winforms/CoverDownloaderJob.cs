@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -121,40 +122,67 @@ namespace NHxD.Frontend.Winforms
 					{
 						try
 						{
-							string uri = string.Format(CultureInfo.InvariantCulture, "https://t.nhentai.net/galleries/{0}/{1}{2}", metadata.MediaId, "cover", metadata.Images.Cover.GetFileExtension());
+							var mediaServerId = -1;
 
-							using (HttpResponseMessage response = Task.Run(() => runArg.HttpClient?.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead)).GetAwaiter().GetResult())
 							{
-								if (!response.IsSuccessStatusCode)
+								var url = $"https://nhentai.net/g/{metadata.Id}/";
+
+								Program.Logger.LogLine($"Downloading gallery webpage {url}...");
+
+								using (var response = Task.Run(() => runArg.HttpClient?.GetAsync(url, HttpCompletionOption.ResponseHeadersRead)).GetAwaiter().GetResult())
 								{
-									coverCachedFilePath = "";
-									response.EnsureSuccessStatusCode();
-									//error = string.Format(CultureInfo.InvariantCulture, "{0} ({1})", response.ReasonPhrase, response.StatusCode);
-									//continue;
+									if (!response.IsSuccessStatusCode)
+									{
+										Program.Logger.ErrorLine($"{response.ReasonPhrase} ({response.StatusCode})");
+										response.EnsureSuccessStatusCode();
+									}
+									else
+									{
+										var html = Task.Run(() => response.Content.ReadAsStringAsync()).GetAwaiter().GetResult();
+										var mediaServerIdRegExp = new Regex(@"media_server:\s*(\d+),");
+										var mediaServerIdMatch = mediaServerIdRegExp.Match(html);
+
+										if (!mediaServerIdMatch.Success)
+										{
+											throw new Exception("Could not find media server id.");
+										}
+										else
+										{
+											mediaServerId = int.Parse(mediaServerIdMatch.Groups[1].Value);
+										}
+									}
 								}
-								else
+							}
+
+							if (mediaServerId != -1)
+							{
+								string uri = string.Format(CultureInfo.InvariantCulture, "https://t{3}.nhentai.net/galleries/{0}/{1}{2}", metadata.MediaId, "cover", metadata.Images.Cover.GetFileExtension(), mediaServerId);
+
+								Program.Logger.LogLine($"Downloading cover image {uri}...");
+
+								using (HttpResponseMessage response = Task.Run(() => runArg.HttpClient?.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead)).GetAwaiter().GetResult())
 								{
-									try
+									if (!response.IsSuccessStatusCode)
+									{
+										Program.Logger.ErrorLine($"{response.ReasonPhrase} ({response.StatusCode})");
+										response.EnsureSuccessStatusCode();
+									}
+									else
 									{
 										byte[] imageData = Task.Run(() => response.Content.ReadAsByteArrayAsync()).GetAwaiter().GetResult();
 
 										Directory.CreateDirectory(Path.GetDirectoryName(coverCachedFilePath));
 										File.WriteAllBytes(coverCachedFilePath, imageData);
 									}
-									catch (Exception ex)
-									{
-										coverCachedFilePath = "";
-										error = ex.Message;
-										//continue;
-									}
 								}
 							}
 						}
 						catch (Exception ex)
 						{
-							coverCachedFilePath = "";
+							//coverCachedFilePath = "";
 							error = ex.Message;
-							//continue;
+
+							Program.Logger.ErrorLine(ex.ToString());
 						}
 					}
 				}

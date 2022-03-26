@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -157,77 +158,104 @@ namespace NHxD.Frontend.Winforms
 					{
 						try
 						{
-							string uri = string.Format(CultureInfo.InvariantCulture, "https://i.nhentai.net/galleries/{0}/{1}{2}", metadata.MediaId, i + 1, metadata.Images.Pages[i].GetFileExtension());
+							var mediaServerId = -1;
+
+							{
+								var url = $"https://nhentai.net/g/{metadata.Id}/{i + 1}/";
+
+								Program.Logger.LogLine($"Downloading gallery webpage {url}...");
+
+								using (var response = Task.Run(() => runArg.HttpClient?.GetAsync(url, HttpCompletionOption.ResponseHeadersRead)).GetAwaiter().GetResult())
+								{
+									if (!response.IsSuccessStatusCode)
+									{
+										Program.Logger.ErrorLine($"{response.ReasonPhrase} ({response.StatusCode})");
+										response.EnsureSuccessStatusCode();
+									}
+									else
+									{
+										var html = Task.Run(() => response.Content.ReadAsStringAsync()).GetAwaiter().GetResult();
+										var mediaServerIdRegExp = new Regex(@"media_server:\s*(\d+),");
+										var mediaServerIdMatch = mediaServerIdRegExp.Match(html);
+
+										if (!mediaServerIdMatch.Success)
+										{
+											throw new Exception("Could not find media server id.");
+										}
+										else
+										{
+											mediaServerId = int.Parse(mediaServerIdMatch.Groups[1].Value);
+										}
+									}
+								}
+							}
+
+							string uri = string.Format(CultureInfo.InvariantCulture, "https://i{3}.nhentai.net/galleries/{0}/{1}{2}", metadata.MediaId, i + 1, metadata.Images.Pages[i].GetFileExtension(), mediaServerId);
+
+							Program.Logger.LogLine($"Downloading gallery page {uri}...");
 
 							using (HttpResponseMessage response = Task.Run(() => runArg.HttpClient?.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead)).GetAwaiter().GetResult())
 							{
 								if (!response.IsSuccessStatusCode)
 								{
-									pageCachedFilePath = "";
-									error = string.Format(CultureInfo.InvariantCulture, "{0} ({1})", response.ReasonPhrase, response.StatusCode);
+									Program.Logger.ErrorLine($"{response.ReasonPhrase} ({response.StatusCode})");
+									response.EnsureSuccessStatusCode();
 								}
 								else
 								{
-									try
-									{
-										byte[] imageData = Task.Run(() => response.Content.ReadAsByteArrayAsync()).GetAwaiter().GetResult();
+									byte[] imageData = Task.Run(() => response.Content.ReadAsByteArrayAsync()).GetAwaiter().GetResult();
 
-										// TODO: the issue is that I have designed things to be immutable so metadatas can't change.
-										// but even if I do change the metadata and replace it in the searchResult,
-										// it won't affect other cached searchResults with the same metadata. (because searchresults embed metadatas directly instead of storing indices to them)
-										// so I might be able to save the changes to the metadata (file), one searchResult, but not everything (without greatly impacting performances)
-										/*
-										//if (runArg.FixFileExtension)
-										{
-											ImageType pageImageType = metadata.Images.Pages[i].Type;
-											ImageType? realPageImageType = null;
+									// TODO: the issue is that I have designed things to be immutable so metadatas can't change.
+									// but even if I do change the metadata and replace it in the searchResult,
+									// it won't affect other cached searchResults with the same metadata. (because searchresults embed metadatas directly instead of storing indices to them)
+									// so I might be able to save the changes to the metadata (file), one searchResult, but not everything (without greatly impacting performances)
+									/*
+									//if (runArg.FixFileExtension)
+									{
+										ImageType pageImageType = metadata.Images.Pages[i].Type;
+										ImageType? realPageImageType = null;
 											
-											if (imageData.Length >= 8
-												&& imageData.Match(0, 8, PngFileSignature))
-											{
-												realPageImageType = ImageType.Png;
-											}
-											else if (imageData.Length >= 8
-												&& imageData.Match(0, 2, JfifStartOfImageSegmentHeader)
-												&& imageData.Match(2, 2, JfifStartOfImageSegmentHeader)
-												&& imageData.Match(6, 5, JfifApp0SegmentSegmentIdentifier))
-											{
-												realPageImageType = ImageType.Jpeg;
-											}
-											else if (imageData.Length >= 8
-												&& imageData.Match(0, 8, GifFileSignature))
-											{
-												realPageImageType = ImageType.Gif;
-											}
-											else
-											{
-												// unknown format.
-											}
-
-											if (pageImageType != realPageImageType)
-											{
-
-											}
+										if (imageData.Length >= 8
+											&& imageData.Match(0, 8, PngFileSignature))
+										{
+											realPageImageType = ImageType.Png;
 										}
-										*/
-										Directory.CreateDirectory(Path.GetDirectoryName(pageCachedFilePath));
-										File.WriteAllBytes(pageCachedFilePath, imageData);
+										else if (imageData.Length >= 8
+											&& imageData.Match(0, 2, JfifStartOfImageSegmentHeader)
+											&& imageData.Match(2, 2, JfifStartOfImageSegmentHeader)
+											&& imageData.Match(6, 5, JfifApp0SegmentSegmentIdentifier))
+										{
+											realPageImageType = ImageType.Jpeg;
+										}
+										else if (imageData.Length >= 8
+											&& imageData.Match(0, 8, GifFileSignature))
+										{
+											realPageImageType = ImageType.Gif;
+										}
+										else
+										{
+											// unknown format.
+										}
 
-										++cacheCount;
+										if (pageImageType != realPageImageType)
+										{
+
+										}
 									}
-									catch (Exception ex)
-									{
-										pageCachedFilePath = "";
-										error = ex.Message;
-										//continue;
-									}
+									*/
+									Directory.CreateDirectory(Path.GetDirectoryName(pageCachedFilePath));
+									File.WriteAllBytes(pageCachedFilePath, imageData);
+
+									++cacheCount;
 								}
 							}
 						}
 						catch (Exception ex)
 						{
-							pageCachedFilePath = "";
+							//pageCachedFilePath = "";
 							error = ex.Message;
+
+							Program.Logger.ErrorLine(ex.ToString());
 						}
 					}
 				}
