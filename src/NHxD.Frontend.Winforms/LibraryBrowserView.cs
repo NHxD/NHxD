@@ -28,13 +28,16 @@ namespace NHxD.Frontend.Winforms
 		public LibraryBrowserFilter LibraryBrowserFilter { get; }
 		public LibraryModel LibraryModel { get; }
 		public IPathFormatter PathFormatter { get; }
+		public IQueryParser QueryParser { get; }
 		public DocumentTemplate<ISearchProgressArg> LibraryCovergridTemplate { get; }
 		public DocumentTemplate<ISearchArg> LibraryPreloadTemplate { get; }
 		public DocumentTemplate<Metadata> LibraryCovergridItemTemplate { get; }
 		public PageDownloader PageDownloader { get; }
 		public CoverDownloader CoverLoader { get; }
 		public MetadataKeywordLists MetadataKeywordLists { get; }
+		public IMetadataCache MetadataCache { get; }
 		public ISearchResultCache SearchResultCache { get; }
+		public MetadataCacheSnapshot MetadataCacheSnapshot { get; }
 		public Configuration.ConfigLibraryBrowserView LibraryBrowserSettings { get; }
 
 		public LibraryBrowserView()
@@ -44,18 +47,24 @@ namespace NHxD.Frontend.Winforms
 	
 		public LibraryBrowserView(LibraryBrowserFilter libraryBrowserFilter, LibraryModel libraryModel, DocumentTemplate<ISearchProgressArg> libraryCovergridTemplate, DocumentTemplate<ISearchArg> libraryPreloadTemplate, DocumentTemplate<Metadata> libraryCovergridItemTemplate
 			, IPathFormatter pathFormatter
+			, IQueryParser queryParser
 			, PageDownloader pageDownloader
 			, CoverDownloader coverLoader
 			, MetadataKeywordLists metadataKeywordLists
 			, Configuration.ConfigLibraryBrowserView libraryBrowserSettings
-			, ISearchResultCache searchResultCache)
+			, IMetadataCache metadataCache
+			, ISearchResultCache searchResultCache
+			, MetadataCacheSnapshot metadataCacheSnapshot)
 		{
 			InitializeComponent();
 
 			LibraryBrowserFilter = libraryBrowserFilter;
 			LibraryModel = libraryModel;
 			PathFormatter = pathFormatter;
+			QueryParser = queryParser;
+			MetadataCache = metadataCache;
 			SearchResultCache = searchResultCache;
+			MetadataCacheSnapshot = metadataCacheSnapshot;
 			LibraryCovergridTemplate = libraryCovergridTemplate;
 			LibraryPreloadTemplate = libraryPreloadTemplate;
 			LibraryCovergridItemTemplate = libraryCovergridItemTemplate;
@@ -347,7 +356,14 @@ namespace NHxD.Frontend.Winforms
 
 		public void Search()
 		{
-			SearchArg searchArg = new SearchArg(LibraryModel.PageIndex, true);
+			SearchArg searchArg =
+				LibraryModel.TagId != -1
+				? new SearchArg(LibraryModel.TagId, LibraryModel.PageIndex, true)
+				: new SearchArg(LibraryModel.Query, LibraryModel.PageIndex, true);
+
+			// HACK: normally, filtered searches should go to its own tab and webbrowser document but that'd be too much work so just make it a temporary thing...
+			LibraryModel.TagId = -1;
+			LibraryModel.Query = "";
 
 			webBrowser.Tag = searchArg;
 			webBrowser.DocumentText = LibraryPreloadTemplate.GetFormattedText(searchArg);
@@ -382,7 +398,7 @@ namespace NHxD.Frontend.Winforms
 				return;
 			}
 
-			LibraryLoadRunArg runArg = new LibraryLoadRunArg(PathFormatter, SearchResultCache, searchArg, LibraryBrowserSettings.NumResultsPerPage, LibraryModel.FileSystemWatcher.Path, LibraryBrowserSettings.SortType, LibraryBrowserSettings.GlobalSortType, LibraryBrowserSettings.SortOrder, LibraryBrowserSettings.GlobalSortOrder);
+			LibraryLoadRunArg runArg = new LibraryLoadRunArg(PathFormatter, QueryParser, MetadataCache, SearchResultCache, MetadataCacheSnapshot, searchArg, LibraryBrowserSettings.NumResultsPerPage, LibraryModel.FileSystemWatcher.Path, LibraryBrowserSettings.SortType, LibraryBrowserSettings.GlobalSortType, LibraryBrowserSettings.SortOrder, LibraryBrowserSettings.GlobalSortOrder);
 
 			backgroundWorker.RunWorkerAsync(runArg);
 		}
@@ -433,6 +449,128 @@ namespace NHxD.Frontend.Winforms
 			searchResult.Result = new List<Metadata>();
 			searchResult.PerPage = runArg.NumItemsPerPage;
 
+			if (runArg.SearchArg.TagId != -1)
+			{
+				runArg.MetadataCacheSnapshot.EnsureReady();
+
+				IEnumerable<Metadata> results = runArg.MetadataCache.Items.Values;
+
+				results = results.Where(x => x.Tags.Any(y =>
+				{
+					if (y.Id != runArg.SearchArg.TagId)
+					{
+						return false;
+					}
+
+					return true;
+				}));
+
+				int skipCount = (runArg.SearchArg.PageIndex - 1) * searchResult.PerPage;
+				int totalItemCount = results.Count();
+				int loadCount = 0;
+
+				results = results
+					.Skip(skipCount)
+					.Take(searchResult.PerPage);
+
+				galleryIds = results.Select(x => x.Id).ToList();
+
+				foreach (Metadata metadata in results)
+				{
+					++loadCount;
+
+					LibraryLoadProgressArg progressArg = new LibraryLoadProgressArg(runArg, loadCount, galleryIds.Count, metadata);
+
+					backgroundWorker.ReportProgress((int)((loadCount / (float)galleryIds.Count) * 100), progressArg);
+
+					if (metadata == null)
+					{
+						continue;
+					}
+
+					searchResult.Result.Add(metadata);
+				}
+
+				//searchResult.Result.AddRange(results);
+				searchResult.NumPages = (int)Math.Ceiling(totalItemCount / (double)searchResult.PerPage);
+			}
+			else if (!string.IsNullOrEmpty(runArg.SearchArg.Query))
+			{
+				runArg.MetadataCacheSnapshot.EnsureReady();
+
+				IEnumerable<Metadata> results = runArg.MetadataCache.Items.Values;
+
+				string[] tokens = runArg.SearchArg.Query.Split(new char[] { ':' });
+				string query;
+				int tagId;
+				string tagType;
+				string tagName;
+				int pageIndex;
+
+				if (runArg.QueryParser.ParseTaggedSearch(tokens, out tagId, out tagType, out tagName, out pageIndex))
+				{
+					results = results.Where(x => x.Tags.Any(y =>
+					{
+						if (tagId != -1
+						&& y.Id != tagId)
+						{
+							return false;
+						}
+
+						if (!string.IsNullOrEmpty(tagType)
+						&& !y.Type.ToString().Equals(tagType, StringComparison.OrdinalIgnoreCase))
+						{
+							return false;
+						}
+
+						return true;
+					}));
+				}
+				else if (runArg.QueryParser.ParseQuerySearch(tokens, out query, out pageIndex))
+				{
+					results = results.Where(x =>
+					{
+						// TODO: currently, the query parsing and evaluation is implemented on the JS side...
+						/*
+						if (x.Title.English.Equals(query, StringComparison.CurrentCulture))
+						{
+							return false;
+						}
+						*/
+						return true;
+					});
+				}
+
+				int skipCount = (runArg.SearchArg.PageIndex - 1) * searchResult.PerPage;
+				int totalItemCount = results.Count();
+				int loadCount = 0;
+
+				results = results
+					.Skip(skipCount)
+					.Take(searchResult.PerPage);
+
+				galleryIds = results.Select(x => x.Id).ToList();
+
+				foreach (Metadata metadata in results)
+				{
+					++loadCount;
+
+					LibraryLoadProgressArg progressArg = new LibraryLoadProgressArg(runArg, loadCount, galleryIds.Count, metadata);
+
+					backgroundWorker.ReportProgress((int)((loadCount / (float)galleryIds.Count) * 100), progressArg);
+
+					if (metadata == null)
+					{
+						continue;
+					}
+
+					searchResult.Result.Add(metadata);
+				}
+
+				//searchResult.Result.AddRange(results);
+				searchResult.NumPages = (int)Math.Ceiling(totalItemCount / (double)searchResult.PerPage);
+			}
+			else
 			if (Directory.Exists(runArg.LibraryPath))
 			{
 				DirectoryInfo dirInfo = new DirectoryInfo(runArg.LibraryPath);
@@ -565,7 +703,10 @@ namespace NHxD.Frontend.Winforms
 		private class LibraryLoadRunArg
 		{
 			public IPathFormatter PathFormatter { get; }
+			public IQueryParser QueryParser { get; }
+			public IMetadataCache MetadataCache { get; }
 			public ISearchResultCache SearchResultCache { get; }
+			public MetadataCacheSnapshot MetadataCacheSnapshot { get; }
 			public SearchArg SearchArg { get; }
 			public int NumItemsPerPage { get; }
 			public string LibraryPath { get; }
@@ -574,12 +715,15 @@ namespace NHxD.Frontend.Winforms
 			public SortOrder SortOrder { get; }
 			public SortOrder GlobalSortOrder { get; }
 
-			public LibraryLoadRunArg(IPathFormatter pathFormatter, ISearchResultCache searchResultCache, SearchArg searchArg, int numItemsPerPage, string libraryPath
+			public LibraryLoadRunArg(IPathFormatter pathFormatter, IQueryParser queryParser, IMetadataCache metadataCache, ISearchResultCache searchResultCache, MetadataCacheSnapshot metadataCacheSnapshot, SearchArg searchArg, int numItemsPerPage, string libraryPath
 				, GallerySortType sortType, LibrarySortType globalSortType
 				, SortOrder sortOrder, SortOrder globalSortOrder)
 			{
 				PathFormatter = pathFormatter;
+				QueryParser = queryParser;
+				MetadataCache = metadataCache;
 				SearchResultCache = searchResultCache;
+				MetadataCacheSnapshot = metadataCacheSnapshot;
 				SearchArg = searchArg;
 				NumItemsPerPage = numItemsPerPage;
 				LibraryPath = libraryPath;

@@ -89,6 +89,61 @@ namespace NHxD.Frontend.Winforms
 				MainViewTabControl.SelectTab(LibraryBrowserViewTabPage);
 			}
 
+			// HACK: sharing the library and cache views causes some issues...
+			if (LibraryModel.TagId != -1 || !string.IsNullOrEmpty(LibraryModel.Query))
+			{
+				LibraryModel.TagId = -1;
+				LibraryModel.Query = "";
+				LibraryModel.PageIndex = 1;
+				return;
+			}
+
+			LibraryModel.TagId = -1;
+			LibraryModel.Query = "";
+			LibraryModel.PageIndex = pageIndex;
+		}
+
+		public void BrowseTaggedCache(int tagId)
+		{
+			BrowseTaggedCache(tagId, LibraryModel.PageIndex, true);
+		}
+
+		public void BrowseTaggedCache(int tagId, int pageIndex)
+		{
+			BrowseTaggedCache(tagId, pageIndex, true);
+		}
+
+		public void BrowseTaggedCache(int tagId, int pageIndex, bool activateTab)
+		{
+			if (activateTab)
+			{
+				MainViewTabControl.SelectTab(LibraryBrowserViewTabPage);
+			}
+
+			LibraryModel.TagId = tagId;
+			LibraryModel.Query = "";// "tagged:" + tagId + ":" + pageIndex;
+			LibraryModel.PageIndex = pageIndex;
+		}
+
+		public void BrowseCache(string query)
+		{
+			BrowseCache(query, LibraryModel.PageIndex);
+		}
+
+		public void BrowseCache(string query, int pageIndex)
+		{
+			BrowseCache(query, pageIndex, true);
+		}
+
+		public void BrowseCache(string query, int pageIndex, bool activateTab)
+		{
+			if (activateTab)
+			{
+				MainViewTabControl.SelectTab(LibraryBrowserViewTabPage);
+			}
+
+			LibraryModel.TagId = -1;
+			LibraryModel.Query = query;
 			LibraryModel.PageIndex = pageIndex;
 		}
 

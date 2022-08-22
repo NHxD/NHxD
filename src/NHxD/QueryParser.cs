@@ -59,7 +59,7 @@ namespace NHxD.Frontend.Winforms
 			return true;
 		}
 
-		// tag:<id|name>[:page]
+		// tag[:type]:<id|name>[:page]
 		public bool ParseTaggedSearch(string[] tokens, out int tagId, out string tagType, out string tagName, out int pageIndex)
 		{
 			tagId = -1;
@@ -218,7 +218,7 @@ namespace NHxD.Frontend.Winforms
 			return true;
 		}
 
-		// library[:id]
+		// library[:page]
 		public bool ParseLibrarySearch(string[] tokens, out int pageIndex)
 		{
 			pageIndex = 1;

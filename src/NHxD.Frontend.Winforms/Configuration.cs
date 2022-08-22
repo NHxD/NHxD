@@ -106,6 +106,20 @@ namespace NHxD.Frontend.Winforms.Configuration
 
 		[JsonProperty("session")]
 		public ConfigSession Session { get; set; } = new ConfigSession();
+		[JsonProperty("metadataCache")]
+		public ConfigMetadataCache MetadataCache { get; set; } = new ConfigMetadataCache();
+	}
+
+	public class ConfigMetadataCache
+	{
+		[JsonProperty("buildAtStartup")]
+		public bool BuildAtStartup { get; set; } = false;
+		[JsonProperty("loadAtStartup")]
+		public bool LoadAtStartup { get; set; } = false;
+		[JsonProperty("deleteAtExit")]
+		public bool DeleteAtExit { get; set; } = false;
+		[JsonProperty("compressionLevel"), JsonConverter(typeof(StringEnumConverter))]
+		public System.IO.Compression.CompressionLevel CompressionLevel { get; set; } = System.IO.Compression.CompressionLevel.Fastest;
 	}
 
 	public class ConfigTabControls

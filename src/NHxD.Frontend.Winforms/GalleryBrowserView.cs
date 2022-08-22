@@ -580,6 +580,20 @@ namespace NHxD.Frontend.Winforms
 			PageIndex = pageIndex;
 			Target = isLibrary ? SearchTarget.Library : SearchTarget.Recent;
 		}
+
+		public SearchArg(int tagId, int pageIndex, bool isLibrary)
+		{
+			TagId = tagId;
+			PageIndex = pageIndex;
+			Target = isLibrary ? SearchTarget.Library : SearchTarget.Recent;
+		}
+
+		public SearchArg(string query, int pageIndex, bool isLibrary)
+		{
+			Query = query;
+			PageIndex = pageIndex;
+			Target = isLibrary ? SearchTarget.Library : SearchTarget.Recent;
+		}
 	}
 
 	public class SearchDoArg

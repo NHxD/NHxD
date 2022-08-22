@@ -1,7 +1,6 @@
 ﻿using NHxD.Frontend.Winforms.Configuration;
 using System;
 using System.Diagnostics;
-using System.Drawing;
 using System.Windows.Forms;
 
 namespace NHxD.Frontend.Winforms
@@ -25,7 +24,13 @@ namespace NHxD.Frontend.Winforms
 		private readonly ToolStripMenuItem linkJlistToolStripMenuItem;
 		private readonly ToolStripMenuItem linkFakkuToolStripMenuItem;
 
+		private readonly ToolStripMenuItem toolsToolStripMenuItem;
+		private readonly ToolStripMenuItem manageMetadataCacheToolStripMenuItem;
 		public Settings Settings { get; }
+		public ISearchResultCache SearchResultCache { get; }
+		public IMetadataCache MetadataCache { get; }
+		public MetadataCacheSnapshot MetadataCacheSnapshot { get; }
+		public IPathFormatter PathFormatter { get; }
 
 		public event EventHandler Exit = delegate { };
 		public event EventHandler ToggleListsPanel = delegate { };
@@ -38,9 +43,13 @@ namespace NHxD.Frontend.Winforms
 		{
 		}
 
-		public MainMenuStrip(Settings settings)
+		public MainMenuStrip(Settings settings, IPathFormatter pathFormatter, IMetadataCache metadataCache, ISearchResultCache searchResultCache, MetadataCacheSnapshot metadataCacheSnapshot)
 		{
 			Settings = settings;
+			PathFormatter = pathFormatter;
+			MetadataCache = metadataCache;
+			SearchResultCache = searchResultCache;
+			MetadataCacheSnapshot = metadataCacheSnapshot;
 
 			fileToolStripMenuItem = new ToolStripMenuItem();
 			exitToolStripMenuItem = new ToolStripMenuItem();
@@ -58,6 +67,8 @@ namespace NHxD.Frontend.Winforms
 			linkDlsiteToolStripMenuItem = new ToolStripMenuItem();
 			linkJlistToolStripMenuItem = new ToolStripMenuItem();
 			linkFakkuToolStripMenuItem = new ToolStripMenuItem();
+			toolsToolStripMenuItem = new ToolStripMenuItem();
+			manageMetadataCacheToolStripMenuItem = new ToolStripMenuItem();
 
 			SuspendLayout();
 
@@ -190,6 +201,23 @@ namespace NHxD.Frontend.Winforms
 			aboutToolStripMenuItem.Text = "&About";
 			aboutToolStripMenuItem.Click += new EventHandler(AboutToolStripMenuItem_Click);
 
+			// 
+			// toolsToolStripMenuItem
+			// 
+			toolsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[]
+			{
+				manageMetadataCacheToolStripMenuItem,
+			});
+			toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
+			toolsToolStripMenuItem.Text = "&Tools";
+
+			// 
+			// manageMetadataCacheToolStripMenuItem
+			// 
+			manageMetadataCacheToolStripMenuItem.Name = "manageMetadataCacheToolStripMenuItem";
+			manageMetadataCacheToolStripMenuItem.Text = "Manage &Metadata Cache";
+			manageMetadataCacheToolStripMenuItem.Click += new EventHandler(ManageMetadataCacheToolStripMenuItem_Click);
+
 			//
 			// this
 			//
@@ -197,6 +225,7 @@ namespace NHxD.Frontend.Winforms
 			{
 				fileToolStripMenuItem,
 				viewToolStripMenuItem,
+				toolsToolStripMenuItem,
 				helpToolStripMenuItem
 			});
 			Name = "mainMenuStrip";
@@ -210,6 +239,19 @@ namespace NHxD.Frontend.Winforms
 			listToolStripMenuItem.Checked = !Settings.Panels.Lists.IsCollapsed;
 			detailsToolStripMenuItem.Checked = !Settings.Panels.Details.IsCollapsed;
 			fullScreenToolStripMenuItem.Checked = Settings.Window.FullScreen.IsActive;
+		}
+
+		
+		private void ManageMetadataCacheToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			using (var dialog = new ManageMetadataCacheForm(PathFormatter, MetadataCache, SearchResultCache, MetadataCacheSnapshot, Settings.Cache.MetadataCache))
+			{
+				if (dialog.ShowDialog(this) == DialogResult.OK)
+				{
+					//MetadataCacheSnapshot.Delete();
+					//MetadataCacheSnapshot.EnsureReady();
+				}
+			}
 		}
 
 		private void ExitToolStripMenuItem_Click(object sender, EventArgs e)

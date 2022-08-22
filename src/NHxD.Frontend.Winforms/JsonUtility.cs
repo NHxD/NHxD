@@ -16,9 +16,24 @@ namespace NHxD.Frontend.Winforms
 
 		public static bool SaveToFile<T>(T obj, string path, Formatting formatting) where T : new()
 		{
+			return SaveToFile<T>(obj, path, formatting, null);
+		}
+
+		public static bool SaveToFile<T>(T configuration, string path, Func<string, string> encode) where T : new()
+		{
+			return SaveToFile(configuration, path, Formatting.Indented, encode);
+		}
+
+		public static bool SaveToFile<T>(T obj, string path, Formatting formatting, Func<string, string> encode) where T : new()
+		{
 			try
 			{
 				string text = JsonConvert.SerializeObject(obj, formatting);
+
+				if (encode != null)
+				{
+					text = encode(text);
+				}
 
 				Directory.CreateDirectory(Path.GetDirectoryName(path));
 				File.WriteAllText(path, text);
@@ -40,14 +55,24 @@ namespace NHxD.Frontend.Winforms
 
 		public static T LoadFromFile<T>(string path) where T : class, new()
 		{
+			return LoadFromFile<T>(path, null);
+		}
+
+		public static T LoadFromFile<T>(string path, Func<string, string> decode) where T : class, new()
+		{
 			try
 			{
 				if (File.Exists(path))
 				{
 					string text = File.ReadAllText(path);
 
+					if (decode != null)
+					{
+						text = decode(text);
+					}
+
 					T obj = JsonConvert.DeserializeObject<T>(text);
-					
+
 					if (obj != null)
 					{
 						return obj;

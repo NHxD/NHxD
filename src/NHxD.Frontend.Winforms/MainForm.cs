@@ -45,6 +45,7 @@ namespace NHxD.Frontend.Winforms
 		private readonly ISearchResultCache searchResultCache;
 		private readonly ISessionManager sessionManager;
 		private readonly ICacheFileSystem cacheFileSystem;
+		private readonly MetadataCacheSnapshot metadataCacheSnapshot;
 		private readonly Timer loadTimer;
 		private readonly TagsModel tagsModel;
 		private readonly BookmarksModel bookmarksModel;
@@ -151,6 +152,7 @@ namespace NHxD.Frontend.Winforms
 			searchResultCache = new SearchResultCache(metadataCache);
 			sessionManager = new SessionManager(pathFormatter, searchResultCache, Settings.Cache.Session.RecentLifeSpan, Settings.Cache.Session.SearchLifeSpan, Settings.Cache.Session.TaggedLifeSpan, Settings.Network);
 			cacheFileSystem = new CacheFileSystem(pathFormatter, searchResultCache, archiveWriters);
+			metadataCacheSnapshot = new MetadataCacheSnapshot("static", pathFormatter, metadataCache, searchResultCache, Settings.Cache.MetadataCache);
 			pluginSystem = new PluginSystem(Logger, pathFormatter, cacheFileSystem, archiveWriters, metadataConverters, metadataProcessors);
 
 			backgroundTaskWorker = new BackgroundTaskWorker() { IdleWaitTime = Settings.BackgroundWorkers.BackgroundTaskWorker.IdleWaitTime, MaxConcurrentJobCount = Settings.BackgroundWorkers.BackgroundTaskWorker.MaxConcurrentJobCount };
@@ -202,7 +204,7 @@ namespace NHxD.Frontend.Winforms
 			galleryBrowserFilter = new GalleryBrowserFilter(Settings.Gallery.Browser);
 			detailsBrowserFilter = new DetailsBrowserFilter(Settings.Details.Browser);
 
-			tagsTreeView = new TagsTreeView(tagsFilter, tagsModel, tagTextFormatter, Settings.Lists.Tags, metadataKeywordLists, searchHandler, bookmarkPromptUtility, staticHttpClient.Client);
+			tagsTreeView = new TagsTreeView(tagsFilter, tagsModel, tagTextFormatter, Settings.Lists.Tags, Settings.Network, metadataKeywordLists, pathFormatter, metadataCache, searchResultCache, metadataCacheSnapshot, Settings.Cache.MetadataCache, searchHandler, bookmarkPromptUtility, staticHttpClient.Client);
 			tagsToolStrip = new TagsToolStrip(tagsFilter, tagsModel, Settings.Lists.Tags, metadataKeywordLists, Settings.Polling.FilterDelay);
 			bookmarksTreeView = new BookmarksTreeView(bookmarksFilter, bookmarksModel, Settings.Lists.Bookmarks, webBrowserToolTip, queryParser, cacheFileSystem, searchHandler);
 			bookmarksToolStrip = new BookmarksToolStrip(bookmarksFilter, bookmarksModel, Settings.Lists.Bookmarks, Settings.Polling.FilterDelay);
@@ -213,14 +215,14 @@ namespace NHxD.Frontend.Winforms
 
 			galleryBrowserView = new GalleryBrowserView(galleryBrowserFilter, galleryModel, documentTemplates.SearchCovergrid, documentTemplates.SearchPreload, pathFormatter, Settings.Gallery.Browser, pageDownloader, coverDownloader, metadataKeywordLists, tagsModel, searchHandler);
 			galleryToolStrip = new GalleryBrowserToolStrip(galleryBrowserFilter, galleryModel, Settings.Gallery.Browser, searchHandler);
-			libraryBrowserView = new LibraryBrowserView(libraryBrowserFilter, libraryModel, documentTemplates.LibraryCovergrid, documentTemplates.SearchPreload, documentTemplates.LibraryCovergridItem, pathFormatter, pageDownloader, coverLoader, metadataKeywordLists, Settings.Library.Browser, searchResultCache);
+			libraryBrowserView = new LibraryBrowserView(libraryBrowserFilter, libraryModel, documentTemplates.LibraryCovergrid, documentTemplates.SearchPreload, documentTemplates.LibraryCovergridItem, pathFormatter, queryParser, pageDownloader, coverLoader, metadataKeywordLists, Settings.Library.Browser, metadataCache, searchResultCache, metadataCacheSnapshot);
 			libraryBrowserToolStrip = new LibraryBrowserToolStrip(libraryBrowserFilter, libraryModel, Settings.Library.Browser, searchHandler);
 			detailsToolStrip = new DetailsBrowserToolStrip(detailsBrowserFilter, detailsModel, searchHandler);
 			detailsBrowserView = new DetailsBrowserView(detailsBrowserFilter, detailsModel, documentTemplates.Details, documentTemplates.Download, documentTemplates.DetailsPreload, galleryDownloader, pageDownloader, coverDownloader, metadataKeywordLists, Settings.Details.Browser, searchResultCache, cacheFileSystem);
 			theme = new Theme();
 			applicationLoader = new ApplicationLoader();
 			fullScreenRestoreState = new FullScreenRestoreState();
-			mainMenuStrip = new MainMenuStrip(Settings);
+			mainMenuStrip = new MainMenuStrip(Settings, pathFormatter, metadataCache, searchResultCache, metadataCacheSnapshot);
 			startupSpecialHandler = new StartupSpecialHandler(Settings.Gallery, tagsModel, metadataKeywordLists, searchHandler);
 			taskbar = new Taskbar(coverDownloader, galleryDownloader, pageDownloader, searchResultCache, cacheFileSystem);
 
@@ -765,6 +767,15 @@ namespace NHxD.Frontend.Winforms
 		private void Application_ApplicationExit(object sender, EventArgs e)
 		{
 			WriteUserData();
+			DeleteCaches();
+		}
+
+		private void DeleteCaches()
+		{
+			if (Settings.Cache.MetadataCache.DeleteAtExit)
+			{
+				metadataCacheSnapshot.Delete();
+			}
 		}
 
 		protected override bool ProcessCmdKey(ref Message msg, Keys keyData)

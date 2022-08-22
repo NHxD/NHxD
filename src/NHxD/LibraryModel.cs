@@ -21,11 +21,39 @@ namespace NHxD
 		private readonly Queue<LibraryEvent> events;
 
 		private ISearchProgressArg searchProgressArg;
+		private int tagId = -1;
+		private string query = "";
 		private int pageIndex = 1;
 
 		public BindingList<string> Filters => filters;
 		public FileSystemWatcher FileSystemWatcher => fileSystemWatcher;
 		public Queue<LibraryEvent> Events => events;
+
+		public int TagId
+		{
+			get
+			{
+				return tagId;
+			}
+			set
+			{
+				tagId = value;
+				OnTagIdChanged();
+			}
+		}
+
+		public string Query
+		{
+			get
+			{
+				return query;
+			}
+			set
+			{
+				query = value;
+				OnQueryChanged();
+			}
+		}
 
 		public int PageIndex
 		{
@@ -56,6 +84,8 @@ namespace NHxD
 		public ILibraryPollingTimer Timer { get; }
 
 		public event EventHandler FiltersChanged = delegate { };
+		public event EventHandler TagIdChanged = delegate { };
+		public event EventHandler QueryChanged = delegate { };
 		public event EventHandler PageIndexChanged = delegate { };
 		public event EventHandler SearchProgressArgChanged = delegate { };
 		public event LibraryEventHandler Poll = delegate { };
@@ -141,6 +171,16 @@ namespace NHxD
 			filters.RemoveAt(index);
 
 			FiltersChanged.Invoke(this, EventArgs.Empty);
+		}
+
+		protected virtual void OnTagIdChanged()
+		{
+			TagIdChanged.Invoke(this, EventArgs.Empty);
+		}
+
+		protected virtual void OnQueryChanged()
+		{
+			QueryChanged.Invoke(this, EventArgs.Empty);
 		}
 
 		protected virtual void OnPageIndexChanged()

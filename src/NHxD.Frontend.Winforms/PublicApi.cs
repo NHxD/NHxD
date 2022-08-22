@@ -1297,6 +1297,8 @@ namespace NHxD.Frontend.Winforms
 		void ShowDetails(int galleryId);
 		void ShowDownload(int galleryId);
 		void BrowseLibrary(int pageIndex);
+		void BrowseTaggedCache(int tagId, int pageIndex);
+		void BrowseCache(string query, int pageIndex);
 		void RunTaggedSearch(int tagId, int pageIndex);
 		void RunSearch(string query, int pageIndex);
 		void RunRecentSearch(int pageIndex);
@@ -1497,6 +1499,16 @@ namespace NHxD.Frontend.Winforms
 		public void BrowseLibrary(int pageIndex)
 		{
 			SearchHandler.BrowseLibrary(pageIndex);
+		}
+
+		public void BrowseTaggedCache(int tagId, int pageIndex)
+		{
+			SearchHandler.BrowseTaggedCache(tagId, pageIndex);
+		}
+
+		public void BrowseCache(string query, int pageIndex)
+		{
+			SearchHandler.BrowseCache(query, pageIndex);
 		}
 
 		public void RunTaggedSearch(int tagId, int pageIndex)

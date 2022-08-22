@@ -134,14 +134,33 @@ namespace NHxD.Frontend.Winforms
 						galleryDownloader.Run();
 						break;
 
-					case 13:
+					case 14:
+						loadPassName = "Loading static metadata cache...";
+						Logger.TraceLine(loadPassName);
+
+						if (Settings.Cache.MetadataCache.BuildAtStartup)
+						{
+							metadataCacheSnapshot.AggregateFromFiles();
+							metadataCacheSnapshot.SaveToFile();
+						}
+
+						if (Settings.Cache.MetadataCache.LoadAtStartup)
+						{
+							if (!metadataCacheSnapshot.IsReady)
+							{
+								metadataCacheSnapshot.LoadFromFile();
+							}
+						}
+						break;
+
+					case 15:
 						loadPassName = "Enabling form...";
 						Logger.TraceLine(loadPassName);
 
 						Enabled = true;
 						break;
 
-					case 14:
+					case 16:
 						loadPassName = "Removing splash screen...";
 						Logger.TraceLine(loadPassName);
 
@@ -154,7 +173,7 @@ namespace NHxD.Frontend.Winforms
 						}
 						break;
 
-					case 15:
+					case 17:
 						loadPassName = "Starting up...";
 						Logger.TraceLine(loadPassName);
 						Logger.WriteSeparator();
@@ -167,7 +186,7 @@ namespace NHxD.Frontend.Winforms
 
 				++loadPass;
 
-				applicationLoader.SetProgress((int)(loadPass / 14.0f * 100.0f), loadPassName);
+				applicationLoader.SetProgress((int)(loadPass / 15.0f * 100.0f), loadPassName);
 			}
 			catch (Exception ex)
 			{

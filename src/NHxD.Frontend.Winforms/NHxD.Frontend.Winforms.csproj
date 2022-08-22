@@ -169,6 +169,12 @@
     <Compile Include="MainMenuStrip.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="ManageMetadataCacheForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ManageMetadataCacheForm.Designer.cs">
+      <DependentUpon>ManageMetadataCacheForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="StartupSpecialHandler.cs" />
     <Compile Include="StaticHttpClient.cs" />
     <Compile Include="JsonUtility.cs" />
@@ -286,6 +292,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ManageMetadataCacheForm.resx">
+      <DependentUpon>ManageMetadataCacheForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PluginsForm.resx">
       <DependentUpon>PluginsForm.cs</DependentUpon>
