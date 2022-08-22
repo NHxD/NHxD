@@ -7,9 +7,11 @@ namespace NHxD.Frontend.Winforms
 {
 	public class StaticHttpClient : IDisposable
 	{
+		private readonly HttpClient genericClient;
 		private readonly HttpClient client;
 		private readonly WebProxy webProxy;
 
+		public HttpClient GenericClient => genericClient;
 		public HttpClient Client => client;
 		public WebProxy WebProxy => webProxy;
 
@@ -20,6 +22,9 @@ namespace NHxD.Frontend.Winforms
 			if (!networkSettings.Offline)
 			{
 				client = new HttpClient(GetHttpClientHandler(networkSettings, webProxy), true);
+				genericClient = new HttpClient()
+				{
+				};
 			}
 		}
 

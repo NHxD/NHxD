@@ -225,6 +225,7 @@ namespace NHxD.Frontend.Winforms
 			taskbar = new Taskbar(coverDownloader, galleryDownloader, pageDownloader, searchResultCache, cacheFileSystem);
 
 			publicApi = new PublicApi(staticHttpClient.Client
+				, staticHttpClient.GenericClient
 				, pathFormatter
 				, cacheFileSystem
 				, searchResultCache

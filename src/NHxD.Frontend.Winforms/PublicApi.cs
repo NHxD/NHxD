@@ -1556,6 +1556,7 @@ namespace NHxD.Frontend.Winforms
 		public ISettingsApi Settings => settings;
 
 		public PublicApi(HttpClient httpClient
+			, HttpClient genericHttpClient
 			, IPathFormatter pathFormatter
 			, ICacheFileSystem cacheFileSystem
 			, ISearchResultCache searchResultCache
@@ -1582,7 +1583,7 @@ namespace NHxD.Frontend.Winforms
 			notifications = new NotificationsApi(notificationsSettings);
 			this.metadataKeywordLists = new MetadataKeywordListsApi(metadataKeywordLists);
 			bookmark = new BookmarkApi(bookmarkPromptUtility);
-			dictionary = new DictionaryApi(httpClient);
+			dictionary = new DictionaryApi(genericHttpClient);
 			search = new SearchApi(searchHandler);
 			this.settings = new SettingsApi(settings);
 		}
