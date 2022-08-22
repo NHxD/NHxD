@@ -45,6 +45,26 @@ namespace NHxD.Formatting.TokenModifiers
 					{
 						result = tag.Id.ToString(CultureInfo.InvariantCulture);
 					}
+					else if (namespaces[1].Equals("CreationTime", StringComparison.OrdinalIgnoreCase))
+					{
+						result = (tag.CreationTime ?? default(DateTime)).ToString(CultureInfo.CurrentCulture);
+					}
+					else if (namespaces[1].Equals("LastAccessTime", StringComparison.OrdinalIgnoreCase))
+					{
+						result = (tag.LastAccessTime ?? default(DateTime)).ToString(CultureInfo.CurrentCulture);
+					}
+					else if (namespaces[1].Equals("LastWriteTime", StringComparison.OrdinalIgnoreCase))
+					{
+						result = (tag.LastWriteTime ?? default(DateTime)).ToString(CultureInfo.CurrentCulture);
+					}
+					else if (namespaces[1].Equals("LastVisitTime", StringComparison.OrdinalIgnoreCase))
+					{
+						result = (tag.LastVisitTime ?? default(DateTime)).ToString(CultureInfo.CurrentCulture);
+					}
+				}
+				else if (namespaces[1].Equals("RemoveIfInvalid", StringComparison.OrdinalIgnoreCase))
+				{
+					result = "";
 				}
 			}
 

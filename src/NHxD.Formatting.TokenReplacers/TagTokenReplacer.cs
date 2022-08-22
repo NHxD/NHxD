@@ -42,6 +42,22 @@ namespace NHxD.Formatting.TokenReplacers
 					{
 						result = Tag.Url;
 					}
+					else if (namespaces[1].Equals("CreationTime", StringComparison.OrdinalIgnoreCase))
+					{
+						result = (Tag.CreationTime ?? default(DateTime)).ToString(CultureInfo.CurrentCulture);
+					}
+					else if (namespaces[1].Equals("LastAccessTime", StringComparison.OrdinalIgnoreCase))
+					{
+						result = (Tag.LastAccessTime ?? default(DateTime)).ToString(CultureInfo.CurrentCulture);
+					}
+					else if (namespaces[1].Equals("LastWriteTime", StringComparison.OrdinalIgnoreCase))
+					{
+						result = (Tag.LastWriteTime ?? default(DateTime)).ToString(CultureInfo.CurrentCulture);
+					}
+					else if (namespaces[1].Equals("LastVisitTime", StringComparison.OrdinalIgnoreCase))
+					{
+						result = (Tag.LastVisitTime ?? default(DateTime)).ToString(CultureInfo.CurrentCulture);
+					}
 				}
 			}
 

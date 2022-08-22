@@ -160,10 +160,16 @@ namespace NHxD.Frontend.Winforms
 
 	public enum TagSortType
 	{
+		None,
+		Id,
 		Name,
 		Count,
-		DateAdded,
-		Id,
+		CreationTime,
+		LastAccessTime,
+		LastWriteTime,
+		LastVisitTime,
+
+		DateAdded = CreationTime,
 	}
 
 	public static class TagsFiltersExtensionMethods

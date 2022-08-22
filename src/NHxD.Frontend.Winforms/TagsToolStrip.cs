@@ -19,8 +19,13 @@ namespace NHxD.Frontend.Winforms
 		private readonly ToolStripMenuItem filterOtherButton;
 		private readonly ToolStripDropDownButton sortButton;
 		private readonly ToolStripMenuItem sortTypeNoneButton;
+		private readonly ToolStripMenuItem sortTypeIdButton;
 		private readonly ToolStripMenuItem sortTypeNameButton;
 		private readonly ToolStripMenuItem sortTypeCountButton;
+		private readonly ToolStripMenuItem sortTypeCreationTimeButton;
+		private readonly ToolStripMenuItem sortTypeLastAccessTimeButton;
+		private readonly ToolStripMenuItem sortTypeLastWriteTimeButton;
+		private readonly ToolStripMenuItem sortTypeLastVisitTimeButton;
 		private readonly ToolStripMenuItem sortOrderAscendingButton;
 		private readonly ToolStripMenuItem sortOrderDescendingButton;
 		private readonly Timer filterTimer;
@@ -61,8 +66,13 @@ namespace NHxD.Frontend.Winforms
 			filterOtherButton = new ToolStripMenuItem();
 			sortButton = new ToolStripDropDownButton();
 			sortTypeNoneButton = new ToolStripMenuItem();
+			sortTypeIdButton = new ToolStripMenuItem();
 			sortTypeNameButton = new ToolStripMenuItem();
 			sortTypeCountButton = new ToolStripMenuItem();
+			sortTypeCreationTimeButton = new ToolStripMenuItem();
+			sortTypeLastAccessTimeButton = new ToolStripMenuItem();
+			sortTypeLastWriteTimeButton = new ToolStripMenuItem();
+			sortTypeLastVisitTimeButton = new ToolStripMenuItem();
 			sortOrderAscendingButton = new ToolStripMenuItem();
 			sortOrderDescendingButton = new ToolStripMenuItem();
 			filterTimer = new Timer(components);
@@ -135,8 +145,12 @@ namespace NHxD.Frontend.Winforms
 			sortButton.AutoToolTip = false;
 
 			sortTypeNoneButton.Name = "sort_type_none";
-			sortTypeNoneButton.Text = "&Date Added";
+			sortTypeNoneButton.Text = "&None";
 			sortTypeNoneButton.Click += SortTypeNoneButton_Click;
+
+			sortTypeIdButton.Name = "sort_type_id";
+			sortTypeIdButton.Text = "&Id";
+			sortTypeIdButton.Click += SortTypeIdButton_Click;
 
 			sortTypeNameButton.Name = "sort_type_name";
 			sortTypeNameButton.Text = "&Name";
@@ -145,6 +159,22 @@ namespace NHxD.Frontend.Winforms
 			sortTypeCountButton.Name = "sort_type_count";
 			sortTypeCountButton.Text = "&Count";
 			sortTypeCountButton.Click += SortTypeCountButton_Click;
+
+			sortTypeCreationTimeButton.Name = "sort_type_creation_time";
+			sortTypeCreationTimeButton.Text = "&Date Found";
+			sortTypeCreationTimeButton.Click += SortTypeCreationTimeButton_Click;
+
+			sortTypeLastAccessTimeButton.Name = "sort_type_last_access_time";
+			sortTypeLastAccessTimeButton.Text = "Last &Access Time";
+			sortTypeLastAccessTimeButton.Click += SortTypeLastAccessTimeButton_Click;
+
+			sortTypeLastWriteTimeButton.Name = "sort_type_last_write_time";
+			sortTypeLastWriteTimeButton.Text = "Last &Write Time";
+			sortTypeLastWriteTimeButton.Click += SortTypeLastWriteTimeButton_Click;
+
+			sortTypeLastVisitTimeButton.Name = "sort_type_last_visit_time";
+			sortTypeLastVisitTimeButton.Text = "Last &Visit Time";
+			sortTypeLastVisitTimeButton.Click += SortTypeLastVisitTimeButton_Click;
 
 			sortOrderAscendingButton.Name = "sort_order_ascending";
 			sortOrderAscendingButton.Text = "&Ascending";
@@ -157,9 +187,14 @@ namespace NHxD.Frontend.Winforms
 			ContextMenuStrip sortContextMenuStrip = new ContextMenuStrip();
 
 			sortContextMenuStrip.ShowCheckMargin = true;
+			sortContextMenuStrip.Items.Add(sortTypeNoneButton);
+			sortContextMenuStrip.Items.Add(sortTypeIdButton);
 			sortContextMenuStrip.Items.Add(sortTypeNameButton);
 			sortContextMenuStrip.Items.Add(sortTypeCountButton);
-			sortContextMenuStrip.Items.Add(sortTypeNoneButton);
+			sortContextMenuStrip.Items.Add(sortTypeCreationTimeButton);
+			sortContextMenuStrip.Items.Add(sortTypeLastAccessTimeButton);
+			sortContextMenuStrip.Items.Add(sortTypeLastWriteTimeButton);
+			sortContextMenuStrip.Items.Add(sortTypeLastVisitTimeButton);
 			sortContextMenuStrip.Items.Add(new ToolStripSeparator());
 			sortContextMenuStrip.Items.Add(sortOrderAscendingButton);
 			sortContextMenuStrip.Items.Add(sortOrderDescendingButton);
@@ -225,6 +260,26 @@ namespace NHxD.Frontend.Winforms
 			TagsFilter.SortOrder = SortOrder.Ascending;
 		}
 
+		private void SortTypeLastVisitTimeButton_Click(object sender, EventArgs e)
+		{
+			TagsFilter.SortType = TagSortType.LastVisitTime;
+		}
+
+		private void SortTypeLastWriteTimeButton_Click(object sender, EventArgs e)
+		{
+			TagsFilter.SortType = TagSortType.LastWriteTime;
+		}
+
+		private void SortTypeLastAccessTimeButton_Click(object sender, EventArgs e)
+		{
+			TagsFilter.SortType = TagSortType.LastAccessTime;
+		}
+
+		private void SortTypeCreationTimeButton_Click(object sender, EventArgs e)
+		{
+			TagsFilter.SortType = TagSortType.CreationTime;
+		}
+
 		private void SortTypeCountButton_Click(object sender, EventArgs e)
 		{
 			TagsFilter.SortType = TagSortType.Count;
@@ -235,23 +290,38 @@ namespace NHxD.Frontend.Winforms
 			TagsFilter.SortType = TagSortType.Name;
 		}
 
+		private void SortTypeIdButton_Click(object sender, EventArgs e)
+		{
+			TagsFilter.SortType = TagSortType.Id;
+		}
+
 		private void SortTypeNoneButton_Click(object sender, EventArgs e)
 		{
-			TagsFilter.SortType = TagSortType.DateAdded;
+			TagsFilter.SortType = TagSortType.None;
 		}
 
 		private void SortContextMenuStrip_Opening(object sender, CancelEventArgs e)
 		{
-			sortTypeNoneButton.Checked = TagsFilter.SortType == TagSortType.DateAdded;
+			sortTypeNoneButton.Checked = TagsFilter.SortType == TagSortType.None;
+			sortTypeIdButton.Checked = TagsFilter.SortType == TagSortType.Id;
 			sortTypeNameButton.Checked = TagsFilter.SortType == TagSortType.Name;
 			sortTypeCountButton.Checked = TagsFilter.SortType == TagSortType.Count;
+			sortTypeCreationTimeButton.Checked = TagsFilter.SortType == TagSortType.CreationTime;
+			sortTypeLastAccessTimeButton.Checked = TagsFilter.SortType == TagSortType.LastAccessTime;
+			sortTypeLastWriteTimeButton.Checked = TagsFilter.SortType == TagSortType.LastWriteTime;
+			sortTypeLastVisitTimeButton.Checked = TagsFilter.SortType == TagSortType.LastVisitTime;
 
 			sortOrderAscendingButton.Checked = TagsFilter.SortOrder == SortOrder.Ascending;
 			sortOrderDescendingButton.Checked = TagsFilter.SortOrder == SortOrder.Descending;
 
 			sortTypeNoneButton.Enabled = !sortTypeNoneButton.Checked;
+			sortTypeIdButton.Enabled = !sortTypeIdButton.Checked;
 			sortTypeNameButton.Enabled = !sortTypeNameButton.Checked;
 			sortTypeCountButton.Enabled = !sortTypeCountButton.Checked;
+			sortTypeCreationTimeButton.Enabled = !sortTypeCreationTimeButton.Checked;
+			sortTypeLastAccessTimeButton.Enabled = !sortTypeLastAccessTimeButton.Checked;
+			sortTypeLastWriteTimeButton.Enabled = !sortTypeLastWriteTimeButton.Checked;
+			sortTypeLastVisitTimeButton.Enabled = !sortTypeLastVisitTimeButton.Checked;
 
 			sortOrderAscendingButton.Enabled = !sortOrderAscendingButton.Checked;
 			sortOrderDescendingButton.Enabled = !sortOrderDescendingButton.Checked;

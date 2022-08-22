@@ -856,6 +856,50 @@ namespace NHxD.Frontend.Winforms
 						return tag1.Id.CompareTo(tag2.Id);
 					}
 				}
+				else if (SortType == TagSortType.CreationTime)
+				{
+					if (SortOrder == SortOrder.Descending)
+					{
+						return (int)((tag2.CreationTime - tag1.CreationTime)?.TotalSeconds ?? -1);
+					}
+					else// if (SortOrder == SortOrder.Ascending)
+					{
+						return (int)((tag1.CreationTime - tag2.CreationTime)?.TotalSeconds ?? -1);
+					}
+				}
+				else if (SortType == TagSortType.LastAccessTime)
+				{
+					if (SortOrder == SortOrder.Descending)
+					{
+						return (int)((tag2.LastAccessTime - tag1.LastAccessTime)?.TotalSeconds ?? -1);
+					}
+					else// if (SortOrder == SortOrder.Ascending)
+					{
+						return (int)((tag1.LastAccessTime - tag2.LastAccessTime)?.TotalSeconds ?? -1);
+					}
+				}
+				else if (SortType == TagSortType.LastWriteTime)
+				{
+					if (SortOrder == SortOrder.Descending)
+					{
+						return (int)((tag2.LastWriteTime - tag1.LastWriteTime)?.TotalSeconds ?? -1);
+					}
+					else// if (SortOrder == SortOrder.Ascending)
+					{
+						return (int)((tag1.LastWriteTime - tag2.LastWriteTime)?.TotalSeconds ?? -1);
+					}
+				}
+				else if (SortType == TagSortType.LastVisitTime)
+				{
+					if (SortOrder == SortOrder.Descending)
+					{
+						return (int)((tag2.LastVisitTime - tag1.LastVisitTime)?.TotalSeconds ?? -1);
+					}
+					else// if (SortOrder == SortOrder.Ascending)
+					{
+						return (int)((tag1.LastVisitTime - tag2.LastVisitTime)?.TotalSeconds ?? -1);
+					}
+				}
 				else
 				{
 					if (SortOrder == SortOrder.Descending)

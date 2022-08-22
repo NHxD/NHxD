@@ -172,7 +172,7 @@ namespace NHxD
 
 			if (results.Count > 0)
 			{
-				TagInfo copy = new TagInfo() { Type = tag.Type, Name = tag.Name, Id = tag.Id, Url = tag.Url };
+				TagInfo copy = new TagInfo() { Type = tag.Type, Name = tag.Name, Id = tag.Id, Url = tag.Url, Count = tag.Count, CreationTime = tag.CreationTime, LastAccessTime = tag.LastAccessTime, LastWriteTime = tag.LastWriteTime, LastVisitTime = tag.LastVisitTime };
 
 				this[tag.Type].Remove(results[0]);
 

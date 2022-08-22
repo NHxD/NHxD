@@ -1,4 +1,5 @@
-﻿using Nhentai;
+﻿using Newtonsoft.Json;
+using Nhentai;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,8 @@ namespace NHxD
 		// TODO: use the CreationTime property to order by added date.
 		public List<TagInfo> AllTags => tags;
 		public bool IsDirty => NewTagsCount > 0;
+
+		public bool SupportsLastAccessTime { get; set; }
 
 		public event TagEventHandler ItemAdded = delegate { };
 
@@ -75,11 +78,12 @@ namespace NHxD
 				if (AllTags.Any(x => x.Id == tag.Id))
 				{
 					TagInfo tagInfo = AllTags.First(x => x.Id == tag.Id);
+					bool markAsDirty = false;
 
 					if (tagInfo.Type != tag.Type)
 					{
 						tagInfo.Type = tag.Type;
-						MarkAsDirty();
+						markAsDirty = true;
 					}
 
 					if (string.IsNullOrEmpty(tagInfo.Name)
@@ -87,19 +91,44 @@ namespace NHxD
 					{
 						tagInfo.Name = tag.Name;
 						tagInfo.Count = tag.Count;
-						MarkAsDirty();
+						markAsDirty = true;
 					}
 
 					if (tagInfo.Count != tag.Count)
 					{
 						tagInfo.Count = tag.Count;
-						MarkAsDirty();
+						markAsDirty = true;
 					}
 
 					if (string.IsNullOrEmpty(tagInfo.Url)
 						|| !tagInfo.Url.Equals(tag.Url))
 					{
 						tagInfo.Url = tag.Url;
+						markAsDirty = true;
+					}
+
+					if (tagInfo.CreationTime == null)
+					{
+						tagInfo.CreationTime = DateTime.Now;
+						markAsDirty = true;
+					}
+
+					if (tagInfo.LastAccessTime == null
+					|| SupportsLastAccessTime)
+					{
+						tagInfo.LastAccessTime = DateTime.Now;
+						markAsDirty = true;
+					}
+
+					if (tagInfo.LastWriteTime == null)
+					{
+						markAsDirty = true;
+					}
+
+					if (markAsDirty)
+					{
+						tagInfo.LastWriteTime = DateTime.Now;
+						tagInfo.LastAccessTime = DateTime.Now;
 						MarkAsDirty();
 					}
 
@@ -112,14 +141,30 @@ namespace NHxD
 					Name = tag.Name,
 					Type = tag.Type,
 					Count = tag.Count,
-					Url = tag.Url
-					//CreationTime = DateTime.Now
+					Url = tag.Url,
+					CreationTime = DateTime.Now,
+					LastAccessTime = DateTime.Now,
+					LastWriteTime = DateTime.Now,
+					LastVisitTime = null
 				});
 
 				++addCount;
 			}
 
 			return addCount;
+		}
+
+		public void Visit(int tagId)
+		{
+			if (!AllTags.Any(x => x.Id == tagId))
+			{
+				return;
+			}
+
+			TagInfo tag = AllTags.First(x => x.Id == tagId);
+
+			tag.LastVisitTime = DateTime.Now;
+			MarkAsDirty();
 		}
 	}
 
@@ -137,9 +182,17 @@ namespace NHxD
 
 	public class TagInfo : Tag
 	{
-		// TODO?
-		//[JsonProperty("creationTime")]
-		//public DateTime CreationTime { get; set; }
+		[JsonProperty("creationTime")]
+		public DateTime? CreationTime { get; set; }
+
+		[JsonProperty("lastAccessTime")]
+		public DateTime? LastAccessTime { get; set; }
+
+		[JsonProperty("lastWriteTime")]
+		public DateTime? LastWriteTime { get; set; }
+
+		[JsonProperty("lastVisitTime")]
+		public DateTime? LastVisitTime { get; set; }
 	}
 
 	public delegate void TagEventHandler(object sender, TagEventArgs e);
