@@ -319,7 +319,7 @@ namespace NHxD.Frontend.Winforms
 
 		private void VisitDlsiteToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			Process.Start("https://www.dlsite.com/ecchi-eng/fsr/=/work_category/doujin/work_type_category/comic");
+			Process.Start("https://www.dlsite.com/books/");
 		}
 
 		private void VisitJlistToolStripMenuItem_Click(object sender, EventArgs e)
