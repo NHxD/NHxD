@@ -29,6 +29,10 @@ namespace NHxD.Frontend.Winforms
 					{
 						result = SearchArg.PageIndex.ToString(CultureInfo.InvariantCulture);
 					}
+					else if (namespaces[1].Equals("ValidTagIdOrNothing", StringComparison.OrdinalIgnoreCase))
+					{
+						result = SearchArg.TagId != -1 ? SearchArg.TagId.ToString(CultureInfo.InvariantCulture) : "";
+					}
 					else if (namespaces[1].Equals("TagId", StringComparison.OrdinalIgnoreCase))
 					{
 						result = SearchArg.TagId.ToString(CultureInfo.InvariantCulture);
@@ -46,6 +50,17 @@ namespace NHxD.Frontend.Winforms
 						else
 						{
 							result = "";
+						}
+					}
+					else if (namespaces[1].Equals("QueryOrTagId", StringComparison.OrdinalIgnoreCase))
+					{
+						if (!string.IsNullOrEmpty(SearchArg.Query))
+						{
+							result = SearchArg.Query;
+						}
+						else
+						{
+							result = SearchArg.TagId.ToString(CultureInfo.InvariantCulture);
 						}
 					}
 					else if (namespaces[1].Equals("Target", StringComparison.OrdinalIgnoreCase))
