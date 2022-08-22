@@ -25,7 +25,13 @@ namespace NHxD.Frontend.Winforms
 		public TagsModel TagsModel { get; }
 		public TagTextFormatter TagTextFormatter { get; }
 		public Configuration.ConfigTagsList TagsListSettings { get; }
+		public Configuration.ConfigNetwork NetworkSettings { get; }
 		public MetadataKeywordLists MetadataKeywordLists { get; }
+		public IPathFormatter PathFormatter { get; }
+		public IMetadataCache MetadataCache { get; }
+		public ISearchResultCache SearchResultCache { get; }
+		public MetadataCacheSnapshot MetadataCacheSnapshot { get; }
+		public Configuration.ConfigMetadataCache MetadataCacheSettings { get; }
 		public SearchHandler SearchHandler { get; }
 		public BookmarkPromptUtility BookmarkPromptUtility { get; }
 		public HttpClient HttpClient { get; }
@@ -37,7 +43,13 @@ namespace NHxD.Frontend.Winforms
 
 		public TagsTreeView(TagsFilter tagsFilter, TagsModel tagsModel, TagTextFormatter tagTextFormatter
 			, Configuration.ConfigTagsList tagsListSettings
+			, Configuration.ConfigNetwork networkSettings
 			, MetadataKeywordLists metadataKeywordLists
+			, IPathFormatter pathFormatter
+			, IMetadataCache metadataCache
+			, ISearchResultCache searchResultCache
+			, MetadataCacheSnapshot metadataCacheSnapshot
+			, Configuration.ConfigMetadataCache metadataCacheSettings
 			, SearchHandler searchHandler
 			, BookmarkPromptUtility bookmarkPromptUtility
 			, HttpClient httpClient)
@@ -48,7 +60,13 @@ namespace NHxD.Frontend.Winforms
 			TagsModel = tagsModel;
 			TagTextFormatter = tagTextFormatter;
 			TagsListSettings = tagsListSettings;
+			NetworkSettings = networkSettings;
 			MetadataKeywordLists = metadataKeywordLists;
+			PathFormatter = pathFormatter;
+			MetadataCache = metadataCache;
+			SearchResultCache = searchResultCache;
+			MetadataCacheSnapshot = metadataCacheSnapshot;
+			MetadataCacheSettings = metadataCacheSettings;
 			SearchHandler = searchHandler;
 			BookmarkPromptUtility = bookmarkPromptUtility;
 			HttpClient = httpClient;
@@ -71,7 +89,7 @@ namespace NHxD.Frontend.Winforms
 			treeView.HideSelection = false;
 			treeView.HotTracking = true;
 			treeView.Dock = DockStyle.Fill;
-			//treeView.Sorted = true;
+			treeView.Sorted = true;
 			treeView.TreeViewNodeSorter = new TagsTreeViewNodeSorter(TagSortType.Name, SortOrder.Ascending);
 			treeView.NodeActivated += TreeView_NodeActivated;
 			treeView.NodeSelected += TreeView_NodeSelected;
@@ -455,7 +473,8 @@ namespace NHxD.Frontend.Winforms
 
 			contextMenu.MenuItems.Add(new MenuItem("&Add bookmark", (sender2, e2) => { BookmarkPromptUtility.ShowAddTaggedBookmarkPrompt(tag.Id, 1); }) { Name = "search_definition" });
 
-			if (tag.Type == TagType.Tag)
+			if (tag.Type == TagType.Tag
+				&& !NetworkSettings.Offline)
 			{
 				if (contextMenu.MenuItems.Count > 0)
 				{
@@ -464,6 +483,72 @@ namespace NHxD.Frontend.Winforms
 
 				contextMenu.MenuItems.Add(new MenuItem("&Search for definition", (sender2, e2) => { TagDefinition tagDefinition = new TagDefinition(tag.Name, HttpClient); tagDefinition.Search(); }) { Name = "search_definition" });
 			}
+
+			if (contextMenu.MenuItems.Count > 0)
+			{
+				contextMenu.MenuItems.Add("-");
+			}
+
+			//contextMenu.MenuItems.Add(new MenuItem("View in &library", (sender2, e2) => { SearchHandler.BrowseCache("tagged:" + tag.Id + ":1"); }) { Name = "view_in_library" });
+			contextMenu.MenuItems.Add(new MenuItem("View in &cache", (sender2, e2) =>
+			{
+				/*
+				on load: start worker 1 - discovery phase - searching for metadata...
+				on load: start worker 2 - processing phase - adding metadata...
+				on load: start worker 3 - processing phase - saving cache file...
+				*/
+				/*
+				compression level:
+				0 - none (save as plain json)
+				1 - fastest (faster to save and load but larger file) (save as json.gz)
+				2 - optimal (slower to save and load but smaller file) (save as json.gz)
+				at program start up:
+				synchronize full cache
+				preload full cache file
+				at program exit:
+				delete full cache file
+				*/
+				if (!MetadataCacheSnapshot.IsReady)
+				{
+					if (MessageBox.Show(this, "To perform this operation, the cache needs to be built first. Do it now? (Go to File > Build)", "NHxD", MessageBoxButtons.YesNo) == DialogResult.Yes)
+					{
+						using (ManageMetadataCacheForm dialog = new ManageMetadataCacheForm(PathFormatter, MetadataCache, SearchResultCache, MetadataCacheSnapshot, MetadataCacheSettings))
+						{
+							var result = dialog.ShowDialog(this);
+							/*
+							if (!MetadataCacheSnapshot.IsReady)
+							{
+								MetadataCacheSnapshot.LoadFromFile();
+							}
+
+							SearchHandler.BrowseTaggedCache(tag.Id, 1);
+							*/
+						}
+					}
+				}
+
+				if (MetadataCacheSnapshot.IsReady)
+				{
+					SearchHandler.BrowseTaggedCache(tag.Id, 1);
+				}
+				/*
+				if (!MetadataCacheSnapshot.DoesExist)
+				{
+					if (MessageBox.Show(this, "The full metadata cache needs to be loaded first. This needs to be done only once, but might take a while... Proceed?", "", MessageBoxButtons.YesNo) == DialogResult.Yes)
+					{
+						MetadataCacheSnapshot.AggregateFromFiles();
+						MetadataCacheSnapshot.SaveToFile();
+					}
+				}
+
+				if (!MetadataCacheSnapshot.IsReady)
+				{
+					MetadataCacheSnapshot.LoadFromFile();
+				}
+
+				SearchHandler.BrowseTaggedCache(tag.Id, 1);
+				*/
+			}) { Name = "view_in_cache" });
 		}
 
 		private Color GetHidelistColor(bool isInWhitelist, bool isInBlacklist)
@@ -591,9 +676,11 @@ namespace NHxD.Frontend.Winforms
 
 				if (TagsFilter.ShouldFilter(tagInfo))
 				{
-					contentNode = new TreeNode(e.TagName)
+					TagInfo tag = TagsModel.AllTags.FirstOrDefault(x => x.Id == e.TagId);
+
+					contentNode = new TreeNode(TagTextFormatter.Format(tag, TagsListSettings.LabelFormats.Tag))
 					{
-						Tag = TagsModel.AllTags.FirstOrDefault(x => x.Id == e.TagId)  // should be First() but just in case...
+						Tag = tag
 					};
 
 					if (e.EventType == MetadataKeywordsListsEventType.Add)
