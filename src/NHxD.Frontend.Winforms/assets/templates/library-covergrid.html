@@ -58,7 +58,7 @@
 		</div>
 
 		<nav id="header" class="fixed-top" role="header">
-			<h1><span class="search-query">{Search.QueryOrTagId:Tag.Name}</span> (<span class="search-result-numpages">{SearchResult.NumPages}</span>)</h1>
+			<h1><span class="search-query">{Search.ValidTagIdOrNothing:Tag.Name}</span> (<span class="search-result-numpages">{SearchResult.NumPages}</span>)</h1>
 			<button id="nav-button-first" class="nav-button" title="Jump to first page"></button>
 			<button id="nav-button-previous" class="nav-button" title="Go to previous page"></button>
 			<input id="page-index-input" class="nav-input" name="page-index" type="text" value="{Search.PageIndex}" \>
