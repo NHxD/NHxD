@@ -565,7 +565,18 @@ function initCache()
 
 function Navigation_gotoPage(pageIndex)
 {
-	window.external.Search.BrowseLibrary(pageIndex)
+	if (search.tag_id != -1)
+	{
+		window.external.Search.BrowseTaggedCache(search.tag_id, pageIndex)
+	}
+	else if (search.query != "")
+	{
+		window.external.Search.BrowseCache(search.query, pageIndex)
+	}
+	else
+	{
+		window.external.Search.BrowseLibrary(pageIndex)
+	}
 }
 
 (function()
