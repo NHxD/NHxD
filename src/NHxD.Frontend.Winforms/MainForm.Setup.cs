@@ -369,6 +369,7 @@ namespace NHxD.Frontend.Winforms
 			if (!string.IsNullOrEmpty(Settings.Network.Client.UserAgent))
 			{
 				staticHttpClient.Client?.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", Settings.Network.Client.UserAgent);
+				staticHttpClient.GenericClient?.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", Settings.Network.Client.UserAgent);
 			}
 
 			if (staticHttpClient.Client != null)
