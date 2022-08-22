@@ -485,6 +485,9 @@ namespace NHxD.Frontend.Winforms.Configuration
 
 	public class ConfigClient
 	{
+		[JsonProperty("baseAddress")]
+		public string BaseAddress { get; set; } = "https://nhentai.net";
+
 		[JsonProperty("userAgent")]
 		public string UserAgent { get; set; } = "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:44.0) Gecko/20100101 Firefox/44.0";
 
@@ -493,6 +496,9 @@ namespace NHxD.Frontend.Winforms.Configuration
 
 		[JsonProperty("proxy")]
 		public ConfigProxy Proxy { get; set; } = new ConfigProxy();
+
+		[JsonProperty("cookies")]
+		public Dictionary<string, string> Cookies { get; set; } = new Dictionary<string, string>();
 
 		[JsonIgnore]
 		public bool HasCredentials => !string.IsNullOrEmpty(Credentials.UserName);

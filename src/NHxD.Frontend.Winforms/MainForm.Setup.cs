@@ -382,6 +382,8 @@ namespace NHxD.Frontend.Winforms
 				return;
 			}
 
+			SetCookiesAndUserAgentIfNecessary();
+
 			bool hasCustomMaxIdleTime = Settings.Network.MaxIdleTime > Timeout.Infinite;
 			bool hasCustomConnectionLeaseTimeout = Settings.Network.ConnectionLeaseTimeout > Timeout.Infinite;
 
@@ -400,7 +402,7 @@ namespace NHxD.Frontend.Winforms
 
 			if (hasCustomMaxIdleTime || hasCustomConnectionLeaseTimeout)
 			{
-				Uri address = new Uri("https://nhentai.net/");
+				Uri address = new Uri(Settings.Network.Client.BaseAddress);
 
 				ServicePoint servicePoint = ServicePointManager.FindServicePoint(address, staticHttpClient.WebProxy);
 
@@ -421,6 +423,31 @@ namespace NHxD.Frontend.Winforms
 				{
 					staticHttpClient.Client.Timeout = TimeSpan.FromMilliseconds(Settings.Network.ConnectionTimeout);
 				}
+			}
+		}
+
+		private void SetCookiesAndUserAgentIfNecessary()
+		{
+			if (Settings.Network.Client.Cookies.Count == 0)
+			{
+				loadTimer.Enabled = false;
+
+				using (var dialog = new CookieForm(Settings, pathFormatter))
+				{
+					if (dialog.ShowDialog(this) == DialogResult.OK)
+					{
+						var messageBoxResult = MessageBox.Show(this, "The application needs to be restarted. Do it now?", "NHxD", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+						if (messageBoxResult == DialogResult.Yes)
+						{
+							JsonUtility.SaveToFile(Settings, pathFormatter.GetConfiguration("settings"));
+							Application.Restart();
+							Environment.Exit(0);
+						}
+					}
+				}
+
+				loadTimer.Enabled = true;
 			}
 		}
 

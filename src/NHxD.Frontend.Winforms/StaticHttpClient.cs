@@ -21,7 +21,11 @@ namespace NHxD.Frontend.Winforms
 
 			if (!networkSettings.Offline)
 			{
-				client = new HttpClient(GetHttpClientHandler(networkSettings, webProxy), true);
+				client = new HttpClient(GetHttpClientHandler(networkSettings, webProxy), true)
+				{
+					BaseAddress = new Uri(networkSettings.Client.BaseAddress),
+				};
+
 				genericClient = new HttpClient()
 				{
 				};
@@ -50,7 +54,18 @@ namespace NHxD.Frontend.Winforms
 
 		private static HttpClientHandler GetHttpClientHandler(Configuration.ConfigNetwork networkSettings, WebProxy webProxy)
 		{
-			HttpClientHandler httpClientHandler = new HttpClientHandler();
+			var baseAddress = new Uri(networkSettings.Client.BaseAddress);
+			var cookieContainer = new CookieContainer();
+
+			foreach (var item in networkSettings.Client.Cookies)
+			{
+				cookieContainer.Add(baseAddress, new Cookie(item.Key, item.Value));
+			}
+
+			var httpClientHandler = new HttpClientHandler()
+			{
+				CookieContainer = cookieContainer,
+			};
 
 			if (networkSettings.Client.Proxy.IsEnabled)
 			{

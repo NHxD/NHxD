@@ -26,6 +26,7 @@ namespace NHxD.Frontend.Winforms
 
 		private readonly ToolStripMenuItem toolsToolStripMenuItem;
 		private readonly ToolStripMenuItem manageMetadataCacheToolStripMenuItem;
+		private readonly ToolStripMenuItem clearCookiesToolStripMenuItem;
 		public Settings Settings { get; }
 		public ISearchResultCache SearchResultCache { get; }
 		public IMetadataCache MetadataCache { get; }
@@ -69,6 +70,7 @@ namespace NHxD.Frontend.Winforms
 			linkFakkuToolStripMenuItem = new ToolStripMenuItem();
 			toolsToolStripMenuItem = new ToolStripMenuItem();
 			manageMetadataCacheToolStripMenuItem = new ToolStripMenuItem();
+			clearCookiesToolStripMenuItem = new ToolStripMenuItem();
 
 			SuspendLayout();
 
@@ -207,6 +209,7 @@ namespace NHxD.Frontend.Winforms
 			toolsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[]
 			{
 				manageMetadataCacheToolStripMenuItem,
+				clearCookiesToolStripMenuItem,
 			});
 			toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
 			toolsToolStripMenuItem.Text = "&Tools";
@@ -217,6 +220,13 @@ namespace NHxD.Frontend.Winforms
 			manageMetadataCacheToolStripMenuItem.Name = "manageMetadataCacheToolStripMenuItem";
 			manageMetadataCacheToolStripMenuItem.Text = "Manage &Metadata Cache";
 			manageMetadataCacheToolStripMenuItem.Click += new EventHandler(ManageMetadataCacheToolStripMenuItem_Click);
+
+			// 
+			// clearCookiesToolStripMenuItem
+			// 
+			clearCookiesToolStripMenuItem.Name = "clearCookiesToolStripMenuItem";
+			clearCookiesToolStripMenuItem.Text = "Clear &Cookies";
+			clearCookiesToolStripMenuItem.Click += new EventHandler(ClearCookiesToolStripMenuItem_Click);
 
 			//
 			// this
@@ -230,8 +240,18 @@ namespace NHxD.Frontend.Winforms
 			});
 			Name = "mainMenuStrip";
 
+			MenuActivate += MainMenuStrip_MenuActivate;
+
 			ResumeLayout(false);
 			PerformLayout();
+		}
+
+		private void MainMenuStrip_MenuActivate(object sender, EventArgs e)
+		{
+			listToolStripMenuItem.Checked = !Settings.Panels.Lists.IsCollapsed;
+			detailsToolStripMenuItem.Checked = !Settings.Panels.Details.IsCollapsed;
+			fullScreenToolStripMenuItem.Checked = Settings.Window.FullScreen.IsActive;
+			clearCookiesToolStripMenuItem.Enabled = CanClearCookies();
 		}
 
 		private void ApplicationMenuStrip_MenuActivate(object sender, EventArgs e)
@@ -252,6 +272,19 @@ namespace NHxD.Frontend.Winforms
 					//MetadataCacheSnapshot.EnsureReady();
 				}
 			}
+		}
+
+		private void ClearCookiesToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			if (!CanClearCookies())
+			{
+				return;
+			}
+
+			Settings.Network.Client.Cookies.Clear();
+			Settings.Network.Client.UserAgent = "";
+
+			MessageBox.Show(this, "Changes will be applied the next time the application is started.", "NHxD", MessageBoxButtons.OK, MessageBoxIcon.Information);
 		}
 
 		private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -298,5 +331,9 @@ namespace NHxD.Frontend.Winforms
 		{
 			Process.Start("https://www.fakku.net/doujin");
 		}
+
+		private bool CanClearCookies()
+			=> Settings.Network.Client.Cookies.Count > 0
+				|| !string.IsNullOrEmpty(Settings.Network.Client.UserAgent);
 	}
 }
