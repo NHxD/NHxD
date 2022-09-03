@@ -237,6 +237,11 @@
 
 		var dims = this.getComputedDimensions()
 
+		if (!dims.visibleChildCount)
+		{
+			return
+		}
+
 		if (this.element.style.zoom)
 		{
 			dims.width *= this.element.style.zoom
@@ -313,6 +318,7 @@
 	{
 		var children = this.element.getElementsByTagName("BUTTON")
 		var visibleChildCount = 0
+		var itemHeight = 0
 
 		for (var i = 0; i < children.length; ++i)
 		{
@@ -327,6 +333,8 @@
 			{
 				continue
 			}
+
+			itemHeight = Math.max(itemHeight, parseInt(child.style.height))
 
 			++visibleChildCount
 		}
@@ -346,10 +354,14 @@
 			++visibleSeparators
 		}
 
-		// FIXME: HARD-CODED DIMENSIONS
+		var itemWidth = parseInt(this.element.style.width)
+		var itemSpacing = parseInt(this.element.style.paddingBottom)
+
 		return {
-			width: 200,	//225
-			height: (28 * visibleChildCount) + (6 * visibleSeparators)
+			visibleChildCount: visibleChildCount,
+			visibleSeparatorCount: visibleSeparators,
+			width: itemWidth,
+			height: (itemHeight * visibleChildCount) + (itemSpacing * visibleSeparators)
 		}
 	}
 

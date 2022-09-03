@@ -30,26 +30,11 @@
 		{
 			components = new System.ComponentModel.Container();
 
-			this.tableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
+			this.flowLayoutPanel = new System.Windows.Forms.FlowLayoutPanel();
 			this.webBrowser = new Ash.System.Windows.Forms.WebBrowserEx();
 			this.okButton = new System.Windows.Forms.Button();
-			this.tableLayoutPanel.SuspendLayout();
+			this.flowLayoutPanel.SuspendLayout();
 			this.SuspendLayout();
-			// 
-			// tableLayoutPanel
-			// 
-			this.tableLayoutPanel.ColumnCount = 1;
-			this.tableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-			this.tableLayoutPanel.Controls.Add(this.webBrowser, 0, 0);
-			this.tableLayoutPanel.Controls.Add(this.okButton, 0, 1);
-			this.tableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.tableLayoutPanel.Location = new System.Drawing.Point(0, 0);
-			this.tableLayoutPanel.Name = "tableLayoutPanel";
-			this.tableLayoutPanel.RowCount = 2;
-			this.tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-			this.tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 48F));
-			this.tableLayoutPanel.Size = new System.Drawing.Size(584, 231);
-			this.tableLayoutPanel.TabIndex = 2;
 			// 
 			// webBrowser
 			// 
@@ -70,16 +55,25 @@
 			// 
 			// okButton
 			// 
-			this.okButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.okButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
 			this.okButton.Location = new System.Drawing.Point(502, 197);
-			this.okButton.Margin = new System.Windows.Forms.Padding(3, 3, 11, 11);
 			this.okButton.Name = "okButton";
 			this.okButton.Size = new System.Drawing.Size(75, 23);
 			this.okButton.TabIndex = 0;
 			this.okButton.Text = "&OK";
 			this.okButton.UseVisualStyleBackColor = true;
 			this.okButton.Click += new System.EventHandler(this.OkButton_Click);
+			// 
+			// flowLayoutPanel
+			// 
+			this.flowLayoutPanel.Controls.Add(this.okButton);
+			this.flowLayoutPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
+			this.flowLayoutPanel.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
+			this.flowLayoutPanel.Location = new System.Drawing.Point(12, 12);
+			this.flowLayoutPanel.Name = "flowLayoutPanel";
+			this.flowLayoutPanel.Padding = new System.Windows.Forms.Padding(12);
+			this.flowLayoutPanel.Size = new System.Drawing.Size(852, 48);
+			this.flowLayoutPanel.TabIndex = 2;
 			// 
 			// AboutForm
 			// 
@@ -88,7 +82,8 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.okButton;
 			this.ClientSize = new System.Drawing.Size(584, 231);
-			this.Controls.Add(this.tableLayoutPanel);
+			this.Controls.Add(this.webBrowser);
+			this.Controls.Add(this.flowLayoutPanel);
 			this.MinimizeBox = false;
 			this.MinimumSize = new System.Drawing.Size(600, 270);
 			this.Name = "AboutForm";
@@ -97,7 +92,7 @@
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "About";
 			this.Load += new System.EventHandler(this.AboutForm_Load);
-			this.tableLayoutPanel.ResumeLayout(false);
+			this.flowLayoutPanel.ResumeLayout(false);
 			this.ResumeLayout(false);
 
 		}
@@ -105,7 +100,7 @@
 		#endregion
 
 		private Ash.System.Windows.Forms.WebBrowserEx webBrowser;
-		private System.Windows.Forms.TableLayoutPanel tableLayoutPanel;
+		private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel;
 		private System.Windows.Forms.Button okButton;
 	}
 }

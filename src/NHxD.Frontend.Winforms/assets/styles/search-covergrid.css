@@ -247,7 +247,7 @@ span.tag-hidelist
 	width: 100%;
 	opacity: 0;
 	background-color: rgba(245, 245, 245, 0.9);
-	height: 80px;
+	/*height: 80px;*/
 	z-index: 1;
 }
 
@@ -274,7 +274,8 @@ span.tag-hidelist
 	font-weight: bold;
 	text-align: center;
 	width: 60px;
-	height: 28px;
+	/*height: 28px;*/
+	height: 100%;
 }
 
 #footer

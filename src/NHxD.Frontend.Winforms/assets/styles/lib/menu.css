@@ -1,7 +1,7 @@
 .context-menu
 {
 	/*width: 225px;*/	/* with checkboxes */
-	width: 200px;
+	width: 300px;	/*200*/
 	background-color: white;
 	color: #223;
 	position: absolute;
@@ -22,7 +22,7 @@
 
 .menu-command
 {
-	height: 28px;
+	height: 36px;	/*28*/
 	padding: 6px;
 	padding-left: 12px;
 	padding-right: 12px;
