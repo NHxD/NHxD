@@ -58,9 +58,13 @@ namespace NHxD.Frontend.Winforms
 						{
 							result = SearchArg.Query;
 						}
-						else
+						else if (SearchArg.TagId != -1)
 						{
 							result = SearchArg.TagId.ToString(CultureInfo.InvariantCulture);
+						}
+						else
+						{
+							result = "";
 						}
 					}
 					else if (namespaces[1].Equals("Target", StringComparison.OrdinalIgnoreCase))
